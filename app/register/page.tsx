@@ -8,9 +8,10 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [role, setRole] = useState<'eksportir' | 'investor'>('eksportir');
+  const [role, setRole] = useState<'eksportir' | 'pendana'>('pendana');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +23,11 @@ export default function RegisterPage() {
     
     // Handle registration logic here
     console.log('Register:', { fullName, email, phoneNumber, role, password });
+    
+    // Redirect eksportir to Profil Bisnis
+    if (role === 'eksportir') {
+      window.location.href = '/register/profil-bisnis';
+    }
   };
 
   return (
@@ -136,6 +142,17 @@ export default function RegisterPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
+                      onClick={() => setRole('pendana')}
+                      className={`px-4 py-3 rounded-lg border-2 transition-all text-sm font-medium ${
+                        role === 'pendana'
+                          ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
+                          : 'border-slate-600 bg-slate-900/30 text-slate-400 hover:border-slate-500'
+                      }`}
+                    >
+                      Pendana
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setRole('eksportir')}
                       className={`px-4 py-3 rounded-lg border-2 transition-all text-sm font-medium ${
                         role === 'eksportir'
@@ -145,18 +162,21 @@ export default function RegisterPage() {
                     >
                       Eksportir
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setRole('investor')}
-                      className={`px-4 py-3 rounded-lg border-2 transition-all text-sm font-medium ${
-                        role === 'investor'
-                          ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
-                          : 'border-slate-600 bg-slate-900/30 text-slate-400 hover:border-slate-500'
-                      }`}
-                    >
-                      Investor
-                    </button>
                   </div>
+                  
+                  {/* Eksportir Notice */}
+                  {role === 'eksportir' && (
+                    <div className="mt-3 p-3 bg-amber-950/30 border border-amber-800/30 rounded-lg">
+                      <div className="flex items-start space-x-2">
+                        <svg className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                        <p className="text-xs text-slate-300 leading-relaxed">
+                          Sebagai eksportir, Anda perlu melengkapi Profil Bisnis untuk verifikasi dan akses pembiayaan.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Password Field */}
@@ -199,12 +219,30 @@ export default function RegisterPage() {
                   />
                 </div>
 
+                {/* Membership Agreement Checkbox */}
+                <div className="flex items-start space-x-3">
+                  <input
+                    type="checkbox"
+                    id="agreeToTerms"
+                    checked={agreeToTerms}
+                    onChange={(e) => setAgreeToTerms(e.target.checked)}
+                    className="mt-1 w-4 h-4 bg-slate-900/50 border-slate-600 rounded text-cyan-600 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
+                    required
+                  />
+                  <label
+                    htmlFor="agreeToTerms"
+                    className="text-sm text-slate-300 leading-relaxed cursor-pointer"
+                  >
+                    Saya setuju mendaftar menjadi Anggota Koperasi Jasa ARUS dan tunduk pada AD/ART.
+                  </label>
+                </div>
+
                 {/* Submit Button */}
                 <button
                   type="submit"
                   className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-medium py-3 px-4 rounded-lg transition-all text-base shadow-lg shadow-cyan-900/50 mt-6"
                 >
-                  Daftar & Lanjutkan
+                  {role === 'eksportir' ? 'Lanjut ke Profil Bisnis' : 'Daftar & Lanjutkan'}
                 </button>
 
                 {/* Security Notice */}
