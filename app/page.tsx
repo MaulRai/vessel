@@ -3,7 +3,7 @@ import Link from "next/link";
 const navLinks = [
   { href: "/login", label: "Masuk" },
   { href: "/register", label: "Daftar Perusahaan" },
-  { href: "/register/profil-bisnis", label: "Profil Bisnis" },
+  { href: "/profil-bisnis", label: "Profil Bisnis" },
   { href: "/pendana/pendanaan/buat", label: "Buat Pendanaan" },
 ];
 

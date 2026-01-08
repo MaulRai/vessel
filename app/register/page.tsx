@@ -5,29 +5,22 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function RegisterPage() {
-  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [role, setRole] = useState<'eksportir' | 'pendana'>('pendana');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       alert('Password tidak cocok');
       return;
     }
-    
+
     // Handle registration logic here
-    console.log('Register:', { fullName, email, phoneNumber, role, password });
-    
-    // Redirect eksportir to Profil Bisnis
-    if (role === 'eksportir') {
-      window.location.href = '/register/profil-bisnis';
-    }
+    console.log('Register:', { email, phoneNumber, role: 'pendana', password });
   };
 
   return (
@@ -59,10 +52,10 @@ export default function RegisterPage() {
                   className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white hover:bg-slate-50 text-slate-800 font-medium rounded-lg transition-all border border-slate-300 shadow-sm"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                   </svg>
                   Daftar dengan Google
                 </button>
@@ -75,25 +68,6 @@ export default function RegisterPage() {
                   <div className="relative flex justify-center text-sm">
                     <span className="px-2 bg-slate-800/50 text-slate-400">atau</span>
                   </div>
-                </div>
-
-                {/* Full Name Field */}
-                <div>
-                  <label
-                    htmlFor="fullName"
-                    className="block text-sm font-medium text-slate-300 mb-2"
-                  >
-                    Nama Lengkap
-                  </label>
-                  <input
-                    type="text"
-                    id="fullName"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-base placeholder:text-slate-500"
-                    placeholder="Nama lengkap sesuai KTP"
-                    required
-                  />
                 </div>
 
                 {/* Email Field */}
@@ -134,49 +108,18 @@ export default function RegisterPage() {
                   />
                 </div>
 
-                {/* Role Selection */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-3">
-                    Daftar Sebagai
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setRole('pendana')}
-                      className={`px-4 py-3 rounded-lg border-2 transition-all text-sm font-medium ${
-                        role === 'pendana'
-                          ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
-                          : 'border-slate-600 bg-slate-900/30 text-slate-400 hover:border-slate-500'
-                      }`}
-                    >
-                      Pendana
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRole('eksportir')}
-                      className={`px-4 py-3 rounded-lg border-2 transition-all text-sm font-medium ${
-                        role === 'eksportir'
-                          ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
-                          : 'border-slate-600 bg-slate-900/30 text-slate-400 hover:border-slate-500'
-                      }`}
-                    >
-                      Eksportir
-                    </button>
+                {/* Account Type Info */}
+                <div className="p-4 bg-slate-900/40 border border-slate-700 rounded-lg">
+                  <div className="flex items-start space-x-3">
+                    <svg className="w-5 h-5 text-cyan-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a1 1 0 100 2 1 1 0 000-2zm-1 4a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      Akun baru otomatis terdaftar sebagai <span className="text-cyan-300 font-semibold">Pendana</span>. 
+                      Jika ingin menjadi Eksportir, ajukan perubahan tipe akun melalui pengaturan profil dan lengkapi 
+                      halaman Profil Bisnis terlebih dahulu.
+                    </p>
                   </div>
-                  
-                  {/* Eksportir Notice */}
-                  {role === 'eksportir' && (
-                    <div className="mt-3 p-3 bg-amber-950/30 border border-amber-800/30 rounded-lg">
-                      <div className="flex items-start space-x-2">
-                        <svg className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                        </svg>
-                        <p className="text-xs text-slate-300 leading-relaxed">
-                          Sebagai eksportir, Anda perlu melengkapi Profil Bisnis untuk verifikasi dan akses pembiayaan.
-                        </p>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Password Field */}
@@ -242,7 +185,7 @@ export default function RegisterPage() {
                   type="submit"
                   className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-medium py-3 px-4 rounded-lg transition-all text-base shadow-lg shadow-cyan-900/50 mt-6"
                 >
-                  {role === 'eksportir' ? 'Lanjut ke Profil Bisnis' : 'Daftar & Lanjutkan'}
+                  Daftar & Lanjutkan
                 </button>
 
                 {/* Security Notice */}
