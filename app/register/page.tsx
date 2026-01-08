@@ -115,8 +115,8 @@ export default function RegisterPage() {
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a1 1 0 100 2 1 1 0 000-2zm-1 4a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                     <p className="text-xs text-slate-300 leading-relaxed">
-                      Akun baru otomatis terdaftar sebagai <span className="text-cyan-300 font-semibold">Pendana</span>. 
-                      Jika ingin menjadi Eksportir, ajukan perubahan tipe akun melalui pengaturan profil dan lengkapi 
+                      Akun baru otomatis terdaftar sebagai <span className="text-cyan-300 font-semibold">Pendana</span>.
+                      Jika ingin menjadi Eksportir, ajukan perubahan tipe akun melalui pengaturan profil dan lengkapi
                       halaman Profil Bisnis terlebih dahulu.
                     </p>
                   </div>
@@ -176,8 +176,7 @@ export default function RegisterPage() {
                     htmlFor="agreeToTerms"
                     className="text-sm text-slate-300 leading-relaxed cursor-pointer"
                   >
-                    Saya setuju mendaftar menjadi Anggota Koperasi Jasa ARUS dan tunduk pada AD/ART.
-                  </label>
+                    Saya setuju mendaftar menjadi Anggota Koperasi Jasa VESSEL dan tunduk pada AD/ART yang berlaku.                  </label>
                 </div>
 
                 {/* Submit Button */}

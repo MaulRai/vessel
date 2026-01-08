@@ -254,6 +254,7 @@ export default function BuatPendanaanPage() {
 
   // Step 4 State
   const [acknowledgement, setAcknowledgement] = useState(false);
+  const [dataIntegrity, setDataIntegrity] = useState(false);
 
   const dueDateInputRef = useRef<HTMLInputElement | null>(null);
   const todayJakarta = useMemo(
@@ -390,13 +391,19 @@ export default function BuatPendanaanPage() {
       alert('Mohon setujui pengalihan hak tagih untuk melanjutkan');
       return;
     }
+
+    if (!dataIntegrity) {
+      alert('Mohon konfirmasi bahwa data yang diberikan benar dan asli');
+      return;
+    }
     
     // Log form data (no API integration yet)
     console.log('Submitting financing request:', {
       step1Data,
       step2Data,
       step3Data,
-      acknowledgement
+      acknowledgement,
+      dataIntegrity
     });
     
     setIsSubmitted(true);
@@ -454,6 +461,7 @@ export default function BuatPendanaanPage() {
                     setStep2Data({ commercialInvoice: null, billOfLading: null, purchaseOrder: null });
                     setStep3Data({ transactionType: 'first', previousTransferProof: null });
                     setAcknowledgement(false);
+                    setDataIntegrity(false);
                   }}
                   className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium rounded-lg transition-all"
                 >
@@ -931,21 +939,40 @@ export default function BuatPendanaanPage() {
 
                 {/* Acknowledgement Checkbox */}
                 <div className="bg-cyan-950/20 border border-cyan-800/30 rounded-lg p-5">
-                  <div className="flex items-start space-x-3">
-                    <input
-                      type="checkbox"
-                      id="acknowledgement"
-                      checked={acknowledgement}
-                      onChange={(e) => setAcknowledgement(e.target.checked)}
-                      className="mt-1 w-4 h-4 bg-slate-900/50 border-slate-600 rounded text-cyan-600 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
-                    />
-                    <label
-                      htmlFor="acknowledgement"
-                      className="text-sm text-slate-300 leading-relaxed cursor-pointer"
-                    >
-                      Saya menyetujui pengalihan hak tagih (cessie) atas invoice/tagihan ini kepada platform untuk proses pendanaan.
-                      <span className="text-red-400 ml-1">*</span>
-                    </label>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="acknowledgement"
+                        checked={acknowledgement}
+                        onChange={(e) => setAcknowledgement(e.target.checked)}
+                        className="mt-1 w-4 h-4 bg-slate-900/50 border-slate-600 rounded text-cyan-600 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
+                      />
+                      <label
+                        htmlFor="acknowledgement"
+                        className="text-sm text-slate-300 leading-relaxed cursor-pointer"
+                      >
+                        Saya menyetujui pengalihan hak tagih (cessie) atas invoice/tagihan ini kepada platform untuk proses pendanaan.
+                        <span className="text-red-400 ml-1">*</span>
+                      </label>
+                    </div>
+
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        id="dataIntegrity"
+                        checked={dataIntegrity}
+                        onChange={(e) => setDataIntegrity(e.target.checked)}
+                        className="mt-1 w-4 h-4 bg-slate-900/50 border-slate-600 rounded text-cyan-600 focus:ring-2 focus:ring-cyan-500 focus:ring-offset-0"
+                      />
+                      <label
+                        htmlFor="dataIntegrity"
+                        className="text-sm text-slate-300 leading-relaxed cursor-pointer"
+                      >
+                        Data yang saya berikan adalah benar dan asli, serta saya bersedia mempertanggungjawabkan keabsahannya.
+                        <span className="text-red-400 ml-1">*</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -972,7 +999,7 @@ export default function BuatPendanaanPage() {
             ) : (
               <button
                 onClick={handleSubmit}
-                disabled={!acknowledgement}
+                disabled={!acknowledgement || !dataIntegrity}
                 className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all shadow-lg shadow-cyan-900/50"
               >
                 Kirim Permohonan Pendanaan
