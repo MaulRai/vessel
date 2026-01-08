@@ -938,11 +938,11 @@ export default function ProfilBisnisPage() {
 
       <SectionCard title="Dokumen Identitas">
         <div className="grid gap-6 md:grid-cols-2">
-          {renderInput('responsibleDocs.ktpNumber', 'No. KTP', responsibleDocs.ktpNumber, (value) => setResponsibleDocs((prev) => ({ ...prev, ktpNumber: value })), { required: true })}
+          {renderInput('responsibleDocs.ktpNumber', 'No. KTP Direktur', responsibleDocs.ktpNumber, (value) => setResponsibleDocs((prev) => ({ ...prev, ktpNumber: value })), { required: true })}
           {renderInput('responsibleDocs.npwpNumber', 'No. NPWP', responsibleDocs.npwpNumber, (value) => setResponsibleDocs((prev) => ({ ...prev, npwpNumber: value })), { required: true })}
         </div>
         <div className="grid gap-6 md:grid-cols-2">
-          {uploadField('Upload File KTP', responsibleDocs.ktpFile, (file) => setResponsibleDocs((prev) => ({ ...prev, ktpFile: file })), true)}
+          {uploadField('Upload File KTP Direktur', responsibleDocs.ktpFile, (file) => setResponsibleDocs((prev) => ({ ...prev, ktpFile: file })), true)}
           {uploadField('Upload File NPWP', responsibleDocs.npwpFile, (file) => setResponsibleDocs((prev) => ({ ...prev, npwpFile: file })), true)}
         </div>
       </SectionCard>
@@ -1150,7 +1150,8 @@ export default function ProfilBisnisPage() {
             <p className="text-sm uppercase tracking-wide text-cyan-400 font-semibold">Profil Bisnis & Verifikasi</p>
             <h1 className="text-3xl font-bold text-slate-100 mt-2">Profil Bisnis & Verifikasi</h1>
             <p className="text-slate-400 mt-2">
-              Lengkapi data untuk verifikasi perusahaan. Data Anda aman dan digunakan sesuai regulasi.
+              Lengkapi data untuk verifikasi perusahaan. Data digunakan untuk verifikasi kelayakan usaha (KYB)
+              dan seluruh informasi tetap aman serta sesuai regulasi.
             </p>
           </div>
 
