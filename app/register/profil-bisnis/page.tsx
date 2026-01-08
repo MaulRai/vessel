@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { ReactNode, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-type CommodityType = 'Kopi' | 'Furnitur' | 'Rempah' | 'Perikanan' | 'Tekstil' | 'Lainnya';
+type TabKey = 'perusahaan' | 'penanggung' | 'keuangan' | 'dokumen' | 'tandaTangan';
 
 interface UploadedFile {
   name: string;
@@ -11,483 +10,1209 @@ interface UploadedFile {
   file: File;
 }
 
-interface FormData {
-  companyName: string;
-  companyAddress: string;
-  commodity: CommodityType | '';
-  customCommodity: string;
-  annualRevenue: string;
+interface CompanyBasics {
+  name: string;
+  entityType: string;
+  profile: UploadedFile | null;
+  phone: string;
+  email: string;
+  city: string;
 }
 
-interface DocumentFiles {
-  ktp: UploadedFile | null;
-  npwp: UploadedFile | null;
-  nib: UploadedFile | null;
-  akta: UploadedFile | null;
+interface CompanyLocation {
+  status: string;
+  locationDoc: UploadedFile | null;
+  address1: string;
+  address2: string;
+  postalCode: string;
+  province: string;
+  city: string;
+  district: string;
+  village: string;
+  sector: string;
 }
+
+interface TeamMember {
+  id: string;
+  name: string;
+  title: string;
+  resume: UploadedFile | null;
+  ownership: '' | 'pemilik' | 'bukan';
+}
+
+interface RiskItem {
+  id: string;
+  riskType: string;
+  description: string;
+  mitigation: string;
+}
+
+interface ResponsiblePerson {
+  fullName: string;
+  gender: string;
+  religion: string;
+  birthDate: string;
+  birthPlace: string;
+  email: string;
+  phone: string;
+  position: string;
+  nationality: string;
+  education: string;
+  maritalStatus: string;
+}
+
+interface ResponsibleAddress {
+  address: string;
+  postalCode: string;
+  province: string;
+  city: string;
+  district: string;
+  village: string;
+  sameAsKtp: boolean;
+  ktpAddress: string;
+  ktpPostalCode: string;
+  ktpProvince: string;
+  ktpCity: string;
+  ktpDistrict: string;
+  ktpVillage: string;
+}
+
+interface ResponsibleDocuments {
+  ktpNumber: string;
+  ktpFile: UploadedFile | null;
+  npwpNumber: string;
+  npwpFile: UploadedFile | null;
+}
+
+interface RelationsData {
+  relativeName: string;
+  relativePhone: string;
+  relationType: string;
+  commissionerName: string;
+  commissionerPhone: string;
+  commissionerKtp: string;
+  commissionerKtpFile: UploadedFile | null;
+  commissionerApproval: UploadedFile | null;
+}
+
+interface FinancialPerformance {
+  sales: string;
+  operatingIncome: string;
+  netIncome: string;
+  currentAssets: string;
+  nonCurrentAssets: string;
+  shortDebt: string;
+  longDebt: string;
+  totalEquity: string;
+}
+
+interface BankInfo {
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  branch: string;
+  bankAddress: string;
+}
+
+interface FinancialDocuments {
+  bankStatement: UploadedFile | null;
+  financialReport: UploadedFile | null;
+  currentYearReport: UploadedFile | null;
+}
+
+interface CorporateLegal {
+  companyNpwp: string;
+  companyNpwpFile: UploadedFile | null;
+  deedNumber: string;
+  deedDate: string;
+  deedFile: UploadedFile | null;
+  ministryDate: string;
+  ministryFile: UploadedFile | null;
+  deedChanges: {
+    id: string;
+    deedNumber: string;
+    deedDate: string;
+    deedFile: UploadedFile | null;
+  }[];
+}
+
+interface LicensingData {
+  licenseType: 'NIB' | 'SIUP & TDP';
+  nibNumber: string;
+  nibFile: UploadedFile | null;
+  nibRiskFile: UploadedFile | null;
+  commitmentLetter: UploadedFile | null;
+}
+
+interface DigitalSignatureData {
+  selfie: UploadedFile | null;
+}
+
+type SectionCardProps = {
+  title: string;
+  description?: string;
+  children: ReactNode;
+};
+
+const SectionCard = ({ title, description, children }: SectionCardProps) => (
+  <section className="bg-slate-900/40 border border-slate-700 rounded-2xl p-6 space-y-4">
+    <div>
+      <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
+      {description && <p className="text-sm text-slate-400 mt-1">{description}</p>}
+    </div>
+    {children}
+  </section>
+);
+
+const generateId = () =>
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2, 10);
 
 export default function ProfilBisnisPage() {
-  const [formData, setFormData] = useState<FormData>({
-    companyName: '',
-    companyAddress: '',
-    commodity: '',
-    customCommodity: '',
-    annualRevenue: '',
-  });
-
-  const [documents, setDocuments] = useState<DocumentFiles>({
-    ktp: null,
-    npwp: null,
-    nib: null,
-    akta: null,
-  });
-
-  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [activeTab, setActiveTab] = useState<TabKey>('perusahaan');
+  const [savedToast, setSavedToast] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
+  const [companyBasics, setCompanyBasics] = useState<CompanyBasics>({
+    name: '',
+    entityType: '',
+    profile: null,
+    phone: '',
+    email: '',
+    city: '',
+  });
 
-  const handleFileSelect = (docType: keyof DocumentFiles, file: File) => {
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    if (file.size > maxSize) {
+  const [companyLocation, setCompanyLocation] = useState<CompanyLocation>({
+    status: '',
+    locationDoc: null,
+    address1: '',
+    address2: '',
+    postalCode: '',
+    province: '',
+    city: '',
+    district: '',
+    village: '',
+    sector: '',
+  });
+
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
+    { id: generateId(), name: '', title: '', resume: null, ownership: '' },
+  ]);
+
+  const [riskList, setRiskList] = useState<RiskItem[]>([
+    { id: generateId(), riskType: '', description: '', mitigation: '' },
+  ]);
+
+  const [responsiblePerson, setResponsiblePerson] = useState<ResponsiblePerson>({
+    fullName: '',
+    gender: '',
+    religion: '',
+    birthDate: '',
+    birthPlace: '',
+    email: '',
+    phone: '',
+    position: '',
+    nationality: '',
+    education: '',
+    maritalStatus: '',
+  });
+
+  const [responsibleAddress, setResponsibleAddress] = useState<ResponsibleAddress>({
+    address: '',
+    postalCode: '',
+    province: '',
+    city: '',
+    district: '',
+    village: '',
+    sameAsKtp: false,
+    ktpAddress: '',
+    ktpPostalCode: '',
+    ktpProvince: '',
+    ktpCity: '',
+    ktpDistrict: '',
+    ktpVillage: '',
+  });
+
+  const [responsibleDocs, setResponsibleDocs] = useState<ResponsibleDocuments>({
+    ktpNumber: '',
+    ktpFile: null,
+    npwpNumber: '',
+    npwpFile: null,
+  });
+
+  const [relationsData, setRelationsData] = useState<RelationsData>({
+    relativeName: '',
+    relativePhone: '',
+    relationType: '',
+    commissionerName: '',
+    commissionerPhone: '',
+    commissionerKtp: '',
+    commissionerKtpFile: null,
+    commissionerApproval: null,
+  });
+
+  const [financialPerformance, setFinancialPerformance] = useState<FinancialPerformance>({
+    sales: '',
+    operatingIncome: '',
+    netIncome: '',
+    currentAssets: '',
+    nonCurrentAssets: '',
+    shortDebt: '',
+    longDebt: '',
+    totalEquity: '',
+  });
+
+  const [bankInfo, setBankInfo] = useState<BankInfo>({
+    bankName: '',
+    accountName: '',
+    accountNumber: '',
+    branch: '',
+    bankAddress: '',
+  });
+
+  const [financialDocs, setFinancialDocs] = useState<FinancialDocuments>({
+    bankStatement: null,
+    financialReport: null,
+    currentYearReport: null,
+  });
+
+  const [corporateLegal, setCorporateLegal] = useState<CorporateLegal>({
+    companyNpwp: '',
+    companyNpwpFile: null,
+    deedNumber: '',
+    deedDate: '',
+    deedFile: null,
+    ministryDate: '',
+    ministryFile: null,
+    deedChanges: [],
+  });
+
+  const [licensing, setLicensing] = useState<LicensingData>({
+    licenseType: 'NIB',
+    nibNumber: '',
+    nibFile: null,
+    nibRiskFile: null,
+    commitmentLetter: null,
+  });
+
+  const [digitalSignature, setDigitalSignature] = useState<DigitalSignatureData>({
+    selfie: null,
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const fieldRefs = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | null>>({});
+  const activeFieldRef = useRef<string | null>(null);
+
+  useLayoutEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const activeKey = activeFieldRef.current;
+    if (!activeKey) {
+      return;
+    }
+    const node = fieldRefs.current[activeKey];
+    if (node && document.activeElement !== node) {
+      node.focus();
+      try {
+        const length = node.value.length;
+        node.setSelectionRange(length, length);
+      } catch {
+        // Ignore selection errors for inputs that do not support setSelectionRange
+      }
+    }
+  });
+
+  const tabList: { key: TabKey; label: string }[] = [
+    { key: 'perusahaan', label: 'Perusahaan' },
+    { key: 'penanggung', label: 'Penanggung Jawab' },
+    { key: 'keuangan', label: 'Keuangan' },
+    { key: 'dokumen', label: 'Dokumen Perusahaan' },
+    { key: 'tandaTangan', label: 'Tanda Tangan Digital' },
+  ];
+
+  const requiredChecks = useMemo(() => {
+    const fields: boolean[] = [];
+
+    // Company basics
+    fields.push(
+      Boolean(companyBasics.name.trim()),
+      Boolean(companyBasics.entityType),
+      Boolean(companyBasics.profile),
+      Boolean(companyBasics.phone.trim()),
+      Boolean(companyBasics.email.trim()),
+      Boolean(companyBasics.city.trim()),
+    );
+
+    // Location
+    fields.push(
+      Boolean(companyLocation.status),
+      companyLocation.status === 'Sewa' || companyLocation.status === 'Pinjam'
+        ? Boolean(companyLocation.locationDoc)
+        : true,
+      Boolean(companyLocation.address1.trim()),
+      Boolean(companyLocation.postalCode.trim()),
+      Boolean(companyLocation.province),
+      Boolean(companyLocation.city),
+      Boolean(companyLocation.district),
+      Boolean(companyLocation.village),
+      Boolean(companyLocation.sector),
+    );
+
+    // Team members
+    teamMembers.forEach((member) => {
+      fields.push(
+        Boolean(member.name.trim()),
+        Boolean(member.title.trim()),
+        Boolean(member.resume),
+        Boolean(member.ownership),
+      );
+    });
+
+    // Risks
+    riskList.forEach((risk) => {
+      fields.push(
+        Boolean(risk.riskType),
+        Boolean(risk.description.trim()),
+        Boolean(risk.mitigation.trim()),
+      );
+    });
+
+    // Responsible person
+    Object.values(responsiblePerson).forEach((value) => fields.push(Boolean((value as string).trim())));
+
+    // Address
+    fields.push(
+      Boolean(responsibleAddress.address.trim()),
+      Boolean(responsibleAddress.postalCode.trim()),
+      Boolean(responsibleAddress.province),
+      Boolean(responsibleAddress.city),
+      Boolean(responsibleAddress.district),
+      Boolean(responsibleAddress.village),
+    );
+
+    if (!responsibleAddress.sameAsKtp) {
+      fields.push(
+        Boolean(responsibleAddress.ktpAddress.trim()),
+        Boolean(responsibleAddress.ktpPostalCode.trim()),
+        Boolean(responsibleAddress.ktpProvince),
+        Boolean(responsibleAddress.ktpCity),
+        Boolean(responsibleAddress.ktpDistrict),
+        Boolean(responsibleAddress.ktpVillage),
+      );
+    }
+
+    // Docs
+    fields.push(
+      Boolean(responsibleDocs.ktpNumber.trim()),
+      Boolean(responsibleDocs.ktpFile),
+      Boolean(responsibleDocs.npwpNumber.trim()),
+      Boolean(responsibleDocs.npwpFile),
+      Boolean(responsiblePerson.maritalStatus),
+    );
+
+    // Relations
+    fields.push(
+      Boolean(relationsData.relativeName.trim()),
+      Boolean(relationsData.relativePhone.trim()),
+      Boolean(relationsData.relationType),
+    );
+
+    const commissionerProvided = Boolean(
+      relationsData.commissionerName.trim() ||
+        relationsData.commissionerPhone.trim() ||
+        relationsData.commissionerKtp.trim() ||
+        relationsData.commissionerKtpFile ||
+        relationsData.commissionerApproval,
+    );
+
+    if (commissionerProvided) {
+      fields.push(
+        Boolean(relationsData.commissionerName.trim()),
+        Boolean(relationsData.commissionerPhone.trim()),
+        Boolean(relationsData.commissionerKtp.trim()),
+        Boolean(relationsData.commissionerKtpFile),
+        Boolean(relationsData.commissionerApproval),
+      );
+    }
+
+    // Financial
+    Object.values(financialPerformance).forEach((val) => fields.push(Boolean((val as string).trim())));
+    Object.values(bankInfo).forEach((val) => fields.push(Boolean((val as string).trim())));
+    fields.push(
+      Boolean(financialDocs.bankStatement),
+      Boolean(financialDocs.financialReport),
+      Boolean(financialDocs.currentYearReport),
+    );
+
+    // Legal docs
+    fields.push(
+      Boolean(corporateLegal.companyNpwp.trim()),
+      Boolean(corporateLegal.companyNpwpFile),
+      Boolean(corporateLegal.deedNumber.trim()),
+      Boolean(corporateLegal.deedDate),
+      Boolean(corporateLegal.deedFile),
+      Boolean(corporateLegal.ministryDate),
+      Boolean(corporateLegal.ministryFile),
+    );
+
+    corporateLegal.deedChanges.forEach((change) => {
+      fields.push(Boolean(change.deedNumber.trim()), Boolean(change.deedDate), Boolean(change.deedFile));
+    });
+
+    fields.push(
+      Boolean(licensing.nibNumber.trim()),
+      Boolean(licensing.nibFile),
+      Boolean(licensing.nibRiskFile),
+      Boolean(licensing.commitmentLetter),
+    );
+
+    fields.push(Boolean(digitalSignature.selfie));
+
+    return fields;
+  }, [
+    bankInfo,
+    companyBasics,
+    companyLocation,
+    corporateLegal,
+    digitalSignature,
+    financialDocs,
+    financialPerformance,
+    licensing,
+    relationsData,
+    responsibleAddress,
+    responsibleDocs,
+    responsiblePerson,
+    riskList,
+    teamMembers,
+  ]);
+
+  const progress = useMemo(() => {
+    const filled = requiredChecks.filter(Boolean).length;
+    const percent = requiredChecks.length === 0 ? 0 : Math.round((filled / requiredChecks.length) * 100);
+    return Math.min(percent, 100);
+  }, [requiredChecks]);
+
+  const handleFileUpload = (file: File, callback: (uploaded: UploadedFile) => void) => {
+    if (file.size > 10 * 1024 * 1024) {
       alert('Ukuran file maksimal 10MB');
       return;
     }
-
-    setDocuments(prev => ({
-      ...prev,
-      [docType]: {
-        name: file.name,
-        size: file.size,
-        file: file,
-      },
-    }));
+    callback({ name: file.name, size: file.size, file });
   };
 
-  const handleFileRemove = (docType: keyof DocumentFiles) => {
-    setDocuments(prev => ({ ...prev, [docType]: null }));
-  };
-
-  const formatCurrency = (value: string): string => {
-    const numbers = value.replace(/\D/g, '');
-    return numbers.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  };
-
-  const handleRevenueChange = (value: string) => {
-    const formatted = formatCurrency(value);
-    handleInputChange('annualRevenue', formatted);
-  };
-
-  const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof FormData, string>> = {};
-
-    if (!formData.companyName.trim()) {
-      newErrors.companyName = 'Nama perusahaan wajib diisi';
-    }
-    if (!formData.companyAddress.trim()) {
-      newErrors.companyAddress = 'Alamat perusahaan wajib diisi';
-    }
-    if (!formData.commodity) {
-      newErrors.commodity = 'Jenis komoditas wajib dipilih';
-    }
-    if (formData.commodity === 'Lainnya' && !formData.customCommodity.trim()) {
-      newErrors.customCommodity = 'Harap sebutkan komoditas';
-    }
-    if (!formData.annualRevenue.trim()) {
-      newErrors.annualRevenue = 'Omzet tahunan wajib diisi';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const isFormComplete = (): boolean => {
-    return (
-      formData.companyName.trim() !== '' &&
-      formData.companyAddress.trim() !== '' &&
-      formData.commodity !== '' &&
-      (formData.commodity !== 'Lainnya' || formData.customCommodity.trim() !== '') &&
-      formData.annualRevenue.trim() !== '' &&
-      documents.ktp !== null &&
-      documents.npwp !== null &&
-      documents.nib !== null &&
-      documents.akta !== null
+  const handleTeamMemberChange = (id: string, field: keyof TeamMember, value: string | UploadedFile | null) => {
+    setTeamMembers((prev) =>
+      prev.map((member) => (member.id === id ? { ...member, [field]: value } : member)),
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
+  const handleRiskChange = (id: string, field: keyof RiskItem, value: string) => {
+    setRiskList((prev) => prev.map((risk) => (risk.id === id ? { ...risk, [field]: value } : risk)));
+  };
+
+  const addTeamMember = () => {
+    setTeamMembers((prev) => [
+      ...prev,
+      { id: generateId(), name: '', title: '', resume: null, ownership: '' },
+    ]);
+  };
+
+  const removeTeamMember = (id: string) => {
+    setTeamMembers((prev) => (prev.length === 1 ? prev : prev.filter((member) => member.id !== id)));
+  };
+
+  const addRisk = () => {
+    setRiskList((prev) => [
+      ...prev,
+      { id: generateId(), riskType: '', description: '', mitigation: '' },
+    ]);
+  };
+
+  const removeRisk = (id: string) => {
+    setRiskList((prev) => (prev.length === 1 ? prev : prev.filter((risk) => risk.id !== id)));
+  };
+
+  const addDeedChange = () => {
+    setCorporateLegal((prev) => ({
+      ...prev,
+      deedChanges: [
+        ...prev.deedChanges,
+        { id: generateId(), deedNumber: '', deedDate: '', deedFile: null },
+      ],
+    }));
+  };
+
+  const handleDeedChange = (
+    id: string,
+    field: 'deedNumber' | 'deedDate' | 'deedFile',
+    value: string | UploadedFile | null,
+  ) => {
+    setCorporateLegal((prev) => ({
+      ...prev,
+      deedChanges: prev.deedChanges.map((change) =>
+        change.id === id ? { ...change, [field]: value } : change,
+      ),
+    }));
+  };
+
+  const removeDeedChange = (id: string) => {
+    setCorporateLegal((prev) => ({
+      ...prev,
+      deedChanges: prev.deedChanges.filter((change) => change.id !== id),
+    }));
+  };
+
+  const formatNumberInput = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  const handleSaveDraft = () => {
+    console.log('Draft saved', {
+      companyBasics,
+      companyLocation,
+      teamMembers,
+      riskList,
+      responsiblePerson,
+      responsibleAddress,
+      responsibleDocs,
+      relationsData,
+      financialPerformance,
+      bankInfo,
+      financialDocs,
+      corporateLegal,
+      licensing,
+      digitalSignature,
+    });
+    setSavedToast(true);
+    setTimeout(() => setSavedToast(false), 4000);
+  };
+
+  const handleSubmit = () => {
+    const missingSelfie = !digitalSignature.selfie;
+    if (missingSelfie) {
+      setErrors({ selfie: 'Mohon ambil foto selfie penanggung jawab terlebih dahulu.' });
+      setActiveTab('tandaTangan');
       return;
     }
-
-    if (!isFormComplete()) {
-      alert('Harap lengkapi semua data dan upload semua dokumen');
-      return;
-    }
-
-    // Simulate submission
-    console.log('Form submitted:', { formData, documents });
+    setErrors({});
     setSubmitted(true);
-    
-    // Scroll to top to show success message
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Main Card */}
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700/50 p-8 md:p-12">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent mb-2">
-              Profil Bisnis
-            </h1>
-            <p className="text-slate-300 text-base">
-              Lengkapi data untuk verifikasi bisnis dan akses pencairan invoice.
-            </p>
+  const renderSidebar = () => (
+    <nav className="space-y-2">
+      {tabList.map((tab) => (
+        <button
+          key={tab.key}
+          onClick={() => setActiveTab(tab.key)}
+          className={`w-full text-left px-4 py-3 rounded-xl transition-all border ${
+            activeTab === tab.key
+              ? 'bg-cyan-600/20 border-cyan-500 text-cyan-200'
+              : 'bg-slate-900/30 border-slate-700 text-slate-300 hover:border-slate-600'
+          }`}
+        >
+          <div className="text-sm font-semibold">{tab.label}</div>
+          <p className="text-xs text-slate-400">Lengkapi data {tab.label.toLowerCase()}</p>
+        </button>
+      ))}
+    </nav>
+  );
+
+  const renderInput = (
+    fieldKey: string,
+    label: string,
+    value: string,
+    onChange: (value: string) => void,
+    options: { placeholder?: string; required?: boolean; type?: string; helper?: string } = {},
+  ) => (
+    <div>
+      <label className="block text-sm font-medium text-slate-300 mb-2">
+        {label} {options.required && <span className="text-red-400">*</span>}
+      </label>
+      <input
+        ref={(node) => {
+          fieldRefs.current[fieldKey] = node;
+        }}
+        type={options.type ?? 'text'}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => {
+          activeFieldRef.current = fieldKey;
+        }}
+        onBlur={() => {
+          if (activeFieldRef.current === fieldKey) {
+            activeFieldRef.current = null;
+          }
+        }}
+        className="w-full px-4 py-3 bg-slate-950/40 border border-slate-700 rounded-xl text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 placeholder:text-slate-500"
+        placeholder={options.placeholder}
+      />
+      {options.helper && <p className="text-xs text-slate-500 mt-1">{options.helper}</p>}
+    </div>
+  );
+
+  const renderSelect = (
+    label: string,
+    value: string,
+    onChange: (value: string) => void,
+    choices: string[],
+    required = false,
+  ) => (
+    <div>
+      <label className="block text-sm font-medium text-slate-300 mb-2">
+        {label} {required && <span className="text-red-400">*</span>}
+      </label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-4 py-3 bg-slate-950/40 border border-slate-700 rounded-xl text-slate-100 focus:ring-2 focus:ring-cyan-500"
+      >
+        <option value="">Pilih {label}</option>
+        {choices.map((choice) => (
+          <option key={choice} value={choice}>
+            {choice}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  const renderTextarea = (
+    fieldKey: string,
+    label: string,
+    value: string,
+    onChange: (value: string) => void,
+    required = false,
+    rows = 3,
+  ) => (
+    <div>
+      <label className="block text-sm font-medium text-slate-300 mb-2">
+        {label} {required && <span className="text-red-400">*</span>}
+      </label>
+      <textarea
+        rows={rows}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        ref={(node) => {
+          fieldRefs.current[fieldKey] = node;
+        }}
+        onFocus={() => {
+          activeFieldRef.current = fieldKey;
+        }}
+        onBlur={() => {
+          if (activeFieldRef.current === fieldKey) {
+            activeFieldRef.current = null;
+          }
+        }}
+        className="w-full px-4 py-3 bg-slate-950/40 border border-slate-700 rounded-xl text-slate-100 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 placeholder:text-slate-500"
+      />
+    </div>
+  );
+
+  const uploadField = (
+    label: string,
+    file: UploadedFile | null,
+    onFileChange: (uploaded: UploadedFile | null) => void,
+    required = false,
+    accept = '.pdf,.jpg,.jpeg,.png',
+  ) => (
+    <div>
+      <label className="block text-sm font-medium text-slate-300 mb-2">
+        {label} {required && <span className="text-red-400">*</span>}
+      </label>
+      {!file ? (
+        <label className="relative flex flex-col items-center justify-center w-full border-2 border-dashed border-slate-600 rounded-xl py-6 cursor-pointer text-center text-slate-400 hover:border-cyan-500 transition-all">
+          <svg className="w-10 h-10 mb-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          <div className="text-sm">
+            Seret & lepas atau <span className="text-cyan-400">pilih file</span>
           </div>
+          <p className="text-xs mt-1">PDF/JPG/PNG · Maks 10MB</p>
+          <input
+            type="file"
+            accept={accept}
+            className="absolute inset-0 opacity-0 cursor-pointer"
+            onChange={(e) => {
+              const selected = e.target.files?.[0];
+              if (selected) {
+                handleFileUpload(selected, (uploaded) => onFileChange(uploaded));
+              }
+            }}
+          />
+        </label>
+      ) : (
+        <div className="flex items-center justify-between border border-slate-700 rounded-xl px-4 py-3 bg-slate-900/50">
+          <div>
+            <p className="text-sm text-slate-100">{file.name}</p>
+            <p className="text-xs text-slate-500">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => onFileChange(null)}
+            className="text-red-400 text-sm hover:text-red-300"
+          >
+            Hapus
+          </button>
+        </div>
+      )}
+    </div>
+  );
 
-          {/* Success Message */}
-          {submitted && (
-            <div className="mb-6 p-4 bg-emerald-950/30 border border-emerald-800/30 rounded-lg">
-              <div className="flex items-start space-x-2">
-                <svg className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <div>
-                  <p className="text-sm text-emerald-400 font-medium">Permintaan verifikasi berhasil dikirim</p>
-                  <p className="text-xs text-slate-300 mt-1">
-                    Tim kami akan memproses dalam 1–3 hari kerja.
-                  </p>
-                </div>
+  const companyTab = (
+    <div className="space-y-8">
+      <SectionCard title="Informasi Dasar" description="Data utama perusahaan untuk verifikasi awal.">
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderInput('companyBasics.name', 'Nama Perusahaan', companyBasics.name, (value) => setCompanyBasics((prev) => ({ ...prev, name: value })), {
+            required: true,
+            placeholder: 'PT Mitra Ekspor Nusantara',
+          })}
+          {renderSelect('Bentuk Badan Usaha', companyBasics.entityType, (value) => setCompanyBasics((prev) => ({ ...prev, entityType: value })), ['PT', 'CV', 'Firma', 'Koperasi', 'Lainnya'], true)}
+        </div>
+        {uploadField('Profil Perusahaan (PDF)', companyBasics.profile, (file) => setCompanyBasics((prev) => ({ ...prev, profile: file })), true, '.pdf')}
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderInput('companyBasics.phone', 'Nomor Telepon', companyBasics.phone, (value) => setCompanyBasics((prev) => ({ ...prev, phone: value })), {
+            required: true,
+            placeholder: '021-1234567',
+          })}
+          {renderInput('companyBasics.email', 'Email Perusahaan', companyBasics.email, (value) => setCompanyBasics((prev) => ({ ...prev, email: value })), {
+            required: true,
+            placeholder: 'cs@perusahaan.com',
+            type: 'email',
+          })}
+        </div>
+        {renderInput('companyBasics.city', 'Kota/Kabupaten Berdiri', companyBasics.city, (value) => setCompanyBasics((prev) => ({ ...prev, city: value })), {
+          required: true,
+          placeholder: 'Jakarta Selatan',
+        })}
+      </SectionCard>
+
+      <SectionCard title="Lokasi & Alamat" description="Detail lokasi operasional untuk verifikasi kunjungan.">
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderSelect('Status Lokasi Usaha', companyLocation.status, (value) => setCompanyLocation((prev) => ({ ...prev, status: value })), ['Milik Sendiri', 'Sewa', 'Pinjam Pakai', 'Lainnya'], true)}
+          {uploadField('Dokumen Lokasi Usaha', companyLocation.locationDoc, (file) => setCompanyLocation((prev) => ({ ...prev, locationDoc: file })), companyLocation.status === 'Sewa' || companyLocation.status === 'Pinjam Pakai')}
+        </div>
+        {renderInput('companyLocation.address1', 'Alamat Perusahaan (Jalan/No)', companyLocation.address1, (value) => setCompanyLocation((prev) => ({ ...prev, address1: value })), {
+          required: true,
+          placeholder: 'Jl. Gatot Subroto No. 12',
+        })}
+        {renderInput('companyLocation.address2', 'Alamat Perusahaan 2 (Opsional)', companyLocation.address2, (value) => setCompanyLocation((prev) => ({ ...prev, address2: value })), {
+          placeholder: 'Gedung / Lantai',
+        })}
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderInput('companyLocation.postalCode', 'Kode Pos', companyLocation.postalCode, (value) => setCompanyLocation((prev) => ({ ...prev, postalCode: value })), { required: true })}
+          {renderSelect('Provinsi', companyLocation.province, (value) => setCompanyLocation((prev) => ({ ...prev, province: value })), ['DKI Jakarta', 'Jawa Barat', 'Jawa Timur', 'Jawa Tengah', 'Banten', 'Sumatera Utara', 'Lainnya'], true)}
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderSelect('Kabupaten/Kota', companyLocation.city, (value) => setCompanyLocation((prev) => ({ ...prev, city: value })), ['Jakarta Selatan', 'Jakarta Timur', 'Bandung', 'Surabaya', 'Medan', 'Makassar'], true)}
+          {renderSelect('Kecamatan', companyLocation.district, (value) => setCompanyLocation((prev) => ({ ...prev, district: value })), ['Setiabudi', 'Menteng', 'Cidadap', 'Cilandak', 'Sukmajaya', 'Lainnya'], true)}
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderSelect('Kelurahan', companyLocation.village, (value) => setCompanyLocation((prev) => ({ ...prev, village: value })), ['Kuningan', 'Senayan', 'Lebak Bulus', 'Rawamangun', 'Cipinang', 'Lainnya'], true)}
+          {renderSelect('Sektor Usaha', companyLocation.sector, (value) => setCompanyLocation((prev) => ({ ...prev, sector: value })), ['Perdagangan', 'Manufaktur', 'Pertanian/Perkebunan', 'Perikanan', 'Jasa', 'Lainnya'], true)}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Informasi Tim" description="Daftarkan anggota tim kunci.">
+        <div className="space-y-6">
+          {teamMembers.map((member, index) => (
+            <div key={member.id} className="border border-slate-700 rounded-2xl p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-400">Anggota #{index + 1}</p>
+                <button
+                  type="button"
+                  onClick={() => removeTeamMember(member.id)}
+                  className="text-xs text-red-400 hover:text-red-300"
+                  disabled={teamMembers.length === 1}
+                >
+                  Hapus
+                </button>
               </div>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Section A - Data Bisnis */}
-            <div>
-              <h2 className="text-xl font-semibold text-slate-100 mb-6 flex items-center">
-                <span className="flex items-center justify-center w-7 h-7 rounded-full bg-cyan-500/20 text-cyan-400 text-sm font-bold mr-3">
-                  A
-                </span>
-                Data Bisnis
-              </h2>
-
-              <div className="space-y-5">
-                {/* Company Name */}
-                <div>
-                  <label htmlFor="companyName" className="block text-sm font-medium text-slate-300 mb-2">
-                    Nama PT/CV <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="companyName"
-                    value={formData.companyName}
-                    onChange={(e) => handleInputChange('companyName', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-base placeholder:text-slate-500"
-                    placeholder="PT Ekspor Indonesia"
-                    aria-required="true"
-                  />
-                  {errors.companyName && (
-                    <p className="mt-1 text-sm text-red-400">{errors.companyName}</p>
-                  )}
-                </div>
-
-                {/* Company Address */}
-                <div>
-                  <label htmlFor="companyAddress" className="block text-sm font-medium text-slate-300 mb-2">
-                    Alamat Perusahaan <span className="text-red-400">*</span>
-                  </label>
-                  <textarea
-                    id="companyAddress"
-                    value={formData.companyAddress}
-                    onChange={(e) => handleInputChange('companyAddress', e.target.value)}
-                    rows={3}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-base placeholder:text-slate-500 resize-none"
-                    placeholder="Jl. Sudirman No. 123, Jakarta Selatan"
-                    aria-required="true"
-                  />
-                  {errors.companyAddress && (
-                    <p className="mt-1 text-sm text-red-400">{errors.companyAddress}</p>
-                  )}
-                </div>
-
-                {/* Commodity Type */}
-                <div>
-                  <label htmlFor="commodity" className="block text-sm font-medium text-slate-300 mb-2">
-                    Jenis Komoditas <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    id="commodity"
-                    value={formData.commodity}
-                    onChange={(e) => handleInputChange('commodity', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-base"
-                    aria-required="true"
-                  >
-                    <option value="">Pilih komoditas</option>
-                    <option value="Kopi">Kopi</option>
-                    <option value="Furnitur">Furnitur</option>
-                    <option value="Rempah">Rempah</option>
-                    <option value="Perikanan">Perikanan</option>
-                    <option value="Tekstil">Tekstil</option>
-                    <option value="Lainnya">Lainnya</option>
-                  </select>
-                  {errors.commodity && (
-                    <p className="mt-1 text-sm text-red-400">{errors.commodity}</p>
-                  )}
-                </div>
-
-                {/* Custom Commodity (conditional) */}
-                {formData.commodity === 'Lainnya' && (
-                  <div>
-                    <label htmlFor="customCommodity" className="block text-sm font-medium text-slate-300 mb-2">
-                      Sebutkan Komoditas <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="customCommodity"
-                      value={formData.customCommodity}
-                      onChange={(e) => handleInputChange('customCommodity', e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-base placeholder:text-slate-500"
-                      placeholder="Contoh: Elektronik, Otomotif, dll"
-                      aria-required="true"
-                    />
-                    {errors.customCommodity && (
-                      <p className="mt-1 text-sm text-red-400">{errors.customCommodity}</p>
-                    )}
-                  </div>
-                )}
-
-                {/* Annual Revenue */}
-                <div>
-                  <label htmlFor="annualRevenue" className="block text-sm font-medium text-slate-300 mb-2">
-                    Omzet Tahunan (IDR) <span className="text-red-400">*</span>
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">Rp</span>
-                    <input
-                      type="text"
-                      id="annualRevenue"
-                      value={formData.annualRevenue}
-                      onChange={(e) => handleRevenueChange(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-base placeholder:text-slate-500"
-                      placeholder="5.000.000.000"
-                      aria-required="true"
-                    />
-                  </div>
-                  <p className="mt-1 text-xs text-slate-400">Contoh: 5.000.000.000</p>
-                  {errors.annualRevenue && (
-                    <p className="mt-1 text-sm text-red-400">{errors.annualRevenue}</p>
-                  )}
-                </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                {renderInput(`teamMembers.${member.id}.name`, 'Nama Lengkap', member.name, (value) => handleTeamMemberChange(member.id, 'name', value), { required: true })}
+                {renderInput(`teamMembers.${member.id}.title`, 'Jabatan', member.title, (value) => handleTeamMemberChange(member.id, 'title', value), { required: true })}
               </div>
+              {uploadField('Daftar Riwayat Hidup', member.resume, (file) => handleTeamMemberChange(member.id, 'resume', file), true)}
+              {renderSelect('Kepemilikan Saham', member.ownership, (value) => handleTeamMemberChange(member.id, 'ownership', value), ['pemilik', 'bukan'], true)}
             </div>
+          ))}
+          <button
+            type="button"
+            onClick={addTeamMember}
+            className="px-4 py-2 rounded-xl border border-dashed border-cyan-500 text-cyan-300 text-sm hover:bg-cyan-500/10"
+          >
+            Tambah Anggota Tim
+          </button>
+        </div>
+      </SectionCard>
 
-            {/* Section B - Dokumen Legal */}
-            <div>
-              <h2 className="text-xl font-semibold text-slate-100 mb-4 flex items-center">
-                <span className="flex items-center justify-center w-7 h-7 rounded-full bg-cyan-500/20 text-cyan-400 text-sm font-bold mr-3">
-                  B
-                </span>
-                Dokumen Legal
-              </h2>
-              <p className="text-sm text-slate-400 mb-6">
-                Upload sekali saja. Anda bisa mengganti sebelum mengirim verifikasi.
-              </p>
-
-              <div className="space-y-4">
-                <UploadCard
-                  label="KTP Direktur"
-                  required
-                  acceptedTypes="image/*, application/pdf"
-                  maxSize="10MB"
-                  file={documents.ktp}
-                  onFileSelect={(file) => handleFileSelect('ktp', file)}
-                  onFileRemove={() => handleFileRemove('ktp')}
-                />
-                
-                <UploadCard
-                  label="NPWP Badan"
-                  required
-                  acceptedTypes="image/*, application/pdf"
-                  maxSize="10MB"
-                  file={documents.npwp}
-                  onFileSelect={(file) => handleFileSelect('npwp', file)}
-                  onFileRemove={() => handleFileRemove('npwp')}
-                />
-                
-                <UploadCard
-                  label="NIB (Nomor Induk Berusaha)"
-                  required
-                  acceptedTypes="application/pdf"
-                  maxSize="10MB"
-                  file={documents.nib}
-                  onFileSelect={(file) => handleFileSelect('nib', file)}
-                  onFileRemove={() => handleFileRemove('nib')}
-                />
-                
-                <UploadCard
-                  label="Akta Pendirian"
-                  required
-                  acceptedTypes="application/pdf"
-                  maxSize="10MB"
-                  file={documents.akta}
-                  onFileSelect={(file) => handleFileSelect('akta', file)}
-                  onFileRemove={() => handleFileRemove('akta')}
-                />
+      <SectionCard title="Risiko" description="Identifikasi risiko dan mitigasinya.">
+        <div className="space-y-6">
+          {riskList.map((risk, index) => (
+            <div key={risk.id} className="border border-slate-700 rounded-2xl p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-400">Risiko #{index + 1}</p>
+                <button
+                  type="button"
+                  onClick={() => removeRisk(risk.id)}
+                  className="text-xs text-red-400"
+                  disabled={riskList.length === 1}
+                >
+                  Hapus
+                </button>
               </div>
+              {renderSelect('Jenis Risiko', risk.riskType, (value) => handleRiskChange(risk.id, 'riskType', value), ['Operasional', 'Keuangan', 'Legal', 'Supply Chain', 'Lainnya'], true)}
+              {renderTextarea(`riskList.${risk.id}.description`, 'Deskripsi Risiko', risk.description, (value) => handleRiskChange(risk.id, 'description', value), true, 3)}
+              {renderTextarea(`riskList.${risk.id}.mitigation`, 'Mitigasi Risiko', risk.mitigation, (value) => handleRiskChange(risk.id, 'mitigation', value), true, 3)}
             </div>
+          ))}
+          <button
+            type="button"
+            onClick={addRisk}
+            className="px-4 py-2 rounded-xl border border-dashed border-cyan-500 text-cyan-300 text-sm hover:bg-cyan-500/10"
+          >
+            Tambah Risiko
+          </button>
+        </div>
+      </SectionCard>
+    </div>
+  );
 
-            {/* Trust Notice */}
-            <div className="p-4 bg-cyan-950/30 border border-cyan-800/30 rounded-lg">
-              <div className="flex items-start space-x-2">
-                <svg className="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Data Anda aman dan hanya digunakan untuk proses verifikasi sesuai regulasi. Kami tidak membagikan dokumen Anda kepada pihak lain tanpa persetujuan.
-                </p>
+  const penanggungTab = (
+    <div className="space-y-8">
+      <SectionCard title="Data Pribadi" description="Informasi penanggung jawab utama.">
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderInput('responsiblePerson.fullName', 'Nama Lengkap', responsiblePerson.fullName, (value) => setResponsiblePerson((prev) => ({ ...prev, fullName: value })), { required: true })}
+          {renderSelect('Jenis Kelamin', responsiblePerson.gender, (value) => setResponsiblePerson((prev) => ({ ...prev, gender: value })), ['Laki-laki', 'Perempuan'], true)}
+          {renderSelect('Agama', responsiblePerson.religion, (value) => setResponsiblePerson((prev) => ({ ...prev, religion: value })), ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu', 'Lainnya'], true)}
+          {renderInput('responsiblePerson.birthDate', 'Tanggal Lahir', responsiblePerson.birthDate, (value) => setResponsiblePerson((prev) => ({ ...prev, birthDate: value })), { required: true, type: 'date' })}
+          {renderInput('responsiblePerson.birthPlace', 'Tempat Lahir', responsiblePerson.birthPlace, (value) => setResponsiblePerson((prev) => ({ ...prev, birthPlace: value })), { required: true })}
+          {renderInput('responsiblePerson.email', 'Email', responsiblePerson.email, (value) => setResponsiblePerson((prev) => ({ ...prev, email: value })), { required: true, type: 'email' })}
+          {renderInput('responsiblePerson.phone', 'No. Handphone', responsiblePerson.phone, (value) => setResponsiblePerson((prev) => ({ ...prev, phone: value })), { required: true })}
+          {renderInput('responsiblePerson.position', 'Jabatan', responsiblePerson.position, (value) => setResponsiblePerson((prev) => ({ ...prev, position: value })), { required: true })}
+          {renderInput('responsiblePerson.nationality', 'Kewarganegaraan', responsiblePerson.nationality, (value) => setResponsiblePerson((prev) => ({ ...prev, nationality: value })), { required: true })}
+          {renderSelect('Pendidikan Terakhir', responsiblePerson.education, (value) => setResponsiblePerson((prev) => ({ ...prev, education: value })), ['SMA/SMK', 'Diploma', 'S1', 'S2', 'S3'], true)}
+          {renderSelect('Status Pernikahan', responsiblePerson.maritalStatus, (value) => setResponsiblePerson((prev) => ({ ...prev, maritalStatus: value })), ['Belum Menikah', 'Menikah', 'Cerai'], true)}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Alamat" description="Alamat domisili dan sesuai KTP.">
+        {renderTextarea('responsibleAddress.address', 'Alamat Tempat Tinggal', responsibleAddress.address, (value) => setResponsibleAddress((prev) => ({ ...prev, address: value })), true, 3)}
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderInput('responsibleAddress.postalCode', 'Kode Pos', responsibleAddress.postalCode, (value) => setResponsibleAddress((prev) => ({ ...prev, postalCode: value })), { required: true })}
+          {renderSelect('Provinsi', responsibleAddress.province, (value) => setResponsibleAddress((prev) => ({ ...prev, province: value })), ['DKI Jakarta', 'Jawa Barat', 'Jawa Timur', 'Jawa Tengah', 'Lainnya'], true)}
+        </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          {renderSelect('Kabupaten/Kota', responsibleAddress.city, (value) => setResponsibleAddress((prev) => ({ ...prev, city: value })), ['Jakarta Selatan', 'Jakarta Timur', 'Bandung', 'Surabaya', 'Lainnya'], true)}
+          {renderSelect('Kecamatan', responsibleAddress.district, (value) => setResponsibleAddress((prev) => ({ ...prev, district: value })), ['Setiabudi', 'Menteng', 'Tebet', 'Cilandak', 'Lainnya'], true)}
+          {renderSelect('Kelurahan', responsibleAddress.village, (value) => setResponsibleAddress((prev) => ({ ...prev, village: value })), ['Kuningan', 'Senayan', 'Rawamangun', 'Cipinang', 'Lainnya'], true)}
+        </div>
+        <label className="inline-flex items-center space-x-3 text-sm text-slate-300">
+          <input
+            type="checkbox"
+            checked={responsibleAddress.sameAsKtp}
+            onChange={(e) => setResponsibleAddress((prev) => ({ ...prev, sameAsKtp: e.target.checked }))}
+            className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-cyan-500"
+          />
+          <span>Alamat sama dengan KTP</span>
+        </label>
+        {!responsibleAddress.sameAsKtp && (
+          <div className="space-y-4">
+            {renderTextarea('responsibleAddress.ktpAddress', 'Alamat sesuai KTP', responsibleAddress.ktpAddress, (value) => setResponsibleAddress((prev) => ({ ...prev, ktpAddress: value })), true, 3)}
+            <div className="grid gap-6 md:grid-cols-2">
+              {renderInput('responsibleAddress.ktpPostalCode', 'Kode Pos sesuai KTP', responsibleAddress.ktpPostalCode, (value) => setResponsibleAddress((prev) => ({ ...prev, ktpPostalCode: value })), { required: true })}
+              {renderSelect('Provinsi KTP', responsibleAddress.ktpProvince, (value) => setResponsibleAddress((prev) => ({ ...prev, ktpProvince: value })), ['DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Lainnya'], true)}
+            </div>
+            <div className="grid gap-6 md:grid-cols-3">
+              {renderSelect('Kabupaten/Kota KTP', responsibleAddress.ktpCity, (value) => setResponsibleAddress((prev) => ({ ...prev, ktpCity: value })), ['Jakarta Selatan', 'Bogor', 'Depok', 'Bekasi', 'Lainnya'], true)}
+              {renderSelect('Kecamatan KTP', responsibleAddress.ktpDistrict, (value) => setResponsibleAddress((prev) => ({ ...prev, ktpDistrict: value })), ['Setiabudi', 'Menteng', 'Sukmajaya', 'Cimanggis', 'Lainnya'], true)}
+              {renderSelect('Kelurahan KTP', responsibleAddress.ktpVillage, (value) => setResponsibleAddress((prev) => ({ ...prev, ktpVillage: value })), ['Kuningan', 'Cinere', 'Sawangan', 'Lainnya'], true)}
+            </div>
+          </div>
+        )}
+      </SectionCard>
+
+      <SectionCard title="Dokumen Identitas">
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderInput('responsibleDocs.ktpNumber', 'No. KTP', responsibleDocs.ktpNumber, (value) => setResponsibleDocs((prev) => ({ ...prev, ktpNumber: value })), { required: true })}
+          {renderInput('responsibleDocs.npwpNumber', 'No. NPWP', responsibleDocs.npwpNumber, (value) => setResponsibleDocs((prev) => ({ ...prev, npwpNumber: value })), { required: true })}
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          {uploadField('Upload File KTP', responsibleDocs.ktpFile, (file) => setResponsibleDocs((prev) => ({ ...prev, ktpFile: file })), true)}
+          {uploadField('Upload File NPWP', responsibleDocs.npwpFile, (file) => setResponsibleDocs((prev) => ({ ...prev, npwpFile: file })), true)}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Relasi & Komisaris">
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderInput('relationsData.relativeName', 'Nama Relasi/Kerabat', relationsData.relativeName, (value) => setRelationsData((prev) => ({ ...prev, relativeName: value })), { required: true })}
+          {renderInput('relationsData.relativePhone', 'No. Telepon Relasi', relationsData.relativePhone, (value) => setRelationsData((prev) => ({ ...prev, relativePhone: value })), { required: true })}
+          {renderSelect('Hubungan', relationsData.relationType, (value) => setRelationsData((prev) => ({ ...prev, relationType: value })), ['Pasangan', 'Orang Tua', 'Saudara', 'Rekan Kerja', 'Lainnya'], true)}
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderInput('relationsData.commissionerName', 'Nama Komisaris', relationsData.commissionerName, (value) => setRelationsData((prev) => ({ ...prev, commissionerName: value })), { placeholder: 'Opsional' })}
+          {renderInput('relationsData.commissionerPhone', 'No. Telepon Komisaris', relationsData.commissionerPhone, (value) => setRelationsData((prev) => ({ ...prev, commissionerPhone: value })), { placeholder: 'Opsional' })}
+          {renderInput('relationsData.commissionerKtp', 'No. KTP Komisaris', relationsData.commissionerKtp, (value) => setRelationsData((prev) => ({ ...prev, commissionerKtp: value })), { placeholder: 'Opsional' })}
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          {uploadField('Upload KTP Komisaris', relationsData.commissionerKtpFile, (file) => setRelationsData((prev) => ({ ...prev, commissionerKtpFile: file })), false)}
+          {uploadField('Surat Persetujuan Komisaris', relationsData.commissionerApproval, (file) => setRelationsData((prev) => ({ ...prev, commissionerApproval: file })), false)}
+        </div>
+      </SectionCard>
+    </div>
+  );
+
+  const keuanganTab = (
+    <div className="space-y-8">
+      <SectionCard title="Kinerja Keuangan (Per Tahun)" description="Gunakan angka rupiah tanpa simbol.">
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderInput('financialPerformance.sales', 'Total Penjualan Per Tahun (Rp)', financialPerformance.sales, (value) => setFinancialPerformance((prev) => ({ ...prev, sales: formatNumberInput(value) })), { required: true })}
+          {renderInput('financialPerformance.operatingIncome', 'Laba Usaha (Rp)', financialPerformance.operatingIncome, (value) => setFinancialPerformance((prev) => ({ ...prev, operatingIncome: formatNumberInput(value) })), { required: true })}
+          {renderInput('financialPerformance.netIncome', 'Laba Bersih Perusahaan (Rp)', financialPerformance.netIncome, (value) => setFinancialPerformance((prev) => ({ ...prev, netIncome: formatNumberInput(value) })), { required: true })}
+          {renderInput('financialPerformance.currentAssets', 'Aset Lancar (Rp)', financialPerformance.currentAssets, (value) => setFinancialPerformance((prev) => ({ ...prev, currentAssets: formatNumberInput(value) })), { required: true })}
+          {renderInput('financialPerformance.nonCurrentAssets', 'Aset Tidak Lancar (Rp)', financialPerformance.nonCurrentAssets, (value) => setFinancialPerformance((prev) => ({ ...prev, nonCurrentAssets: formatNumberInput(value) })), { required: true })}
+          {renderInput('financialPerformance.shortDebt', 'Utang Jangka Pendek (Rp)', financialPerformance.shortDebt, (value) => setFinancialPerformance((prev) => ({ ...prev, shortDebt: formatNumberInput(value) })), { required: true })}
+          {renderInput('financialPerformance.longDebt', 'Utang Jangka Panjang (Rp)', financialPerformance.longDebt, (value) => setFinancialPerformance((prev) => ({ ...prev, longDebt: formatNumberInput(value) })), { required: true })}
+          {renderInput('financialPerformance.totalEquity', 'Total Modal (Rp)', financialPerformance.totalEquity, (value) => setFinancialPerformance((prev) => ({ ...prev, totalEquity: formatNumberInput(value) })), { required: true })}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Informasi Rekening">
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderInput('bankInfo.bankName', 'Nama Bank', bankInfo.bankName, (value) => setBankInfo((prev) => ({ ...prev, bankName: value })), { required: true })}
+          {renderInput('bankInfo.accountName', 'Nama Rekening', bankInfo.accountName, (value) => setBankInfo((prev) => ({ ...prev, accountName: value })), { required: true })}
+          {renderInput('bankInfo.accountNumber', 'Nomor Rekening', bankInfo.accountNumber, (value) => setBankInfo((prev) => ({ ...prev, accountNumber: value })), { required: true })}
+          {renderInput('bankInfo.branch', 'Cabang / Wilayah / Negara', bankInfo.branch, (value) => setBankInfo((prev) => ({ ...prev, branch: value })), { required: true })}
+          {renderInput('bankInfo.bankAddress', 'Alamat Bank', bankInfo.bankAddress, (value) => setBankInfo((prev) => ({ ...prev, bankAddress: value })), { required: true })}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Dokumen Keuangan">
+        <div className="grid gap-6 md:grid-cols-2">
+          {uploadField('Rekening Koran Perusahaan', financialDocs.bankStatement, (file) => setFinancialDocs((prev) => ({ ...prev, bankStatement: file })), true)}
+          {uploadField('Laporan Keuangan Perusahaan', financialDocs.financialReport, (file) => setFinancialDocs((prev) => ({ ...prev, financialReport: file })), true)}
+          {uploadField('Laporan Keuangan Tahun Berjalan', financialDocs.currentYearReport, (file) => setFinancialDocs((prev) => ({ ...prev, currentYearReport: file })), true)}
+        </div>
+      </SectionCard>
+    </div>
+  );
+
+  const dokumenTab = (
+    <div className="space-y-8">
+      <SectionCard title="Legalitas Utama">
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderInput('corporateLegal.companyNpwp', 'Nomor NPWP Perusahaan', corporateLegal.companyNpwp, (value) => setCorporateLegal((prev) => ({ ...prev, companyNpwp: value })), { required: true })}
+          {uploadField('Upload File NPWP', corporateLegal.companyNpwpFile, (file) => setCorporateLegal((prev) => ({ ...prev, companyNpwpFile: file })), true)}
+          {renderInput('corporateLegal.deedNumber', 'No. Akta Pendirian', corporateLegal.deedNumber, (value) => setCorporateLegal((prev) => ({ ...prev, deedNumber: value })), { required: true })}
+          {renderInput('corporateLegal.deedDate', 'Tanggal Akta Pendirian', corporateLegal.deedDate, (value) => setCorporateLegal((prev) => ({ ...prev, deedDate: value })), { required: true, type: 'date' })}
+          {uploadField('Upload File Akta Pendirian', corporateLegal.deedFile, (file) => setCorporateLegal((prev) => ({ ...prev, deedFile: file })), true, '.pdf')}
+          {renderInput('corporateLegal.ministryDate', 'Tanggal SK Kemenkumham Akta Pendirian', corporateLegal.ministryDate, (value) => setCorporateLegal((prev) => ({ ...prev, ministryDate: value })), { required: true, type: 'date' })}
+          {uploadField('Upload SK Kemenkumham Akta Pendirian', corporateLegal.ministryFile, (file) => setCorporateLegal((prev) => ({ ...prev, ministryFile: file })), true, '.pdf')}
+        </div>
+        <div className="space-y-4">
+          {corporateLegal.deedChanges.map((change, index) => (
+            <div key={change.id} className="border border-slate-700 rounded-2xl p-4 space-y-4">
+              <div className="flex items-center justify-between text-sm text-slate-400">
+                Akta Perubahan #{index + 1}
+                <button
+                  type="button"
+                  onClick={() => removeDeedChange(change.id)}
+                  className="text-xs text-red-400"
+                >
+                  Hapus
+                </button>
               </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                {renderInput(`corporateLegal.deedChanges.${change.id}.deedNumber`, 'No. Akta Perubahan', change.deedNumber, (value) => handleDeedChange(change.id, 'deedNumber', value), { required: true })}
+                {renderInput(`corporateLegal.deedChanges.${change.id}.deedDate`, 'Tanggal Akta', change.deedDate, (value) => handleDeedChange(change.id, 'deedDate', value), { required: true, type: 'date' })}
+              </div>
+              {uploadField('Upload Akta Perubahan', change.deedFile, (file) => handleDeedChange(change.id, 'deedFile', file), true, '.pdf')}
             </div>
+          ))}
+          <button
+            type="button"
+            onClick={addDeedChange}
+            className="px-4 py-2 rounded-xl border border-dashed border-cyan-500 text-cyan-300 text-sm hover:bg-cyan-500/10"
+          >
+            Tambah Akta Perubahan
+          </button>
+        </div>
+      </SectionCard>
 
-            {/* Submit Button */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button
-                type="submit"
-                disabled={!isFormComplete()}
-                className={`flex-1 py-3 px-6 rounded-lg font-medium text-base transition-all ${
-                  isFormComplete()
-                    ? 'bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white shadow-lg shadow-cyan-900/50'
-                    : 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                }`}
-              >
-                Verifikasi Bisnis Saya
-              </button>
-              <Link
-                href="/"
-                className="flex-shrink-0 py-3 px-6 rounded-lg font-medium text-base transition-all border-2 border-slate-600 text-slate-300 hover:border-slate-500 text-center"
-              >
-                Nanti Saja
-              </Link>
-            </div>
-          </form>
+      <SectionCard title="Perizinan">
+        {renderSelect(
+          'Jenis Dokumen Perizinan',
+          licensing.licenseType,
+          (value) => setLicensing((prev) => ({ ...prev, licenseType: value as LicensingData['licenseType'] })),
+          ['NIB', 'SIUP & TDP'],
+          true,
+        )}
+        <div className="grid gap-6 md:grid-cols-2">
+          {renderInput('licensing.nibNumber', 'No. NIB', licensing.nibNumber, (value) => setLicensing((prev) => ({ ...prev, nibNumber: value })), { required: true })}
+          {uploadField('Upload File NIB', licensing.nibFile, (file) => setLicensing((prev) => ({ ...prev, nibFile: file })), true)}
+          {uploadField('Upload NIB Berbasis Risiko', licensing.nibRiskFile, (file) => setLicensing((prev) => ({ ...prev, nibRiskFile: file })), true)}
+          {uploadField('Surat Pernyataan Kesanggupan', licensing.commitmentLetter, (file) => setLicensing((prev) => ({ ...prev, commitmentLetter: file })), true)}
+        </div>
+      </SectionCard>
+    </div>
+  );
+
+  const tandaTanganTab = (
+    <div className="space-y-8">
+      <SectionCard title="Verifikasi Wajah" description="Gunakan kamera untuk mengambil selfie penanggung jawab.">
+        {uploadField('Foto Selfie Penanggung Jawab', digitalSignature.selfie, (file) => setDigitalSignature({ selfie: file }), true, '.jpg,.jpeg,.png')}
+        {errors.selfie && <p className="text-sm text-red-400">{errors.selfie}</p>}
+      </SectionCard>
+
+      <div className="flex flex-col md:flex-row gap-4 justify-between">
+        <button
+          type="button"
+          onClick={handleSaveDraft}
+          className="px-6 py-3 rounded-xl border border-slate-600 text-slate-300 hover:border-slate-500"
+        >
+          Simpan
+        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setActiveTab('dokumen')}
+            className="px-6 py-3 rounded-xl bg-slate-800 text-slate-200 border border-slate-700"
+          >
+            Kembali
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 text-white font-semibold shadow-lg shadow-cyan-900/50"
+          >
+            Kirim Untuk Verifikasi
+          </button>
         </div>
       </div>
     </div>
   );
-}
 
-// Upload Card Component
-interface UploadCardProps {
-  label: string;
-  required?: boolean;
-  acceptedTypes: string;
-  maxSize: string;
-  file: UploadedFile | null;
-  onFileSelect: (file: File) => void;
-  onFileRemove: () => void;
-}
-
-function UploadCard({ label, required, acceptedTypes, maxSize, file, onFileSelect, onFileRemove }: UploadCardProps) {
-  const [dragOver, setDragOver] = useState(false);
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) {
-      onFileSelect(droppedFile);
+  const renderActiveTab = () => {
+    switch (activeTab) {
+      case 'perusahaan':
+        return companyTab;
+      case 'penanggung':
+        return penanggungTab;
+      case 'keuangan':
+        return keuanganTab;
+      case 'dokumen':
+        return dokumenTab;
+      case 'tandaTangan':
+        return tandaTanganTab;
+      default:
+        return null;
     }
-  };
-
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      onFileSelect(selectedFile);
-    }
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
   return (
-    <div className="p-4 bg-slate-900/30 border border-slate-600 rounded-lg">
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <h3 className="text-sm font-medium text-slate-200">
-            {label} {required && <span className="text-red-400">*</span>}
-          </h3>
-          <p className="text-xs text-slate-400 mt-1">
-            {acceptedTypes.includes('image') ? 'JPG, PNG, atau PDF' : 'PDF'} · Maks {maxSize}
-          </p>
-        </div>
-      </div>
-
-      {!file ? (
-        <div
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-            dragOver
-              ? 'border-cyan-500 bg-cyan-500/5'
-              : 'border-slate-600 hover:border-slate-500'
-          }`}
-        >
-          <svg className="w-10 h-10 text-slate-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-          </svg>
-          <p className="text-sm text-slate-300 mb-2">
-            Seret file ke sini atau
-          </p>
-          <label className="inline-block">
-            <input
-              type="file"
-              accept={acceptedTypes}
-              onChange={handleFileInputChange}
-              className="hidden"
-            />
-            <span className="cursor-pointer text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors">
-              Pilih File
-            </span>
-          </label>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between p-3 bg-slate-800/50 border border-slate-600 rounded-lg">
-          <div className="flex items-center space-x-3 flex-1 min-w-0">
-            <svg className="w-8 h-8 text-cyan-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-            </svg>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-slate-200 truncate">{file.name}</p>
-              <p className="text-xs text-slate-400">{formatFileSize(file.size)}</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-8 px-4">
+      <div className="max-w-6xl mx-auto grid gap-6 lg:grid-cols-[280px,1fr]">
+        <div className="bg-slate-900/60 border border-slate-700 rounded-2xl p-6 space-y-6">
+          <div>
+            <p className="text-cyan-400 text-sm font-semibold">Kelengkapan</p>
+            <div className="flex items-center gap-3 mt-2">
+              <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-2 bg-gradient-to-r from-cyan-500 to-teal-500" style={{ width: `${progress}%` }} />
+              </div>
+              <span className="text-slate-200 text-sm font-semibold">{progress}%</span>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onFileRemove}
-            className="ml-3 p-2 text-slate-400 hover:text-red-400 transition-colors flex-shrink-0"
-            aria-label="Hapus file"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </button>
+          <div className="hidden lg:block">{renderSidebar()}</div>
+          <div className="lg:hidden">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value as TabKey)}
+              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-slate-100"
+            >
+              {tabList.map((tab) => (
+                <option key={tab.key} value={tab.key}>
+                  {tab.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="text-xs text-slate-500">
+            Data Anda tersimpan secara lokal saat menekan tombol &quot;Simpan&quot;. Tidak ada data yang dikirim hingga Anda menekan &quot;Kirim Untuk Verifikasi&quot;.
+          </div>
         </div>
-      )}
+
+        <div className="bg-slate-900/30 border border-slate-800 rounded-2xl p-6 md:p-8 space-y-6">
+          <div>
+            <p className="text-sm uppercase tracking-wide text-cyan-400 font-semibold">Profil Bisnis & Verifikasi</p>
+            <h1 className="text-3xl font-bold text-slate-100 mt-2">Profil Bisnis & Verifikasi</h1>
+            <p className="text-slate-400 mt-2">
+              Lengkapi data untuk verifikasi perusahaan. Data Anda aman dan digunakan sesuai regulasi.
+            </p>
+          </div>
+
+          {submitted && (
+            <div className="p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 flex items-start gap-3">
+              <svg className="w-5 h-5 text-emerald-400 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <p className="text-sm text-emerald-300 font-semibold">Permohonan verifikasi terkirim</p>
+                <p className="text-xs text-emerald-200 mt-1">Tim kami segera meninjau data dan menghubungi Anda melalui email.</p>
+              </div>
+            </div>
+          )}
+
+          {savedToast && (
+            <div className="p-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-200 text-sm">
+              Perubahan tersimpan secara lokal.
+            </div>
+          )}
+
+          {renderActiveTab()}
+
+          {activeTab !== 'tandaTangan' && (
+            <div className="flex flex-col md:flex-row gap-3 justify-between pt-4">
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentIndex = tabList.findIndex((tab) => tab.key === activeTab);
+                    if (currentIndex > 0) {
+                      setActiveTab(tabList[currentIndex - 1].key);
+                    }
+                  }}
+                  className="px-5 py-3 rounded-xl border border-slate-700 text-slate-200"
+                >
+                  Kembali
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentIndex = tabList.findIndex((tab) => tab.key === activeTab);
+                    if (currentIndex < tabList.length - 1) {
+                      setActiveTab(tabList[currentIndex + 1].key);
+                    }
+                  }}
+                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-lg shadow-cyan-900/40"
+                >
+                  Lanjut
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={handleSaveDraft}
+                className="px-5 py-3 rounded-xl border border-slate-700 text-slate-200"
+              >
+                Simpan
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
