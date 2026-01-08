@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import Link from 'next/link';
 
 // Types
@@ -15,7 +15,7 @@ interface Step1Data {
   invoiceAmount: string;
   agreedExchangeRate: string;
   dueDate: string;
-  fundingDuration: '7' | '14';
+  fundingDuration: string;
 }
 
 interface Step2Data {
@@ -78,6 +78,28 @@ function Stepper({ currentStep, onStepClick }: { currentStep: number; onStepClic
           </div>
         ))}
       </div>
+      <style jsx>{`
+        .white-calendar {
+          color-scheme: dark;
+          position: relative;
+        }
+
+        :global(.white-calendar::-webkit-calendar-picker-indicator) {
+          opacity: 0;
+          pointer-events: auto;
+          background: transparent;
+        }
+
+        :global(.white-calendar::-moz-focus-inner) {
+          border: 0;
+        }
+
+        :global(.white-calendar::-moz-calendar-picker-indicator) {
+          opacity: 0;
+          pointer-events: auto;
+          background: transparent;
+        }
+      `}</style>
     </div>
   );
 }
@@ -229,8 +251,26 @@ export default function BuatPendanaanPage() {
   // Step 4 State
   const [acknowledgement, setAcknowledgement] = useState(false);
 
+  const dueDateInputRef = useRef<HTMLInputElement | null>(null);
+  const todayJakarta = useMemo(
+    () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date()),
+    []
+  );
+
   // Errors
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleDueDateFieldClick = () => {
+    const node = dueDateInputRef.current;
+    if (!node) return;
+    const picker = (node as HTMLInputElement & { showPicker?: () => void }).showPicker;
+    if (picker) {
+      picker.call(node);
+    } else {
+      node.focus();
+      node.click();
+    }
+  };
 
   // Handle file upload
   const handleFileUpload = (field: keyof Step2Data | 'previousTransferProof', file: File) => {
@@ -268,6 +308,16 @@ export default function BuatPendanaanPage() {
     if (!step1Data.currency) newErrors.currency = 'Mata uang harus dipilih';
     if (!step1Data.invoiceAmount) newErrors.invoiceAmount = 'Nominal invoice harus diisi';
     if (!step1Data.dueDate) newErrors.dueDate = 'Tanggal jatuh tempo harus diisi';
+    else if (step1Data.dueDate < todayJakarta) {
+      newErrors.dueDate = 'Tanggal jatuh tempo tidak boleh sebelum hari ini (WIB)';
+    }
+
+    const durationValue = parseInt(step1Data.fundingDuration, 10);
+    if (!step1Data.fundingDuration) {
+      newErrors.fundingDuration = 'Durasi pendanaan harus diisi';
+    } else if (Number.isNaN(durationValue) || durationValue < 3 || durationValue > 14) {
+      newErrors.fundingDuration = 'Durasi harus antara 3 hingga 14 hari';
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -498,7 +548,7 @@ export default function BuatPendanaanPage() {
                     <svg className="w-4 h-4 inline mr-1 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
-                    Nilai ini adalah kesepakatan final untuk pencairan Rupiah, terlepas dari fluktuasi pasar saat dana terkumpul.
+                    Angka ini dikalkulasi dari Kurs Tengah BI (Rp 16.000) dikurangi buffer volatilitas 1.5% untuk melindungi nilai pendanaan selama masa penggalangan dana.
                   </p>
                 </div>
 
@@ -507,31 +557,48 @@ export default function BuatPendanaanPage() {
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Tanggal Jatuh Tempo (Tenor) <span className="text-red-400">*</span>
                   </label>
-                  <input
-                    type="date"
-                    value={step1Data.dueDate}
-                    onChange={(e) => setStep1Data({ ...step1Data, dueDate: e.target.value })}
-                    className={`w-full px-4 py-3 bg-slate-900/50 border rounded-lg focus:ring-2 focus:ring-cyan-500 transition-all text-slate-100 ${
-                      errors.dueDate ? 'border-red-500' : 'border-slate-600'
-                    }`}
-                  />
+                  <div className="relative cursor-pointer" onClick={handleDueDateFieldClick}>
+                    <input
+                      type="date"
+                      value={step1Data.dueDate}
+                      onChange={(e) => setStep1Data({ ...step1Data, dueDate: e.target.value })}
+                      min={todayJakarta}
+                      className={`white-calendar w-full pr-12 pl-4 py-3 bg-slate-900/50 border rounded-lg focus:ring-2 focus:ring-cyan-500 transition-all text-slate-100 ${
+                        errors.dueDate ? 'border-red-500' : 'border-slate-600'
+                      }`}
+                      ref={dueDateInputRef}
+                    />
+                    <svg
+                      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v9a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm10 7H4v6a1 1 0 001 1h10a1 1 0 001-1V9z" />
+                    </svg>
+                  </div>
                   {errors.dueDate && <p className="mt-1 text-xs text-red-400">{errors.dueDate}</p>}
                 </div>
 
                 {/* Funding Duration */}
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Durasi Pendanaan <span className="text-red-400">*</span>
+                    Durasi Pendanaan (Hari) <span className="text-red-400">*</span>
                   </label>
-                  <select
+                  <input
+                    type="number"
+                    min={3}
+                    max={14}
                     value={step1Data.fundingDuration}
-                    onChange={(e) => setStep1Data({ ...step1Data, fundingDuration: e.target.value as '7' | '14' })}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 transition-all text-slate-100"
-                  >
-                    <option value="7">7 hari</option>
-                    <option value="14">14 hari</option>
-                  </select>
-                  <p className="mt-1 text-xs text-slate-400">Durasi maksimal 14 hari.</p>
+                    onChange={(e) => setStep1Data({ ...step1Data, fundingDuration: e.target.value })}
+                    className={`w-full px-4 py-3 bg-slate-900/50 border rounded-lg focus:ring-2 focus:ring-cyan-500 transition-all text-slate-100 ${
+                      errors.fundingDuration ? 'border-red-500' : 'border-slate-600'
+                    }`}
+                    placeholder="Masukkan durasi (3-14 hari)"
+                  />
+                  <p className="mt-1 text-xs text-slate-400">Durasi pendanaan dapat dipilih antara 3-14 hari.</p>
+                  {errors.fundingDuration && (
+                    <p className="mt-1 text-xs text-red-400">{errors.fundingDuration}</p>
+                  )}
                 </div>
 
                 {/* Estimated Funds */}

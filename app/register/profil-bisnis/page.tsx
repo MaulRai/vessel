@@ -148,6 +148,12 @@ interface DigitalSignatureData {
   selfie: UploadedFile | null;
 }
 
+interface MembershipAgreement {
+  membership: boolean;
+  savings: boolean;
+  adArt: boolean;
+}
+
 type SectionCardProps = {
   title: string;
   description?: string;
@@ -298,6 +304,12 @@ export default function ProfilBisnisPage() {
 
   const [digitalSignature, setDigitalSignature] = useState<DigitalSignatureData>({
     selfie: null,
+  });
+
+  const [membershipAgreement, setMembershipAgreement] = useState<MembershipAgreement>({
+    membership: false,
+    savings: false,
+    adArt: false,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -470,6 +482,11 @@ export default function ProfilBisnisPage() {
     );
 
     fields.push(Boolean(digitalSignature.selfie));
+    fields.push(
+      membershipAgreement.membership,
+      membershipAgreement.savings,
+      membershipAgreement.adArt,
+    );
 
     return fields;
   }, [
@@ -487,6 +504,7 @@ export default function ProfilBisnisPage() {
     responsiblePerson,
     riskList,
     teamMembers,
+    membershipAgreement,
   ]);
 
   const progress = useMemo(() => {
@@ -586,21 +604,45 @@ export default function ProfilBisnisPage() {
       corporateLegal,
       licensing,
       digitalSignature,
+      membershipAgreement,
     });
     setSavedToast(true);
     setTimeout(() => setSavedToast(false), 4000);
   };
 
   const handleSubmit = () => {
-    const missingSelfie = !digitalSignature.selfie;
-    if (missingSelfie) {
-      setErrors({ selfie: 'Mohon ambil foto selfie penanggung jawab terlebih dahulu.' });
+    const newErrors: Record<string, string> = {};
+    if (!digitalSignature.selfie) {
+      newErrors.selfie = 'Mohon ambil foto selfie penanggung jawab terlebih dahulu.';
+    }
+    if (!membershipAgreement.membership || !membershipAgreement.savings || !membershipAgreement.adArt) {
+      newErrors.membership = 'Mohon setujui seluruh akad keanggotaan sebelum melanjutkan.';
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       setActiveTab('tandaTangan');
       return;
     }
     setErrors({});
     setSubmitted(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleMembershipAgreementChange = (key: keyof MembershipAgreement, checked: boolean) => {
+    setMembershipAgreement((prev) => {
+      const updated = { ...prev, [key]: checked };
+      if (updated.membership && updated.savings && updated.adArt) {
+        setErrors((prevErrors) => {
+          if (!prevErrors.membership) {
+            return prevErrors;
+          }
+          const nextErrors = { ...prevErrors };
+          delete nextErrors.membership;
+          return nextErrors;
+        });
+      }
+      return updated;
+    });
   };
 
   const renderSidebar = () => (
@@ -1055,7 +1097,7 @@ export default function ProfilBisnisPage() {
           {renderInput('licensing.nibNumber', 'No. NIB', licensing.nibNumber, (value) => setLicensing((prev) => ({ ...prev, nibNumber: value })), { required: true })}
           {uploadField('Upload File NIB', licensing.nibFile, (file) => setLicensing((prev) => ({ ...prev, nibFile: file })), true)}
           {uploadField('Upload NIB Berbasis Risiko', licensing.nibRiskFile, (file) => setLicensing((prev) => ({ ...prev, nibRiskFile: file })), true)}
-          {uploadField('Surat Pernyataan Kesanggupan', licensing.commitmentLetter, (file) => setLicensing((prev) => ({ ...prev, commitmentLetter: file })), true)}
+          {uploadField('Surat Permohonan Menjadi Anggota & Kesanggupan Bayar', licensing.commitmentLetter, (file) => setLicensing((prev) => ({ ...prev, commitmentLetter: file })), true)}
         </div>
       </SectionCard>
     </div>
@@ -1066,6 +1108,42 @@ export default function ProfilBisnisPage() {
       <SectionCard title="Verifikasi Wajah" description="Gunakan kamera untuk mengambil selfie penanggung jawab.">
         {uploadField('Foto Selfie Penanggung Jawab', digitalSignature.selfie, (file) => setDigitalSignature({ selfie: file }), true, '.jpg,.jpeg,.png')}
         {errors.selfie && <p className="text-sm text-red-400">{errors.selfie}</p>}
+      </SectionCard>
+
+      <SectionCard
+        title="Akad Keanggotaan"
+        description="Setujui ketentuan menjadi Anggota Luar Biasa/Mitra Koperasi Jasa VESSEL."
+      >
+        <div className="space-y-4">
+          <label className="flex items-start gap-3 text-sm text-slate-200 bg-slate-900/40 border border-slate-700 rounded-xl p-4">
+            <input
+              type="checkbox"
+              className="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-900 text-cyan-500"
+              checked={membershipAgreement.membership}
+              onChange={(e) => handleMembershipAgreementChange('membership', e.target.checked)}
+            />
+            <span>Saya mewakili perusahaan mengajukan diri menjadi Anggota Luar Biasa/Mitra pada Koperasi Jasa VESSEL.</span>
+          </label>
+          <label className="flex items-start gap-3 text-sm text-slate-200 bg-slate-900/40 border border-slate-700 rounded-xl p-4">
+            <input
+              type="checkbox"
+              className="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-900 text-cyan-500"
+              checked={membershipAgreement.savings}
+              onChange={(e) => handleMembershipAgreementChange('savings', e.target.checked)}
+            />
+            <span>Saya menyetujui pemotongan Simpanan Pokok (Rp 50.000) dan Simpanan Wajib dari pencairan pembiayaan pertama.</span>
+          </label>
+          <label className="flex items-start gap-3 text-sm text-slate-200 bg-slate-900/40 border border-slate-700 rounded-xl p-4">
+            <input
+              type="checkbox"
+              className="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-900 text-cyan-500"
+              checked={membershipAgreement.adArt}
+              onChange={(e) => handleMembershipAgreementChange('adArt', e.target.checked)}
+            />
+            <span>Saya telah membaca dan menyetujui AD/ART Koperasi.</span>
+          </label>
+        </div>
+        {errors.membership && <p className="text-sm text-red-400">{errors.membership}</p>}
       </SectionCard>
 
       <div className="flex flex-col md:flex-row gap-4 justify-between">
@@ -1089,7 +1167,7 @@ export default function ProfilBisnisPage() {
             onClick={handleSubmit}
             className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 text-white font-semibold shadow-lg shadow-cyan-900/50"
           >
-            Kirim Untuk Verifikasi
+            Setuju & Daftar Anggota
           </button>
         </div>
       </div>
