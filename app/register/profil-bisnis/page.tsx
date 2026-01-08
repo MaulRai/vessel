@@ -1225,7 +1225,6 @@ export default function ProfilBisnisPage() {
 
         <div className="bg-slate-900/30 border border-slate-800 rounded-2xl p-6 md:p-8 space-y-6">
           <div>
-            <p className="text-sm uppercase tracking-wide text-cyan-400 font-semibold">Profil Bisnis & Verifikasi</p>
             <h1 className="text-3xl font-bold text-slate-100 mt-2">Profil Bisnis & Verifikasi</h1>
             <p className="text-slate-400 mt-2">
               Lengkapi data untuk verifikasi perusahaan. Data digunakan untuk verifikasi kelayakan usaha (KYB)
