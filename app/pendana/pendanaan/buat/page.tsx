@@ -16,6 +16,8 @@ interface Step1Data {
   agreedExchangeRate: string;
   dueDate: string;
   fundingDuration: string;
+  importerName: string;
+  destinationCountry: string;
 }
 
 interface Step2Data {
@@ -232,7 +234,9 @@ export default function BuatPendanaanPage() {
     invoiceAmount: '',
     agreedExchangeRate: '15750', // Mock exchange rate
     dueDate: '',
-    fundingDuration: '14'
+    fundingDuration: '14',
+    importerName: '',
+    destinationCountry: ''
   });
 
   // Step 2 State
@@ -305,6 +309,8 @@ export default function BuatPendanaanPage() {
   const validateStep1 = (): boolean => {
     const newErrors: Record<string, string> = {};
     
+    if (!step1Data.importerName.trim()) newErrors.importerName = 'Nama perusahaan importir harus diisi';
+    if (!step1Data.destinationCountry) newErrors.destinationCountry = 'Negara tujuan harus dipilih';
     if (!step1Data.currency) newErrors.currency = 'Mata uang harus dipilih';
     if (!step1Data.invoiceAmount) newErrors.invoiceAmount = 'Nominal invoice harus diisi';
     if (!step1Data.dueDate) newErrors.dueDate = 'Tanggal jatuh tempo harus diisi';
@@ -436,7 +442,15 @@ export default function BuatPendanaanPage() {
                   onClick={() => {
                     setIsSubmitted(false);
                     setCurrentStep(1);
-                    setStep1Data({ currency: '', invoiceAmount: '', agreedExchangeRate: '15750', dueDate: '', fundingDuration: '14' });
+                    setStep1Data({
+                      currency: '',
+                      invoiceAmount: '',
+                      agreedExchangeRate: '15750',
+                      dueDate: '',
+                      fundingDuration: '14',
+                      importerName: '',
+                      destinationCountry: ''
+                    });
                     setStep2Data({ commercialInvoice: null, billOfLading: null, purchaseOrder: null });
                     setStep3Data({ transactionType: 'first', previousTransferProof: null });
                     setAcknowledgement(false);
@@ -490,6 +504,49 @@ export default function BuatPendanaanPage() {
                   <p className="text-sm text-slate-400 mb-6">
                     Isi informasi tagihan yang akan didanai
                   </p>
+                </div>
+
+                {/* Importer Name */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Nama Perusahaan Importir <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={step1Data.importerName}
+                    onChange={(e) => setStep1Data({ ...step1Data, importerName: e.target.value })}
+                    className={`w-full px-4 py-3 bg-slate-900/50 border rounded-lg focus:ring-2 focus:ring-cyan-500 transition-all text-slate-100 ${
+                      errors.importerName ? 'border-red-500' : 'border-slate-600'
+                    }`}
+                    placeholder="Nama perusahaan buyer/importir"
+                  />
+                  {errors.importerName && <p className="mt-1 text-xs text-red-400">{errors.importerName}</p>}
+                </div>
+
+                {/* Destination Country */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Negara Tujuan <span className="text-red-400">*</span>
+                  </label>
+                  <select
+                    value={step1Data.destinationCountry}
+                    onChange={(e) => setStep1Data({ ...step1Data, destinationCountry: e.target.value })}
+                    className={`w-full px-4 py-3 bg-slate-900/50 border rounded-lg focus:ring-2 focus:ring-cyan-500 transition-all text-slate-100 ${
+                      errors.destinationCountry ? 'border-red-500' : 'border-slate-600'
+                    }`}
+                  >
+                    <option value="">Pilih negara tujuan</option>
+                    <option value="Singapura">Singapura</option>
+                    <option value="Amerika Serikat">Amerika Serikat</option>
+                    <option value="Tiongkok">Tiongkok</option>
+                    <option value="Jepang">Jepang</option>
+                    <option value="Uni Eropa">Uni Eropa</option>
+                    <option value="Negara Lainnya">Negara Lainnya</option>
+                  </select>
+                  <p className="mt-1 text-xs text-slate-400">Negara mempengaruhi Grade Risiko.</p>
+                  {errors.destinationCountry && (
+                    <p className="mt-1 text-xs text-red-400">{errors.destinationCountry}</p>
+                  )}
                 </div>
 
                 {/* Currency */}
@@ -759,6 +816,14 @@ export default function BuatPendanaanPage() {
                     </button>
                   </div>
                   <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Nama Importir:</span>
+                      <span className="text-slate-200 font-medium">{step1Data.importerName}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Negara Tujuan:</span>
+                      <span className="text-slate-200 font-medium">{step1Data.destinationCountry || '-'}</span>
+                    </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Mata Uang Invoice:</span>
                       <span className="text-slate-200 font-medium">{step1Data.currency}</span>
