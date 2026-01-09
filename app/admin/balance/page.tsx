@@ -1,0 +1,231 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+
+interface GrantResult {
+    success: boolean;
+    message: string;
+    newBalance?: number;
+}
+
+export default function AdminBalancePage() {
+    const [userIdentifier, setUserIdentifier] = useState('');
+    const [amount, setAmount] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [result, setResult] = useState<GrantResult | null>(null);
+    const [searchResults, setSearchResults] = useState<Array<{ id: string; email: string; username: string; balance: number }>>([]);
+    const [selectedUser, setSelectedUser] = useState<{ id: string; email: string; username: string; balance: number } | null>(null);
+
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+
+    const getAuthToken = () => {
+        return typeof window !== 'undefined' ? localStorage.getItem('vessel_access_token') : null;
+    };
+
+    const handleGrantBalance = async () => {
+        if (!selectedUser || !amount) {
+            setResult({ success: false, message: 'Pilih user dan masukkan jumlah' });
+            return;
+        }
+
+        const amountNum = parseFloat(amount);
+        if (isNaN(amountNum) || amountNum <= 0) {
+            setResult({ success: false, message: 'Jumlah harus berupa angka positif' });
+            return;
+        }
+
+        setIsLoading(true);
+        setResult(null);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/balance/grant`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${getAuthToken()}`,
+                },
+                body: JSON.stringify({
+                    user_id: selectedUser.id,
+                    amount: amountNum,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                setResult({
+                    success: true,
+                    message: `Berhasil menambahkan Rp ${amountNum.toLocaleString('id-ID')} ke akun ${selectedUser.email}`,
+                    newBalance: data.data?.new_balance,
+                });
+                setAmount('');
+                setSelectedUser(null);
+            } else {
+                setResult({
+                    success: false,
+                    message: data.error?.message || 'Gagal menambahkan balance',
+                });
+            }
+        } catch (error) {
+            setResult({
+                success: false,
+                message: 'Koneksi gagal. Periksa server.',
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const formatCurrency = (value: string) => {
+        const num = value.replace(/\D/g, '');
+        return num.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-8 px-4">
+            <div className="max-w-4xl mx-auto">
+                <div className="mb-6">
+                    <Link
+                        href="/admin/dashboard-verifikasi"
+                        className="inline-flex items-center text-slate-400 hover:text-slate-200 transition-colors"
+                    >
+                        <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Kembali ke Dashboard
+                    </Link>
+                </div>
+
+                <header className="mb-8">
+                    <p className="text-sm text-amber-300/80 font-semibold tracking-wide">Admin Panel</p>
+                    <h1 className="text-3xl font-bold text-slate-50">Manajemen Balance User</h1>
+                    <p className="text-slate-400 mt-2">
+                        Tambahkan balance ke akun user untuk keperluan testing (MVP)
+                    </p>
+                </header>
+
+                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-8">
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                User ID
+                            </label>
+                            <input
+                                type="text"
+                                value={userIdentifier}
+                                onChange={(e) => setUserIdentifier(e.target.value)}
+                                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-slate-100"
+                                placeholder="Masukkan UUID user"
+                            />
+                            <p className="mt-1 text-xs text-slate-500">Format: UUID (contoh: 123e4567-e89b-12d3-a456-426614174000)</p>
+                        </div>
+
+                        {userIdentifier && (
+                            <button
+                                onClick={() => {
+                                    setSelectedUser({
+                                        id: userIdentifier,
+                                        email: 'user@example.com',
+                                        username: 'user',
+                                        balance: 0,
+                                    });
+                                }}
+                                className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors"
+                            >
+                                Pilih User
+                            </button>
+                        )}
+
+                        {selectedUser && (
+                            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-slate-200 font-medium">User ID: {selectedUser.id}</p>
+                                        <p className="text-sm text-slate-400">User terpilih untuk penambahan balance</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Jumlah Balance (IDR)
+                            </label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">Rp</span>
+                                <input
+                                    type="text"
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
+                                    className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-slate-100"
+                                    placeholder="0"
+                                />
+                            </div>
+                            {amount && (
+                                <p className="mt-1 text-sm text-slate-400">
+                                    Rp {parseInt(amount).toLocaleString('id-ID')}
+                                </p>
+                            )}
+                        </div>
+
+                        {result && (
+                            <div
+                                className={`p-4 rounded-lg ${result.success
+                                        ? 'bg-green-500/10 border border-green-500/50'
+                                        : 'bg-red-500/10 border border-red-500/50'
+                                    }`}
+                            >
+                                <p className={result.success ? 'text-green-400' : 'text-red-400'}>
+                                    {result.message}
+                                </p>
+                                {result.newBalance !== undefined && (
+                                    <p className="text-green-400 text-sm mt-1">
+                                        Balance baru: Rp {result.newBalance.toLocaleString('id-ID')}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        <button
+                            onClick={handleGrantBalance}
+                            disabled={isLoading || !selectedUser || !amount}
+                            className="w-full px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-medium rounded-lg transition-all shadow-lg"
+                        >
+                            {isLoading ? 'Memproses...' : 'Tambah Balance'}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="mt-8 p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl">
+                    <h3 className="text-lg font-semibold text-slate-200 mb-3">Catatan MVP</h3>
+                    <ul className="space-y-2 text-sm text-slate-400">
+                        <li className="flex items-start gap-2">
+                            <svg className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Fitur ini hanya untuk keperluan testing pada MVP</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <svg className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Balance yang ditambahkan adalah virtual (bukan transfer uang nyata)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <svg className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Pada versi final, integrasi payment gateway akan digunakan</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    );
+}

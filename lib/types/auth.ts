@@ -1,6 +1,6 @@
 // Auth Types - sesuai dengan backend lisk-builders
 
-export type UserRole = 'investor' | 'mitra';
+export type UserRole = 'investor' | 'mitra' | 'admin';
 
 export type MemberStatus = 'calon_anggota_pendana' | 'member_mitra' | 'admin';
 
@@ -15,6 +15,7 @@ export interface User {
   member_status: MemberStatus;
   balance_idr: number;
   email_verified: boolean;
+  profile_completed: boolean;
   profile?: UserProfile;
   created_at: string;
   updated_at: string;
@@ -97,7 +98,7 @@ export interface LoginResponse {
   expires_in: number;
 }
 
-export interface RegisterResponse extends LoginResponse {}
+export interface RegisterResponse extends LoginResponse { }
 
 // Auth State
 export interface AuthState {
