@@ -3,8 +3,8 @@ import Link from "next/link";
 const navLinks = [
   { href: "/login", label: "Masuk" },
   { href: "/register", label: "Daftar Perusahaan" },
-  { href: "/profil-bisnis", label: "Profil Bisnis" },
-  { href: "/pendana/pendanaan/buat", label: "Buat Pendanaan" },
+  { href: "/eksportir/profil-bisnis", label: "Profil Bisnis" },
+  { href: "/eksportir/pendanaan/buat", label: "Buat Pendanaan" },
   { href: "/admin/dashboard-verifikasi", label: "Dashboard Verifikasi Admin" },
   { href: "/admin/verifikasi-pengajuan-profil-bisnis/pengajuan-profil-bisnis-001", label: "Detail Verifikasi Pengajuan Profil Bisnis" },
   { href: "/admin/verifikasi-pengajuan-dana/pengajuan-dana-001", label: "Detail Verifikasi Pengajuan Dana" },
