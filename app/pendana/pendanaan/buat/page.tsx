@@ -18,6 +18,10 @@ interface Step1Data {
   fundingDuration: string;
   importerName: string;
   destinationCountry: string;
+  tranchePrioritas: string;
+  trancheKatalis: string;
+  yieldPrioritas: string;
+  yieldKatalis: string;
 }
 
 interface Step2Data {
@@ -27,8 +31,9 @@ interface Step2Data {
 }
 
 interface Step3Data {
-  transactionType: 'first' | 'repeat';
+  transactionType: 'first' | 'repeat' | 'system-verified';
   previousTransferProof: UploadedFile | null;
+  manualAnswer: '' | 'belum' | 'sudah';
 }
 
 // Stepper Component
@@ -236,7 +241,11 @@ export default function BuatPendanaanPage() {
     dueDate: '',
     fundingDuration: '14',
     importerName: '',
-    destinationCountry: ''
+    destinationCountry: '',
+    tranchePrioritas: '80',
+    trancheKatalis: '20',
+    yieldPrioritas: '10',
+    yieldKatalis: '15'
   });
 
   // Step 2 State
@@ -249,8 +258,16 @@ export default function BuatPendanaanPage() {
   // Step 3 State
   const [step3Data, setStep3Data] = useState<Step3Data>({
     transactionType: 'first',
-    previousTransferProof: null
+    previousTransferProof: null,
+    manualAnswer: ''
   });
+
+  // Mock function to check if importer exists in transaction history
+  const checkImporterHistory = (importerName: string): boolean => {
+    // Mock: Returns true if name contains certain keywords (for demo)
+    const verifiedImporters = ['PT Arunika Bahari', 'Samsung', 'Apple'];
+    return verifiedImporters.some(name => importerName.toLowerCase().includes(name.toLowerCase()));
+  };
 
   // Step 4 State
   const [acknowledgement, setAcknowledgement] = useState(false);
@@ -343,8 +360,13 @@ export default function BuatPendanaanPage() {
 
   const validateStep3 = (): boolean => {
     const newErrors: Record<string, string> = {};
+    const importerExists = step1Data.importerName.trim() ? checkImporterHistory(step1Data.importerName) : false;
     
-    if (step3Data.transactionType === 'repeat' && !step3Data.previousTransferProof) {
+    if (!importerExists && !step3Data.manualAnswer) {
+      newErrors.manualAnswer = 'Mohon jawab pertanyaan riwayat transaksi';
+    }
+    
+    if (step3Data.manualAnswer === 'sudah' && !step3Data.previousTransferProof) {
       newErrors.previousTransferProof = 'Bukti transfer transaksi sebelumnya harus diunggah';
     }
     
@@ -456,10 +478,14 @@ export default function BuatPendanaanPage() {
                       dueDate: '',
                       fundingDuration: '14',
                       importerName: '',
-                      destinationCountry: ''
+                      destinationCountry: '',
+                      tranchePrioritas: '80',
+                      trancheKatalis: '20',
+                      yieldPrioritas: '10',
+                      yieldKatalis: '15'
                     });
                     setStep2Data({ commercialInvoice: null, billOfLading: null, purchaseOrder: null });
-                    setStep3Data({ transactionType: 'first', previousTransferProof: null });
+                    setStep3Data({ transactionType: 'first', previousTransferProof: null, manualAnswer: '' });
                     setAcknowledgement(false);
                     setDataIntegrity(false);
                   }}
@@ -613,7 +639,7 @@ export default function BuatPendanaanPage() {
                     <svg className="w-4 h-4 inline mr-1 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
-                    Angka ini dikalkulasi dari Kurs Tengah BI (Rp 16.000) dikurangi buffer volatilitas 1.5% untuk melindungi nilai pendanaan selama masa penggalangan dana.
+                    Kurs dikunci final untuk melindungi nilai pencairan.
                   </p>
                 </div>
 
@@ -666,17 +692,86 @@ export default function BuatPendanaanPage() {
                   )}
                 </div>
 
+                {/* Tranche Ratio */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Rasio Tranche <span className="text-red-400">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Prioritas (%)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={step1Data.tranchePrioritas}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 0;
+                          setStep1Data({ ...step1Data, tranchePrioritas: e.target.value, trancheKatalis: String(100 - val) });
+                        }}
+                        className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 transition-all text-slate-100"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Katalis (%)</label>
+                      <input
+                        type="number"
+                        value={step1Data.trancheKatalis}
+                        readOnly
+                        className="w-full px-4 py-3 bg-slate-900/30 border border-slate-700 rounded-lg text-slate-400 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-400">Total harus 100%. Misal: Prioritas 80%, Katalis 20%.</p>
+                </div>
+
+                {/* Yield Rate */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Rate Imbal Hasil <span className="text-red-400">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Prioritas (%)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        value={step1Data.yieldPrioritas}
+                        onChange={(e) => setStep1Data({ ...step1Data, yieldPrioritas: e.target.value })}
+                        className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 transition-all text-slate-100"
+                        placeholder="10"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Katalis (%)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        value={step1Data.yieldKatalis}
+                        onChange={(e) => setStep1Data({ ...step1Data, yieldKatalis: e.target.value })}
+                        className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 transition-all text-slate-100"
+                        placeholder="15"
+                      />
+                    </div>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-400">Misal: Prioritas 10%, Katalis 15% per tahun.</p>
+                </div>
+
                 {/* Estimated Funds */}
                 <div className="bg-cyan-950/30 border border-cyan-800/30 rounded-lg p-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-slate-300">Estimasi Dana Diterima:</span>
+                    <span className="text-sm font-medium text-slate-300">Estimasi Pencairan Bersih (IDR):</span>
                     <span className="text-lg font-bold text-cyan-400">
                       Rp {calculateEstimatedFunds()}
                     </span>
                   </div>
-                  {step3Data.transactionType === 'first' && step1Data.invoiceAmount && (
+                  {(step3Data.transactionType === 'first' || step3Data.manualAnswer === 'belum') && step1Data.invoiceAmount && (
                     <p className="mt-2 text-xs text-slate-400">
-                      *Untuk transaksi pertama, maksimal pendanaan 60%
+                      *Untuk kemitraan baru, maksimal pendanaan 60%
                     </p>
                   )}
                 </div>
@@ -728,85 +823,114 @@ export default function BuatPendanaanPage() {
             )}
 
             {/* STEP 3 - Transaction History */}
-            {currentStep === 3 && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-xl font-semibold text-slate-100 mb-4">Riwayat Transaksi</h2>
-                  <p className="text-sm text-slate-400 mb-6">
-                    Pilih jenis transaksi dengan buyer ini
-                  </p>
-                </div>
+            {currentStep === 3 && (() => {
+              const importerExists = step1Data.importerName.trim() ? checkImporterHistory(step1Data.importerName) : false;
+              
+              return (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-xl font-semibold text-slate-100 mb-4">Riwayat Transaksi</h2>
+                    <p className="text-sm text-slate-400 mb-6">
+                      Verifikasi riwayat transaksi dengan importir
+                    </p>
+                  </div>
 
-                {/* Transaction Type Radio */}
-                <div className="space-y-3">
-                  <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-slate-900/30 ${
-                    step3Data.transactionType === 'first'
-                      ? 'border-cyan-500 bg-cyan-950/20'
-                      : 'border-slate-600 bg-slate-900/20'
-                  }">
-                    <input
-                      type="radio"
-                      name="transactionType"
-                      value="first"
-                      checked={step3Data.transactionType === 'first'}
-                      onChange={(e) => setStep3Data({ ...step3Data, transactionType: e.target.value as 'first', previousTransferProof: null })}
-                      className="w-4 h-4 text-cyan-600 focus:ring-2 focus:ring-cyan-500"
-                    />
-                    <span className="ml-3 text-slate-200 font-medium">Transaksi Pertama</span>
-                  </label>
-
-                  <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-slate-900/30 ${
-                    step3Data.transactionType === 'repeat'
-                      ? 'border-cyan-500 bg-cyan-950/20'
-                      : 'border-slate-600 bg-slate-900/20'
-                  }">
-                    <input
-                      type="radio"
-                      name="transactionType"
-                      value="repeat"
-                      checked={step3Data.transactionType === 'repeat'}
-                      onChange={(e) => setStep3Data({ ...step3Data, transactionType: e.target.value as 'repeat' })}
-                      className="w-4 h-4 text-cyan-600 focus:ring-2 focus:ring-cyan-500"
-                    />
-                    <span className="ml-3 text-slate-200 font-medium">Repeat Order</span>
-                  </label>
-                </div>
-
-                {/* First Transaction Warning */}
-                {step3Data.transactionType === 'first' && (
-                  <div className="bg-amber-950/30 border border-amber-800/30 rounded-lg p-4">
-                    <div className="flex items-start space-x-2">
-                      <svg className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                      <p className="text-sm text-slate-300 leading-relaxed">
-                        ⚠️ Untuk transaksi pertama, maksimal pembiayaan yang dapat dicairkan adalah 60% dari nilai tagihan.
-                      </p>
+                  {/* System Verified Badge */}
+                  {importerExists ? (
+                    <div className="bg-emerald-950/30 border border-emerald-800/30 rounded-lg p-5">
+                      <div className="flex items-start space-x-3">
+                        <svg className="w-6 h-6 text-emerald-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <div>
+                          <p className="text-emerald-200 font-semibold mb-1">✅ Riwayat transaksi terverifikasi</p>
+                          <p className="text-sm text-slate-300 leading-relaxed">
+                            Sistem mendeteksi importir <span className="font-semibold">{step1Data.importerName}</span> memiliki riwayat transaksi lunas. Status otomatis ditetapkan: <span className="text-emerald-300 font-semibold">Repeat Order (Verified by System)</span>.
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="space-y-5">
+                      <div className="bg-slate-900/40 border border-slate-700 rounded-lg p-5">
+                        <p className="text-slate-200 font-medium mb-4">Apakah Anda pernah bertransaksi dengan Importir ini sebelumnya?</p>
+                        <div className="space-y-3">
+                          <label className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-slate-900/30 ${
+                            step3Data.manualAnswer === 'belum'
+                              ? 'border-amber-500 bg-amber-950/20'
+                              : 'border-slate-600 bg-slate-900/20'
+                          }`}>
+                            <input
+                              type="radio"
+                              name="manualAnswer"
+                              value="belum"
+                              checked={step3Data.manualAnswer === 'belum'}
+                              onChange={(e) => {
+                                setStep3Data({ ...step3Data, manualAnswer: 'belum', transactionType: 'first', previousTransferProof: null });
+                              }}
+                              className="w-4 h-4 text-amber-600 focus:ring-2 focus:ring-amber-500"
+                            />
+                            <span className="ml-3 text-slate-200 font-medium">Belum Pernah</span>
+                          </label>
 
-                {/* Repeat Order - Upload Previous Transfer */}
-                {step3Data.transactionType === 'repeat' && (
-                  <div className="mt-6">
-                    <UploadCard
-                      label="Bukti Transfer Bank Transaksi Sebelumnya"
-                      file={step3Data.previousTransferProof}
-                      onChange={(file) => handleFileUpload('previousTransferProof', file)}
-                      onRemove={() => handleFileRemove('previousTransferProof')}
-                      required
-                      error={errors.previousTransferProof}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
+                          <label className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-slate-900/30 ${
+                            step3Data.manualAnswer === 'sudah'
+                              ? 'border-cyan-500 bg-cyan-950/20'
+                              : 'border-slate-600 bg-slate-900/20'
+                          }`}>
+                            <input
+                              type="radio"
+                              name="manualAnswer"
+                              value="sudah"
+                              checked={step3Data.manualAnswer === 'sudah'}
+                              onChange={(e) => {
+                                setStep3Data({ ...step3Data, manualAnswer: 'sudah', transactionType: 'repeat' });
+                              }}
+                              className="w-4 h-4 text-cyan-600 focus:ring-2 focus:ring-cyan-500"
+                            />
+                            <span className="ml-3 text-slate-200 font-medium">Sudah Pernah</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* First Transaction Warning */}
+                      {step3Data.manualAnswer === 'belum' && (
+                        <div className="bg-amber-950/30 border border-amber-800/30 rounded-lg p-4">
+                          <div className="flex items-start space-x-2">
+                            <svg className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                            </svg>
+                            <p className="text-sm text-slate-300 leading-relaxed">
+                              ⚠️ Untuk kemitraan baru, maksimal pembiayaan yang dapat dicairkan adalah 60% dari nilai tagihan.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Upload Previous Transfer Proof */}
+                      {step3Data.manualAnswer === 'sudah' && (
+                        <div>
+                          <UploadCard
+                            label="Bukti Transfer Bank Transaksi Sebelumnya"
+                            file={step3Data.previousTransferProof}
+                            onChange={(file) => handleFileUpload('previousTransferProof', file)}
+                            onRemove={() => handleFileRemove('previousTransferProof')}
+                            required
+                            error={errors.previousTransferProof}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* STEP 4 - Review & Submit */}
             {currentStep === 4 && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-100 mb-4">Tinjau & Kirim</h2>
+                  <h2 className="text-xl font-semibold text-slate-100 mb-4">Halaman Summary</h2>
                   <p className="text-sm text-slate-400 mb-6">
                     Periksa kembali informasi sebelum mengirim permohonan
                   </p>
@@ -920,10 +1044,16 @@ export default function BuatPendanaanPage() {
                     <div className="flex justify-between">
                       <span className="text-slate-400">Jenis Transaksi:</span>
                       <span className="text-slate-200 font-medium">
-                        {step3Data.transactionType === 'first' ? 'Transaksi Pertama' : 'Repeat Order'}
+                        {checkImporterHistory(step1Data.importerName) 
+                          ? 'Repeat Order (Verified by System)' 
+                          : step3Data.manualAnswer === 'belum' 
+                          ? 'Kemitraan Baru (60% Max)' 
+                          : step3Data.manualAnswer === 'sudah' 
+                          ? 'Repeat Order (Manual)'
+                          : 'Transaksi Pertama'}
                       </span>
                     </div>
-                    {step3Data.transactionType === 'repeat' && step3Data.previousTransferProof && (
+                    {(step3Data.manualAnswer === 'sudah' || step3Data.transactionType === 'repeat') && step3Data.previousTransferProof && (
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Bukti Transfer:</span>
                         <span className="text-emerald-400 flex items-center">
@@ -952,7 +1082,7 @@ export default function BuatPendanaanPage() {
                         htmlFor="acknowledgement"
                         className="text-sm text-slate-300 leading-relaxed cursor-pointer"
                       >
-                        Saya menyetujui pengalihan hak tagih (cessie) atas invoice/tagihan ini kepada platform untuk proses pendanaan.
+                        Saya menyetujui Pengalihan Hak Tagih (Cessie) kepada Koperasi sebagai jaminan.
                         <span className="text-red-400 ml-1">*</span>
                       </label>
                     </div>
@@ -969,7 +1099,7 @@ export default function BuatPendanaanPage() {
                         htmlFor="dataIntegrity"
                         className="text-sm text-slate-300 leading-relaxed cursor-pointer"
                       >
-                        Data yang saya berikan adalah benar dan asli, serta saya bersedia mempertanggungjawabkan keabsahannya.
+                        Data yang saya berikan adalah benar dan asli.
                         <span className="text-red-400 ml-1">*</span>
                       </label>
                     </div>
