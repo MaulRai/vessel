@@ -117,54 +117,66 @@ export default function PendanaanEksportirPage() {
 
 				<section className="grid gap-6 lg:grid-cols-3">
 					<div className="lg:col-span-2 space-y-6">
-						<article className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 shadow-lg shadow-black/20">
-							<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<section className="rounded-2xl border border-slate-800/80 bg-slate-950/40 p-4 shadow-inner shadow-black/20">
+							<div className="mb-3 flex items-center justify-between">
 								<div>
-									<p className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-300">
-										Invoice Aktif
-									</p>
-									<h2 className="mt-2 text-xl font-bold text-slate-50">
-										{activeInvoice.code}
-									</h2>
-									<p className="text-sm text-slate-400">
-										{activeInvoice.buyer} • {activeInvoice.product}
-									</p>
-								</div>
-								<div className="flex flex-wrap items-center gap-2">
-									<Badge tone="amber">Jatuh tempo {activeInvoice.dueDate}</Badge>
-									<Badge tone="slate">{activeInvoice.tenor} hari tersisa</Badge>
+									<p className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-300">Daftar Invoice Aktif</p>
+									<p className="text-sm text-slate-500">Kartu berikutnya akan muncul di bawah</p>
 								</div>
 							</div>
 
-							<div className="mt-6 grid gap-4 sm:grid-cols-3">
-								<Metric label="Pokok" value={`Rp ${numberId.format(activeInvoice.principal)}`} />
-								<Metric
-									label="Bagi Hasil"
-									value={`Rp ${numberId.format(activeInvoice.profitShare)}`}
-									note="Fixed return"
-								/>
-								<Metric
-									label="Total Bayar"
-									value={`Rp ${numberId.format(totalBayar)}`}
-									note="Ditutup di VA"
-								/>
-							</div>
+							<div className="flex flex-col gap-4" style={{ minHeight: "520px" }}>
+								<article className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 shadow-lg shadow-black/20">
+									<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+										<div>
+											<p className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-300">
+												Invoice Aktif
+											</p>
+											<h2 className="mt-2 text-xl font-bold text-slate-50">
+												{activeInvoice.code}
+											</h2>
+											<p className="text-sm text-slate-400">
+												{activeInvoice.buyer} • {activeInvoice.product}
+											</p>
+										</div>
+										<div className="flex flex-wrap items-center gap-2">
+											<Badge tone="amber">Jatuh tempo {activeInvoice.dueDate}</Badge>
+											<Badge tone="slate">{activeInvoice.tenor} hari tersisa</Badge>
+										</div>
+									</div>
 
-							<div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-								<div className="space-y-1 text-sm text-slate-400">
-									<p>Metode pembayaran: Virtual Account (BCA/Mandiri/BNI).</p>
-									<p className="text-slate-500">
-										Transaksi langsung pada VA; aplikasi tidak memproses dana.
-									</p>
-								</div>
-								<button
-									onClick={() => setIsModalOpen(true)}
-									className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-900/30 transition hover:from-cyan-500 hover:to-teal-500"
-								>
-									Bayar Pendanaan
-								</button>
+									<div className="mt-6 grid gap-4 sm:grid-cols-3">
+										<Metric label="Pokok" value={`Rp ${numberId.format(activeInvoice.principal)}`} />
+										<Metric
+											label="Bagi Hasil"
+											value={`Rp ${numberId.format(activeInvoice.profitShare)}`}
+											note="Fixed return"
+										/>
+										<Metric
+											label="Total Bayar"
+											value={`Rp ${numberId.format(totalBayar)}`}
+											note="Ditutup di VA"
+										/>
+									</div>
+
+									<div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+										<div className="space-y-1 text-sm text-slate-400">
+											<p>Metode pembayaran: Virtual Account (BCA/Mandiri/BNI).</p>
+											<p className="text-slate-500">
+												Transaksi langsung pada VA; aplikasi tidak memproses dana.
+											</p>
+										</div>
+										<button
+											onClick={() => setIsModalOpen(true)}
+											className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-900/30 transition hover:from-cyan-500 hover:to-teal-500"
+										>
+											Bayar Pendanaan
+										</button>
+									</div>
+								</article>
+
 							</div>
-						</article>
+						</section>
 
 						<article className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
 							<div className="flex items-center justify-between">
