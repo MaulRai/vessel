@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterKredensialPage() {
 	const [nik, setNik] = useState('');
@@ -11,6 +12,7 @@ export default function RegisterKredensialPage() {
 	const [ktpFile, setKtpFile] = useState<File | null>(null);
 	const [selfieFile, setSelfieFile] = useState<File | null>(null);
 	const [message, setMessage] = useState<string | null>(null);
+	const router = useRouter();
 
 	const banks = ['BCA', 'Bank Mandiri', 'BRI', 'BNI', 'CIMB Niaga', 'Permata', 'Danamon'];
 
@@ -32,6 +34,7 @@ export default function RegisterKredensialPage() {
 
 		setMessage('Data tersimpan. Lanjutkan ke langkah berikutnya.');
 		console.log('Credential submission', { nik, fullName, bank, accountNumber, ktpFile, selfieFile });
+		router.push('/login');
 	};
 
 	const renderFileName = (file: File | null) => (file ? file.name : 'Belum ada file');
