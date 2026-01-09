@@ -1,12 +1,46 @@
-'use client';
-
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
-import Link from 'next/link';
+import { userAPI, MitraApplicationResponse } from '@/lib/api/user';
 
 function MitraDashboardContent() {
   const { user } = useAuth();
+  const router = useRouter();
+  const [mitraStatus, setMitraStatus] = useState<MitraApplicationResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const res = await userAPI.getMitraStatus();
+        if (res.success && res.data) {
+          setMitraStatus(res.data);
+          if (res.data.application?.status !== 'approved') {
+            router.push('/complete-profile');
+          }
+        } else {
+          router.push('/complete-profile');
+        }
+      } catch (err) {
+        console.error('Failed to check mitra status', err);
+        router.push('/complete-profile');
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkStatus();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
+      </div>
+    );
+  }
 
   const stats = [
     {
@@ -111,13 +145,12 @@ function MitraDashboardContent() {
                   {stat.icon}
                 </div>
                 <span
-                  className={`text-xs font-medium px-2 py-1 rounded-full ${
-                    stat.changeType === 'positive'
-                      ? 'bg-green-500/10 text-green-400'
-                      : stat.changeType === 'negative'
+                  className={`text-xs font-medium px-2 py-1 rounded-full ${stat.changeType === 'positive'
+                    ? 'bg-green-500/10 text-green-400'
+                    : stat.changeType === 'negative'
                       ? 'bg-red-500/10 text-red-400'
                       : 'bg-slate-500/10 text-slate-400'
-                  }`}
+                    }`}
                 >
                   {stat.change}
                 </span>

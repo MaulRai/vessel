@@ -170,11 +170,10 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all ${
-                      isActive
+                    className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all ${isActive
                         ? `bg-${roleColor}-500/10 text-${roleColor}-400 border border-${roleColor}-500/20`
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                    }`}
+                      }`}
                   >
                     {item.icon}
                     <span className="font-medium">{item.label}</span>
@@ -215,7 +214,16 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
         {/* Top Bar */}
         <header className="h-16 bg-slate-900/30 border-b border-slate-800/50 backdrop-blur-xl sticky top-0 z-30">
           <div className="h-full px-6 flex items-center justify-between">
-            <div>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/"
+                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all group"
+                title="Back to Landing Page"
+              >
+                <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </Link>
               <h1 className="text-lg font-semibold text-slate-100">
                 {navItems.find((item) => item.href === pathname)?.label || 'Dashboard'}
               </h1>
