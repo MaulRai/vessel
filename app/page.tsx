@@ -69,10 +69,10 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <section className="relative z-10 min-h-screen flex items-center pt-20 px-4">
+      <section className="relative z-10 min-h-screen flex items-center pt-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="text-left">
+            <div className="text-center lg:text-left">
               <div className="inline-flex items-center space-x-2 px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-full mb-8 backdrop-blur-sm shadow-xl shadow-cyan-900/10 hover:border-cyan-500/30 transition-colors">
                 <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
                 <span className="text-sm text-slate-300 font-medium">Powered by Lisk Blockchain</span>
@@ -86,12 +86,12 @@ export default function LandingPage() {
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl text-slate-400 max-w-xl mb-10 leading-relaxed border-l-2 border-slate-800 pl-6">
+              <p className="text-lg md:text-xl text-slate-400 max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed border-l-0 lg:border-l-2 border-slate-800 pl-0 lg:pl-6 text-center lg:text-left">
                 Indonesia&apos;s first Web3 platform connecting exporters with global investors.
                 Full on-chain transparency, smart contract security, and competitive returns.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center gap-4 mb-16">
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-16">
                 <Link
                   href="/register"
                   className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-bold text-lg transition-all shadow-xl shadow-cyan-500/20 ring-1 ring-white/20 flex items-center justify-center space-x-2"
@@ -165,7 +165,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="features" className="relative z-10 py-32 px-4 bg-slate-900/30">
+      <section id="features" className="relative z-10 py-32 px-4 sm:px-6 lg:px-8 bg-slate-900/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-3xl md:text-5xl font-bold mb-6">
@@ -262,7 +262,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="how-it-works" className="relative z-10 py-32 px-4">
+      <section id="how-it-works" className="relative z-10 py-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-3xl md:text-5xl font-bold mb-6">
@@ -325,7 +325,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="security" className="relative z-10 py-32 px-4 bg-slate-900/30">
+      <section id="security" className="relative z-10 py-32 px-4 sm:px-6 lg:px-8 bg-slate-900/30">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -381,7 +381,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="relative z-10 py-32 px-4">
+      <section className="relative z-10 py-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center">
           <div className="p-16 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
