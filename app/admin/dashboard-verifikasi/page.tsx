@@ -2,8 +2,11 @@
 
 import Link from 'next/link';
 
+type SubmissionType = 'profil-bisnis' | 'pendanaan';
+
 interface SubmissionRow {
   id: string;
+  type: SubmissionType;
   companyName: string;
   contactPerson: string;
   invoiceCurrency: 'USD' | 'EUR';
@@ -17,7 +20,8 @@ interface SubmissionRow {
 
 const submissions: SubmissionRow[] = [
   {
-    id: 'pengajuan-001',
+    id: 'pengajuan-profil-bisnis-001',
+    type: 'profil-bisnis',
     companyName: 'PT Arunika Bahari',
     contactPerson: 'Ratna Widyasari',
     invoiceCurrency: 'USD',
@@ -27,6 +31,19 @@ const submissions: SubmissionRow[] = [
     submittedAt: '8 Jan 2026',
     status: 'Menunggu Verifikasi',
     pendingDocs: 3
+  },
+  {
+    id: 'pengajuan-dana-001',
+    type: 'pendanaan',
+    companyName: 'PT Samudra Niaga Sejahtera',
+    contactPerson: 'Aditya Rahman',
+    invoiceCurrency: 'USD',
+    invoiceAmount: 98000,
+    tenorDays: 45,
+    destinationCountry: 'Belanda',
+    submittedAt: '12 Jan 2026',
+    status: 'Menunggu Verifikasi',
+    pendingDocs: 2
   }
 ];
 
@@ -49,6 +66,70 @@ const numberFormatter = new Intl.NumberFormat('id-ID');
 
 export default function DashboardVerifikasiPage() {
   const totalAwaiting = submissions.filter((row) => row.status === 'Menunggu Verifikasi').length;
+  const danaSubmissions = submissions.filter((row) => row.type === 'pendanaan');
+  const profilSubmissions = submissions.filter((row) => row.type === 'profil-bisnis');
+
+  const renderTable = (rows: SubmissionRow[], title: string, subtitle: string) => (
+    <section className="bg-slate-900/40 border border-slate-800 rounded-2xl overflow-hidden">
+      <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-100">{title}</h2>
+          <p className="text-sm text-slate-400">{subtitle}</p>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-slate-800">
+          <thead className="bg-slate-900/70">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Perusahaan</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Nilai Invoice</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Tenor</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Negara Tujuan</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Aksi</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-800">
+            {rows.map((row) => (
+              <tr key={row.id} className="hover:bg-slate-900/30">
+                <td className="px-6 py-4">
+                  <p className="text-slate-100 font-semibold">{row.companyName}</p>
+                  <p className="text-sm text-slate-400">CP: {row.contactPerson}</p>
+                  <p className="text-xs text-slate-500">Masuk pada {row.submittedAt}</p>
+                </td>
+                <td className="px-6 py-4">
+                  <p className="text-slate-100 font-semibold">
+                    {row.invoiceCurrency} {numberFormatter.format(row.invoiceAmount)}
+                  </p>
+                  <p className="text-xs text-slate-500">Dokumen pending: {row.pendingDocs}</p>
+                </td>
+                <td className="px-6 py-4 text-slate-200">{row.tenorDays} hari</td>
+                <td className="px-6 py-4 text-slate-200">{row.destinationCountry}</td>
+                <td className="px-6 py-4">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[row.status].className}`}>
+                    {statusStyles[row.status].label}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  <Link
+                    href={
+                      row.type === 'profil-bisnis'
+                        ? `/admin/verifikasi-pengajuan-profil-bisnis/${row.id}`
+                        : `/admin/verifikasi-pengajuan-dana/${row.id}`
+                    }
+                    className="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 text-white text-sm font-semibold hover:from-cyan-500 hover:to-teal-500"
+                  >
+                    Lihat Detail
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-8 px-4">
@@ -78,61 +159,8 @@ export default function DashboardVerifikasiPage() {
           </article>
         </section>
 
-        <section className="bg-slate-900/40 border border-slate-800 rounded-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-slate-100">Daftar Pengajuan Dana</h2>
-              <p className="text-sm text-slate-400">Klik detail untuk memverifikasi dokumen dan data</p>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-800">
-              <thead className="bg-slate-900/70">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Perusahaan</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Nilai Invoice</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Tenor</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Negara Tujuan</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
-                {submissions.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-900/30">
-                    <td className="px-6 py-4">
-                      <p className="text-slate-100 font-semibold">{row.companyName}</p>
-                      <p className="text-sm text-slate-400">CP: {row.contactPerson}</p>
-                      <p className="text-xs text-slate-500">Masuk pada {row.submittedAt}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-slate-100 font-semibold">
-                        {row.invoiceCurrency} {numberFormatter.format(row.invoiceAmount)}
-                      </p>
-                      <p className="text-xs text-slate-500">Dokumen pending: {row.pendingDocs}</p>
-                    </td>
-                    <td className="px-6 py-4 text-slate-200">{row.tenorDays} hari</td>
-                    <td className="px-6 py-4 text-slate-200">{row.destinationCountry}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[row.status].className}`}>
-                        {statusStyles[row.status].label}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/admin/verifikasi-pengajuan/${row.id}`}
-                        className="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 text-white text-sm font-semibold hover:from-cyan-500 hover:to-teal-500"
-                      >
-                        Lihat Detail
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        {renderTable(danaSubmissions, 'Daftar Pengajuan Dana', 'Klik detail untuk memverifikasi dokumen dan data pendanaan')}
+        {renderTable(profilSubmissions, 'Daftar Pengajuan Profil Bisnis', 'Klik detail untuk memverifikasi data dan lampiran profil bisnis')}
       </div>
     </div>
   );

@@ -44,8 +44,8 @@ interface SubmissionDetail {
 }
 
 const submissionStore: Record<string, SubmissionDetail> = {
-  'pengajuan-001': {
-    id: 'pengajuan-001',
+  'pengajuan-profil-bisnis-001': {
+    id: 'pengajuan-profil-bisnis-001',
     companyName: 'PT Arunika Bahari',
     contactPerson: 'Ratna Widyasari',
     email: 'ratna@arunikabahari.co.id',
@@ -228,7 +228,7 @@ export default function VerifikasiPengajuanDetail() {
         <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm text-slate-400">ID Pengajuan #{submission.id}</p>
-            <h1 className="text-3xl font-bold text-slate-50">Verifikasi Dokumen & Data</h1>
+            <h1 className="text-3xl font-bold text-slate-50">Verifikasi Dokumen & Data Pengajuan Profil Bisnis</h1>
             <p className="text-slate-400">Pastikan kesesuaian data dengan unggahan pada Profil Bisnis.</p>
           </div>
           {statusBadge}

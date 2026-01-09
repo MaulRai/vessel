@@ -6,7 +6,7 @@ const navLinks = [
   { href: "/profil-bisnis", label: "Profil Bisnis" },
   { href: "/pendana/pendanaan/buat", label: "Buat Pendanaan" },
   { href: "/admin/dashboard-verifikasi", label: "Dashboard Verifikasi Admin" },
-  { href: "/admin/verifikasi-pengajuan/pengajuan-001", label: "Detail Verifikasi Pengajuan Admin" },
+  { href: "/admin/verifikasi-pengajuan-profil-bisnis/pengajuan-profil-bisnis-001", label: "Detail Verifikasi Pengajuan Admin" },
 ];
 
 export default function Home() {
