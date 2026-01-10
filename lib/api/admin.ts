@@ -37,13 +37,13 @@ export interface GrantBalanceResponse {
 }
 
 class AdminAPI {
-    private baseURL: string;
+    protected baseURL: string;
 
     constructor(baseURL: string) {
         this.baseURL = baseURL;
     }
 
-    private getAuthHeaders(): HeadersInit {
+    protected getAuthHeaders(): HeadersInit {
         const token = typeof window !== 'undefined' ? localStorage.getItem('vessel_access_token') : null;
         return {
             'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ class AdminAPI {
         };
     }
 
-    private async request<T>(
+    protected async request<T>(
         endpoint: string,
         options: RequestInit = {}
     ): Promise<APIResponse<T>> {
@@ -189,4 +189,171 @@ export interface MitraApplicationDetail extends MitraApplicationItem {
     rejection_reason?: string;
 }
 
-export const adminAPI = new AdminAPI(API_BASE_URL);
+export interface PendingInvoice {
+    id: string;
+    invoice_number: string;
+    buyer_name: string;
+    buyer_country: string;
+    amount: number;
+    currency: string;
+    idr_amount?: number;
+    status: string;
+    grade?: string;
+    is_repeat_buyer: boolean;
+    document_complete_score: number;
+    created_at: string;
+    due_date: string;
+    exporter?: {
+        id: string;
+        email: string;
+        username?: string;
+    };
+}
+
+export interface PendingInvoicesResponse {
+    invoices: PendingInvoice[];
+    total: number;
+    page: number;
+    per_page: number;
+    total_pages: number;
+}
+
+export interface GradeSuggestion {
+    invoice_id: string;
+    suggested_grade: string;
+    grade_score: number;
+    country_risk: string;
+    country_score: number;
+    history_score: number;
+    document_score: number;
+    is_repeat_buyer: boolean;
+    documents_complete: boolean;
+    funding_limit: number;
+}
+
+export interface InvoiceReviewData {
+    invoice: PendingInvoice & {
+        priority_ratio: number;
+        catalyst_ratio: number;
+        priority_interest_rate?: number;
+        catalyst_interest_rate?: number;
+        advance_percentage: number;
+        funding_duration_days: number;
+        description?: string;
+        original_currency?: string;
+        original_amount?: number;
+        exchange_rate?: number;
+    };
+    exporter?: {
+        id: string;
+        email: string;
+        full_name?: string;
+        phone?: string;
+        company_name?: string;
+    };
+    documents: Array<{
+        document_id: string;
+        document_type: string;
+        file_name: string;
+        file_url: string;
+        is_valid: boolean;
+        needs_revision: boolean;
+        revision_note?: string;
+    }>;
+    grade_suggestion: GradeSuggestion;
+}
+
+export interface ApproveInvoiceRequest {
+    grade: string;
+    priority_interest_rate?: number;
+    catalyst_interest_rate?: number;
+    notes?: string;
+}
+
+export interface FundingPool {
+    id: string;
+    invoice_id: string;
+    target_amount: number;
+    funded_amount: number;
+    investor_count: number;
+    status: string;
+    priority_target: number;
+    priority_funded: number;
+    catalyst_target: number;
+    catalyst_funded: number;
+    priority_interest_rate: number;
+    catalyst_interest_rate: number;
+    pool_currency: string;
+    created_at: string;
+    opened_at?: string;
+    deadline?: string;
+    invoice?: PendingInvoice;
+}
+
+class AdminAPIExtended extends AdminAPI {
+    async getPendingInvoices(
+        page: number = 1,
+        perPage: number = 10
+    ): Promise<APIResponse<PendingInvoicesResponse>> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            per_page: perPage.toString(),
+        });
+        return this.request<PendingInvoicesResponse>(`/admin/invoices/pending?${params.toString()}`, {
+            method: 'GET',
+        });
+    }
+
+    async getInvoiceGradeSuggestion(invoiceId: string): Promise<APIResponse<GradeSuggestion>> {
+        return this.request<GradeSuggestion>(`/admin/invoices/${invoiceId}/grade-suggestion`, {
+            method: 'GET',
+        });
+    }
+
+    async getInvoiceReviewData(invoiceId: string): Promise<APIResponse<InvoiceReviewData>> {
+        return this.request<InvoiceReviewData>(`/admin/invoices/${invoiceId}/review`, {
+            method: 'GET',
+        });
+    }
+
+    async approveInvoice(invoiceId: string, data: ApproveInvoiceRequest): Promise<APIResponse<{ message: string; invoice_id: string; grade: string; nft?: unknown }>> {
+        return this.request<{ message: string; invoice_id: string; grade: string; nft?: unknown }>(`/admin/invoices/${invoiceId}/approve`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async rejectInvoice(invoiceId: string, reason: string): Promise<APIResponse<{ message: string }>> {
+        return this.request<{ message: string }>(`/admin/invoices/${invoiceId}/reject`, {
+            method: 'POST',
+            body: JSON.stringify({ reason }),
+        });
+    }
+
+    async createFundingPool(invoiceId: string): Promise<APIResponse<FundingPool>> {
+        return this.request<FundingPool>(`/admin/invoices/${invoiceId}/pool`, {
+            method: 'POST',
+        });
+    }
+
+    async getAllPools(
+        page: number = 1,
+        perPage: number = 10
+    ): Promise<APIResponse<{ pools: FundingPool[]; total: number; page: number; per_page: number; total_pages: number }>> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            per_page: perPage.toString(),
+        });
+        return this.request<{ pools: FundingPool[]; total: number; page: number; per_page: number; total_pages: number }>(`/pools?${params.toString()}`, {
+            method: 'GET',
+        });
+    }
+
+    async disbursePool(poolId: string): Promise<APIResponse<{ message: string }>> {
+        return this.request<{ message: string }>(`/admin/pools/${poolId}/disburse`, {
+            method: 'POST',
+        });
+    }
+}
+
+export const adminAPI = new AdminAPIExtended(API_BASE_URL);

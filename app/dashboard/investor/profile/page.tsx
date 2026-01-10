@@ -5,11 +5,17 @@ import Link from 'next/link';
 import { userAPI } from '@/lib/api/user';
 
 interface UserProfile {
-    full_name: string;
+    id?: string;
+    full_name?: string;
     email: string;
-    phone: string;
+    username?: string;
+    phone?: string;
     nik_masked?: string;
     created_at: string;
+    role?: string;
+    is_verified?: boolean;
+    profile_completed?: boolean;
+    balance_idr?: number;
 }
 
 interface BankAccount {
@@ -32,11 +38,11 @@ export default function InvestorProfilePage() {
                     userAPI.getBankAccount(),
                 ]);
 
-                if (profileRes.success) {
-                    setProfile(profileRes.data);
+                if (profileRes.success && profileRes.data) {
+                    setProfile(profileRes.data as unknown as UserProfile);
                 }
-                if (bankRes.success) {
-                    setBankAccount(bankRes.data);
+                if (bankRes.success && bankRes.data) {
+                    setBankAccount(bankRes.data as unknown as BankAccount);
                 }
             } catch (error) {
                 console.error('Failed to fetch profile data:', error);

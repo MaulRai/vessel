@@ -657,7 +657,235 @@ class WalletAPI {
     }
 }
 
+export interface CreateInvoiceRequest {
+    buyer_company_name: string;
+    buyer_country: string;
+    buyer_email: string;
+    invoice_number: string;
+    original_currency: string;
+    original_amount: number;
+    locked_exchange_rate: number;
+    idr_amount: number;
+    due_date: string;
+    funding_duration_days: number;
+    priority_ratio: number;
+    catalyst_ratio: number;
+    priority_interest_rate: number;
+    catalyst_interest_rate: number;
+    is_repeat_buyer: boolean;
+    repeat_buyer_proof?: string;
+    data_confirmation: boolean;
+    description?: string;
+}
+
+export interface Invoice {
+    id: string;
+    exporter_id: string;
+    buyer_name: string;
+    buyer_country: string;
+    invoice_number: string;
+    currency: string;
+    amount: number;
+    idr_amount?: number;
+    issue_date: string;
+    due_date: string;
+    description?: string;
+    status: string;
+    grade?: string;
+    is_repeat_buyer: boolean;
+    document_complete_score: number;
+    priority_ratio: number;
+    catalyst_ratio: number;
+    priority_interest_rate?: number;
+    catalyst_interest_rate?: number;
+    original_currency?: string;
+    original_amount?: number;
+    exchange_rate?: number;
+    funding_duration_days: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface InvoiceListResponse {
+    invoices: Invoice[];
+    total: number;
+    page: number;
+    per_page: number;
+    total_pages: number;
+}
+
+export interface RepeatBuyerCheckResponse {
+    is_repeat_buyer: boolean;
+    message: string;
+    previous_transactions?: number;
+    funding_limit: number;
+}
+
+export interface CurrencyConvertResponse {
+    original_currency: string;
+    original_amount: number;
+    target_currency: string;
+    converted_amount: number;
+    exchange_rate: number;
+    buffer_rate: number;
+    locked_rate: number;
+    valid_until: string;
+}
+
+class InvoiceAPI {
+    private baseURL: string;
+
+    constructor(baseURL: string) {
+        this.baseURL = baseURL;
+    }
+
+    private getAuthHeaders(): HeadersInit {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('vessel_access_token') : null;
+        return {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        };
+    }
+
+    private async request<T>(
+        endpoint: string,
+        options: RequestInit = {}
+    ): Promise<APIResponse<T>> {
+        const url = `${this.baseURL}${endpoint}`;
+
+        const config: RequestInit = {
+            ...options,
+            headers: {
+                ...this.getAuthHeaders(),
+                ...options.headers,
+            },
+        };
+
+        try {
+            const response = await fetch(url, config);
+            const data = await response.json();
+
+            if (!response.ok) {
+                const errorMessage = typeof data.error === 'string' ? data.error : (data.error?.message || 'Terjadi kesalahan');
+                return {
+                    success: false,
+                    error: {
+                        code: 'API_ERROR',
+                        message: errorMessage,
+                    },
+                };
+            }
+
+            return data;
+        } catch (error) {
+            return {
+                success: false,
+                error: {
+                    code: 'NETWORK_ERROR',
+                    message: 'Gagal terhubung ke server',
+                },
+            };
+        }
+    }
+
+    async checkRepeatBuyer(buyerCompanyName: string): Promise<APIResponse<RepeatBuyerCheckResponse>> {
+        return this.request<RepeatBuyerCheckResponse>('/invoices/check-repeat-buyer', {
+            method: 'POST',
+            body: JSON.stringify({ buyer_company_name: buyerCompanyName }),
+        });
+    }
+
+    async createFundingRequest(data: CreateInvoiceRequest): Promise<APIResponse<Invoice>> {
+        return this.request<Invoice>('/invoices/funding-request', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async getMyInvoices(page: number = 1, perPage: number = 10, status?: string): Promise<APIResponse<InvoiceListResponse>> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            per_page: perPage.toString(),
+        });
+        if (status) params.append('status', status);
+
+        return this.request<InvoiceListResponse>(`/invoices?${params.toString()}`, {
+            method: 'GET',
+        });
+    }
+
+    async getInvoice(invoiceId: string): Promise<APIResponse<Invoice>> {
+        return this.request<Invoice>(`/invoices/${invoiceId}`, {
+            method: 'GET',
+        });
+    }
+
+    async submitInvoice(invoiceId: string): Promise<APIResponse<{ message: string }>> {
+        return this.request<{ message: string }>(`/invoices/${invoiceId}/submit`, {
+            method: 'POST',
+        });
+    }
+
+    async uploadDocument(invoiceId: string, file: File, documentType: string): Promise<APIResponse<{ id: string; file_url: string; file_hash: string }>> {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('vessel_access_token') : null;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('document_type', documentType);
+
+        try {
+            const response = await fetch(`${this.baseURL}/invoices/${invoiceId}/documents`, {
+                method: 'POST',
+                headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: formData,
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    error: data.error || {
+                        code: 'UPLOAD_ERROR',
+                        message: 'Gagal mengupload dokumen',
+                    },
+                };
+            }
+
+            return { success: true, data };
+        } catch (error) {
+            return {
+                success: false,
+                error: {
+                    code: 'NETWORK_ERROR',
+                    message: 'Gagal mengupload dokumen',
+                },
+            };
+        }
+    }
+
+    async getDocuments(invoiceId: string): Promise<APIResponse<Array<{ id: string; document_type: string; file_name: string; file_url: string }>>> {
+        return this.request<Array<{ id: string; document_type: string; file_name: string; file_url: string }>>(`/invoices/${invoiceId}/documents`, {
+            method: 'GET',
+        });
+    }
+
+    async convertCurrency(currency: string, amount: number): Promise<APIResponse<CurrencyConvertResponse>> {
+        return this.request<CurrencyConvertResponse>('/currency/convert', {
+            method: 'POST',
+            body: JSON.stringify({ currency, amount }),
+        });
+    }
+
+    async getSupportedCurrencies(): Promise<APIResponse<Array<{ code: string; name: string }>>> {
+        return this.request<Array<{ code: string; name: string }>>('/currency/supported', {
+            method: 'GET',
+        });
+    }
+}
+
 export const userAPI = new UserAPI(API_BASE_URL);
+export const invoiceAPI = new InvoiceAPI(API_BASE_URL);
 export const riskQuestionnaireAPI = new RiskQuestionnaireAPI(API_BASE_URL);
 export const marketplaceAPI = new MarketplaceAPI(API_BASE_URL);
 export const investmentAPI = new InvestmentAPI(API_BASE_URL);
