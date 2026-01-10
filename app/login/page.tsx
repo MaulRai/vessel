@@ -14,7 +14,7 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { login, loginAsDemo } = useAuth();
 
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {
@@ -38,18 +38,37 @@ function LoginForm() {
     if (response.success && response.data) {
       const user = response.data.user;
       if (user.role === 'admin') {
-        router.push('/admin/dashboard-verifikasi');
+        router.push('/dashboard/admin');
       } else if (!user.profile_completed) {
         router.push('/complete-profile');
       } else if (user.role === 'investor') {
-        router.push('/dashboard/investor');
+        router.push('/pendana/dashboard');
       } else if (user.role === 'mitra') {
-        router.push('/dashboard/mitra');
+        router.push('/eksportir/dashboard');
       } else {
         router.push('/');
       }
     } else {
       setError(response.error?.message || 'Login gagal. Silakan coba lagi.');
+    }
+  };
+
+  const handleDemoLogin = async (role: 'investor' | 'mitra') => {
+    setError('');
+    setSuccessMessage('');
+    setIsLoading(true);
+    try {
+      await loginAsDemo(role);
+      if (role === 'investor') {
+        router.push('/pendana/dashboard');
+      } else {
+        router.push('/eksportir/dashboard');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Gagal masuk sebagai demo.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -98,6 +117,26 @@ function LoginForm() {
           </svg>
           Masuk dengan Google
         </button>
+
+        {/* Demo Accounts */}
+        <div className="grid sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => handleDemoLogin('mitra')}
+            disabled={isLoading}
+            className="w-full px-4 py-2.5 bg-teal-600/20 border border-teal-500/40 text-teal-100 hover:bg-teal-600/30 rounded-lg text-sm font-medium transition-all"
+          >
+            Login dengan akun dummy Eksportir
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDemoLogin('investor')}
+            disabled={isLoading}
+            className="w-full px-4 py-2.5 bg-cyan-600/20 border border-cyan-500/40 text-cyan-100 hover:bg-cyan-600/30 rounded-lg text-sm font-medium transition-all"
+          >
+            Login dengan akun dummy Pendana
+          </button>
+        </div>
 
         {/* Divider */}
         <div className="relative">

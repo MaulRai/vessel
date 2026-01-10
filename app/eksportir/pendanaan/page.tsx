@@ -1,6 +1,8 @@
 "use client";
 
 import { ReactNode, useMemo, useState } from "react";
+import { AuthGuard } from "@/lib/components/AuthGuard";
+import { DashboardLayout } from "@/lib/components/DashboardLayout";
 
 type BankCode = "BCA" | "Mandiri" | "BNI";
 type StatTone = "cyan" | "amber" | "rose" | "emerald";
@@ -44,7 +46,7 @@ const history = [
 	},
 ];
 
-export default function PendanaanEksportirPage() {
+function PendanaanEksportirContent() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalStep, setModalStep] = useState<"ringkasan" | "va">("ringkasan");
 	const [selectedBank, setSelectedBank] = useState<BankCode>("BCA");
@@ -73,7 +75,8 @@ export default function PendanaanEksportirPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-10 text-slate-100">
+		<DashboardLayout role="mitra">
+			<div className="px-4 py-10 text-slate-100">
 			<div className="mx-auto flex max-w-6xl flex-col gap-8">
 				<header className="space-y-2">
 					<p className="text-sm font-semibold tracking-wide text-cyan-300/80">
@@ -387,7 +390,16 @@ export default function PendanaanEksportirPage() {
 					</div>
 				</div>
 			)}
-		</div>
+			</div>
+		</DashboardLayout>
+	);
+}
+
+export default function PendanaanEksportirPage() {
+	return (
+		<AuthGuard allowedRoles={["mitra"]}>
+			<PendanaanEksportirContent />
+		</AuthGuard>
 	);
 }
 

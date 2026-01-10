@@ -35,9 +35,11 @@ export function AuthGuard({
       if (!allowedRoles.includes(user.role)) {
         // Redirect ke dashboard sesuai role
         if (user.role === 'investor') {
-          router.push('/dashboard/investor');
+          router.push('/pendana/dashboard');
         } else if (user.role === 'mitra') {
-          router.push('/dashboard/mitra');
+          router.push('/eksportir/dashboard');
+        } else if (user.role === 'admin') {
+          router.push('/dashboard/admin');
         } else {
           router.push('/');
         }

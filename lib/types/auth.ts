@@ -16,6 +16,7 @@ export interface User {
   balance_idr: number;
   email_verified: boolean;
   profile_completed: boolean;
+  wallet_address?: string;
   profile?: UserProfile;
   created_at: string;
   updated_at: string;

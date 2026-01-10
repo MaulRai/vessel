@@ -1,15 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { AuthGuard } from '@/lib/components/AuthGuard';
+import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { userAPI } from '@/lib/api/user';
 
 interface UserProfile {
-    full_name: string;
+    id?: string;
+    full_name?: string;
     email: string;
-    phone: string;
+    username?: string;
+    phone?: string;
     nik_masked?: string;
     created_at: string;
+    role?: string;
+    is_verified?: boolean;
+    profile_completed?: boolean;
+    balance_idr?: number;
 }
 
 interface BankAccount {
@@ -19,7 +26,7 @@ interface BankAccount {
     is_verified: boolean;
 }
 
-export default function InvestorProfilePage() {
+function ProfileContent() {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [bankAccount, setBankAccount] = useState<BankAccount | null>(null);
     const [loading, setLoading] = useState(true);
@@ -32,11 +39,11 @@ export default function InvestorProfilePage() {
                     userAPI.getBankAccount(),
                 ]);
 
-                if (profileRes.success) {
-                    setProfile(profileRes.data);
+                if (profileRes.success && profileRes.data) {
+                    setProfile(profileRes.data as unknown as UserProfile);
                 }
-                if (bankRes.success) {
-                    setBankAccount(bankRes.data);
+                if (bankRes.success && bankRes.data) {
+                    setBankAccount(bankRes.data as unknown as BankAccount);
                 }
             } catch (error) {
                 console.error('Failed to fetch profile data:', error);
@@ -47,53 +54,26 @@ export default function InvestorProfilePage() {
 
         fetchData();
     }, []);
-
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
+            <DashboardLayout role="investor">
+                <div className="min-h-[60vh] flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            </DashboardLayout>
         );
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-cyan-500/30">
-            {/* Navigation Bar (Simplified) */}
-            <nav className="border-b border-slate-800/50 bg-slate-950/50 backdrop-blur-xl sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        <div className="flex items-center space-x-2">
-                            <Link href="/dashboard/investor" className="flex items-center space-x-2">
-                                <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-teal-400 rounded-lg flex items-center justify-center">
-                                    <svg className="w-5 h-5 text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                    </svg>
-                                </div>
-                                <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
-                                    VESSEL
-                                </span>
-                            </Link>
-                        </div>
-                        <div>
-                            <Link
-                                href="/dashboard/investor"
-                                className="text-slate-400 hover:text-white text-sm font-medium transition-colors"
-                            >
-                                Back to Dashboard
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <main className="max-w-4xl mx-auto px-4 py-12">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold mb-2">My Profile</h1>
+        <DashboardLayout role="investor">
+            <div className="max-w-4xl mx-auto space-y-8">
+                <div className="space-y-2">
+                    <p className="text-sm font-semibold tracking-wide text-cyan-300/80">Pendana • Profil</p>
+                    <h1 className="text-3xl font-bold text-white">My Profile</h1>
                     <p className="text-slate-400">Manage your personal information and bank account details.</p>
                 </div>
 
                 <div className="grid gap-8">
-                    {/* Identity Section */}
                     <section className="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 backdrop-blur-sm">
                         <div className="flex items-center space-x-4 mb-6">
                             <div className="w-12 h-12 bg-cyan-500/10 rounded-full flex items-center justify-center">
@@ -132,7 +112,6 @@ export default function InvestorProfilePage() {
                         </div>
                     </section>
 
-                    {/* Bank Account Section */}
                     <section className="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 backdrop-blur-sm">
                         <div className="flex items-center space-x-4 mb-6">
                             <div className="w-12 h-12 bg-teal-500/10 rounded-full flex items-center justify-center">
@@ -184,7 +163,15 @@ export default function InvestorProfilePage() {
                         )}
                     </section>
                 </div>
-            </main>
-        </div>
+            </div>
+        </DashboardLayout>
+    );
+}
+
+export default function InvestorProfilePage() {
+    return (
+        <AuthGuard allowedRoles={['investor']}>
+            <ProfileContent />
+        </AuthGuard>
     );
 }

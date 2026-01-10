@@ -14,7 +14,7 @@ interface NavItem {
 
 const investorNavItems: NavItem[] = [
   {
-    href: '/dashboard/investor',
+    href: '/pendana/dashboard',
     label: 'Dashboard',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -23,7 +23,7 @@ const investorNavItems: NavItem[] = [
     ),
   },
   {
-    href: '/dashboard/investor/marketplace',
+    href: '/pendana/marketplace',
     label: 'Marketplace',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -32,7 +32,7 @@ const investorNavItems: NavItem[] = [
     ),
   },
   {
-    href: '/dashboard/investor/portfolio',
+    href: '/pendana/portfolio',
     label: 'Portfolio',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -41,7 +41,7 @@ const investorNavItems: NavItem[] = [
     ),
   },
   {
-    href: '/dashboard/investor/risk-assessment',
+    href: '/pendana/risk-assessment',
     label: 'Risk Assessment',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -50,7 +50,7 @@ const investorNavItems: NavItem[] = [
     ),
   },
   {
-    href: '/dashboard/investor/profile',
+    href: '/pendana/profile',
     label: 'Profil',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,9 +60,9 @@ const investorNavItems: NavItem[] = [
   },
 ];
 
-const mitraNavItems: NavItem[] = [
+const adminNavItems: NavItem[] = [
   {
-    href: '/dashboard/mitra',
+    href: '/dashboard/admin',
     label: 'Dashboard',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,7 +71,64 @@ const mitraNavItems: NavItem[] = [
     ),
   },
   {
-    href: '/dashboard/mitra/invoices',
+    href: '/dashboard/admin/invoices',
+    label: 'Invoice Review',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    ),
+  },
+  {
+    href: '/dashboard/admin/pools',
+    label: 'Funding Pools',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      </svg>
+    ),
+  },
+  {
+    href: '/dashboard/admin/balance',
+    label: 'Grant Balance',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    href: '/dashboard/admin/users',
+    label: 'Users',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+    ),
+  },
+  {
+    href: '/dashboard/admin/mitra',
+    label: 'Mitra Review',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    ),
+  },
+];
+
+const mitraNavItems: NavItem[] = [
+  {
+    href: '/eksportir/dashboard',
+    label: 'Dashboard',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+    ),
+  },
+  {
+    href: '/eksportir/invoices',
     label: 'Invoice',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -80,7 +137,7 @@ const mitraNavItems: NavItem[] = [
     ),
   },
   {
-    href: '/dashboard/mitra/funding',
+    href: '/eksportir/pendanaan',
     label: 'Pendanaan',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -89,16 +146,7 @@ const mitraNavItems: NavItem[] = [
     ),
   },
   {
-    href: '/dashboard/mitra/repayment',
-    label: 'Pembayaran',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-    ),
-  },
-  {
-    href: '/dashboard/mitra/company',
+    href: '/eksportir/company',
     label: 'Perusahaan',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -107,7 +155,7 @@ const mitraNavItems: NavItem[] = [
     ),
   },
   {
-    href: '/dashboard/mitra/profile',
+    href: '/eksportir/profile',
     label: 'Profil',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -127,9 +175,11 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
 
-  const navItems = role === 'investor' ? investorNavItems : mitraNavItems;
-  const roleLabel = role === 'investor' ? 'Pendana' : 'Eksportir';
-  const roleColor = role === 'investor' ? 'cyan' : 'teal';
+  const navItems = role === 'investor' ? investorNavItems : role === 'admin' ? adminNavItems : mitraNavItems;
+  const roleLabel = role === 'investor' ? 'Pendana' : role === 'admin' ? 'Admin' : 'Eksportir';
+  const roleColor = role === 'investor' ? 'cyan' : role === 'admin' ? 'purple' : 'teal';
+  const dashboardHref = role === 'investor' ? '/pendana/dashboard' : role === 'admin' ? '/dashboard/admin' : '/eksportir/dashboard';
+  const isOnDashboard = pathname === dashboardHref;
 
   const handleLogout = () => {
     logout();
@@ -216,15 +266,17 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
         <header className="h-16 bg-slate-900/30 border-b border-slate-800/50 backdrop-blur-xl sticky top-0 z-30">
           <div className="h-full px-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link
-                href="/"
-                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all group"
-                title="Back to Landing Page"
-              >
-                <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </Link>
+              {!isOnDashboard && (
+                <Link
+                  href={dashboardHref}
+                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all group"
+                  title="Kembali ke Dashboard"
+                >
+                  <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                </Link>
+              )}
               <h1 className="text-lg font-semibold text-slate-100">
                 {navItems.find((item) => item.href === pathname)?.label || 'Dashboard'}
               </h1>

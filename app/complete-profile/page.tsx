@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
-import { userAPI, CompleteProfileRequest, SubmitMitraApplicationRequest, MitraApplicationResponse } from '@/lib/api/user';
+import { userAPI, CompleteProfileRequest } from '@/lib/api/user';
 
 const SUPPORTED_BANKS = [
     { code: 'bca', name: 'Bank Central Asia (BCA)' },
@@ -29,17 +29,6 @@ interface FormData {
     bankCode: string;
     accountNumber: string;
     accountName: string;
-    // Mitra fields
-    companyName: string;
-    companyType: 'PT' | 'CV' | 'UD';
-    npwp: string;
-    annualRevenue: '<1M' | '1M-5M' | '5M-25M' | '25M-100M' | '>100M';
-    address: string;
-    businessDescription: string;
-    websiteUrl: string;
-    yearFounded: string;
-    keyProducts: string;
-    exportMarkets: string;
 }
 
 export default function CompleteProfilePage() {
@@ -48,8 +37,6 @@ export default function CompleteProfilePage() {
     const [currentStep, setCurrentStep] = useState<Step>(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
-    const [mitraStatus, setMitraStatus] = useState<MitraApplicationResponse | null>(null);
-    const [loadingMitra, setLoadingMitra] = useState(false);
 
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
@@ -60,16 +47,6 @@ export default function CompleteProfilePage() {
         bankCode: '',
         accountNumber: '',
         accountName: '',
-        companyName: '',
-        companyType: 'PT',
-        npwp: '',
-        annualRevenue: '<1M',
-        address: '',
-        businessDescription: '',
-        websiteUrl: '',
-        yearFounded: '',
-        keyProducts: '',
-        exportMarkets: '',
     });
 
     useEffect(() => {
@@ -79,37 +56,16 @@ export default function CompleteProfilePage() {
                 return;
             }
 
-            // Redirect if already completed (Investor only, Mitra logic handled below)
-            if (user?.role === 'investor' && user?.profile_completed) {
-                router.push('/dashboard/investor');
-            } else if (user?.role === 'mitra') {
-                checkMitraStatus();
+            // Redirect if already completed
+            if (user?.profile_completed) {
+                if (user?.role === 'investor') {
+                    router.push('/pendana/dashboard');
+                } else if (user?.role === 'mitra') {
+                    router.push('/eksportir/dashboard');
+                }
             }
         }
     }, [authLoading, isAuthenticated, user, router]);
-
-    const checkMitraStatus = async () => {
-        setLoadingMitra(true);
-        try {
-            const res = await userAPI.getMitraStatus();
-            if (res.success && res.data) {
-                setMitraStatus(res.data);
-                // If application exists but rejected
-                if (res.data.application.status === 'rejected') {
-                    // Stay on step 1 to re-apply (logic can be improved)
-                    setError(`Aplikasi sebelumnya ditolak: ${res.data.application.rejection_reason}`);
-                }
-                // If approved, redirect
-                else if (res.data.application.status === 'approved') {
-                    router.push('/dashboard/mitra');
-                }
-            }
-        } catch (err) {
-            // 404 expectation for new mitra
-        } finally {
-            setLoadingMitra(false);
-        }
-    };
 
     const updateFormData = (field: keyof FormData, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -149,59 +105,15 @@ export default function CompleteProfilePage() {
         };
         const res = await userAPI.completeProfile(req);
         setIsSubmitting(false);
-        if (res.success) router.push('/dashboard/investor');
-        else setError(res.error?.message || 'Gagal menyimpan profil');
-    };
-
-    // ================== MITRA LOGIC ==================
-
-    const handleMitraApply = async () => {
-        if (!formData.companyName) return fail('Nama perusahaan harus diisi');
-        if (!formData.npwp || formData.npwp.length < 15) return fail('NPWP tidak valid');
-        if (!formData.address) return fail('Alamat perusahaan harus diisi');
-        if (!formData.businessDescription) return fail('Deskripsi bisnis harus diisi');
-        if (!formData.yearFounded) return fail('Tahun berdiri harus diisi');
-        if (!formData.keyProducts) return fail('Produk utama harus diisi');
-        if (!formData.exportMarkets) return fail('Pasar ekspor harus diisi');
-
-        setIsSubmitting(true);
-        const req: SubmitMitraApplicationRequest = {
-            company_name: formData.companyName,
-            company_type: formData.companyType,
-            npwp: formData.npwp,
-            annual_revenue: formData.annualRevenue,
-            address: formData.address,
-            business_description: formData.businessDescription,
-            website_url: formData.websiteUrl,
-            year_founded: parseInt(formData.yearFounded),
-            key_products: formData.keyProducts,
-            export_markets: formData.exportMarkets,
-        };
-        const res = await userAPI.applyMitra(req);
-        setIsSubmitting(false);
-
         if (res.success) {
-            checkMitraStatus(); // Refresh status to move to next phase
+            // Redirect based on role
+            if (user?.role === 'mitra') {
+                router.push('/eksportir/dashboard');
+            } else {
+                router.push('/pendana/dashboard');
+            }
         } else {
-            setError(res.error?.message || 'Gagal mengajukan aplikasi');
-        }
-    };
-
-    const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
-
-    const handleMitraUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        if (file.size > 10 * 1024 * 1024) return fail('Ukuran file maks 10MB');
-
-        setUploadingDoc(type);
-        const res = await userAPI.uploadMitraDocument(file, type);
-        setUploadingDoc(null);
-
-        if (res.success) {
-            checkMitraStatus(); // Refresh status to update checklist
-        } else {
-            setError(res.error?.message || 'Gagal upload dokumen');
+            setError(res.error?.message || 'Gagal menyimpan profil');
         }
     };
 
@@ -210,7 +122,7 @@ export default function CompleteProfilePage() {
     const fail = (msg: string) => { setError(msg); return false; };
 
     const [uploadingField, setUploadingField] = useState<string | null>(null);
-    const handleInvestorUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'ktpPhotoUrl' | 'selfieUrl') => {
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'ktpPhotoUrl' | 'selfieUrl') => {
         const file = e.target.files?.[0];
         if (!file) return;
         if (file.size > 5 * 1024 * 1024) return fail('Max 5MB');
@@ -269,314 +181,6 @@ export default function CompleteProfilePage() {
             <span className="text-sm font-medium">Kembali ke Beranda</span>
         </button>
     );
-
-    if (authLoading || loadingMitra) {
-        return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-                <div className="relative">
-                    <div className="w-16 h-16 rounded-full border-t-2 border-cyan-500 animate-spin"></div>
-                    <div className="absolute inset-0 w-16 h-16 rounded-full border-b-2 border-slate-800 animate-spin-slow"></div>
-                </div>
-            </div>
-        );
-    }
-
-    // ================== MITRA UI ==================
-    if (user?.role === 'mitra') {
-        const app = mitraStatus?.application;
-
-        // Waiting Approval
-        if (app && mitraStatus?.is_complete && app.status === 'pending') {
-            return (
-                <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-                    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] -z-10"></div>
-                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-[120px] -z-10"></div>
-                    <BackButton />
-
-                    <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 p-10 rounded-3xl max-w-lg w-full text-center shadow-2xl">
-                        <div className="w-20 h-20 bg-yellow-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3 border border-yellow-500/20">
-                            <svg className="w-10 h-10 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <h2 className="text-3xl font-bold text-white mb-4">Aplikasi Sedang Ditinjau</h2>
-                        <p className="text-slate-400 leading-relaxed mb-8">
-                            Terima kasih telah mengajukan sebagai Mitra. Tim kami sedang memverifikasi profil dan dokumen hukum Anda. Anda akan mendapatkan notifikasi setelah proses ini selesai.
-                        </p>
-                        <div className="space-y-4">
-                            <button
-                                onClick={() => window.location.reload()}
-                                className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition-all border border-slate-700"
-                            >
-                                Cek Status Terbaru
-                            </button>
-                            <button
-                                onClick={() => router.push('/')}
-                                className="w-full text-slate-500 hover:text-cyan-400 text-sm font-medium transition-colors"
-                            >
-                                Kembali ke Beranda
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // Mitra Document Upload
-        if (app && app.status === 'pending') {
-            const docs = mitraStatus?.documents_status;
-            return (
-                <div className="min-h-screen bg-slate-950 py-20 px-4 relative overflow-hidden">
-                    <BackButton />
-                    <div className="max-w-3xl mx-auto relative">
-                        <StepIndicator steps={[
-                            { title: 'Aplikasi', desc: 'Detail Perusahaan' },
-                            { title: 'Dokumen', desc: 'Legalitas & Dokumen' },
-                            { title: 'Review', desc: 'Tinjauan Akhir' }
-                        ]} current={2} />
-
-                        <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-3xl p-10 shadow-2xl">
-                            {error && <div className="mb-8 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm flex items-center gap-3">
-                                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                {error}
-                            </div>}
-
-                            <div className="grid gap-6">
-                                {[
-                                    { id: 'nib', label: 'NIB (Nomor Induk Berusaha)', desc: 'Nomor Induk Berusaha terbaru', done: docs?.nib },
-                                    { id: 'akta_pendirian', label: 'Akta Pendirian', desc: 'Akta pendirian perusahaan & SK Menkumham', done: docs?.akta_pendirian },
-                                    { id: 'ktp_direktur', label: 'KTP Direktur', desc: 'Foto KTP asli Direktur Utama', done: docs?.ktp_direktur }
-                                ].map((doc) => (
-                                    <div key={doc.id} className={`group flex items-center justify-between p-6 rounded-2xl border transition-all duration-300 ${doc.done ? 'bg-green-500/5 border-green-500/20' : 'bg-slate-800/30 border-slate-700/50 hover:bg-slate-800/50'
-                                        }`}>
-                                        <div className="flex items-center gap-5">
-                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${doc.done ? 'bg-green-500/20 text-green-400' : 'bg-slate-700 text-slate-400'
-                                                }`}>
-                                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                </svg>
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-white mb-0.5">{doc.label}</p>
-                                                <p className="text-sm text-slate-400">{doc.desc}</p>
-                                            </div>
-                                        </div>
-
-                                        {doc.done ? (
-                                            <div className="flex items-center gap-2 bg-green-500/10 text-green-400 px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider">
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                </svg>
-                                                Uploaded
-                                            </div>
-                                        ) : (
-                                            <div className="relative">
-                                                <input
-                                                    type="file"
-                                                    id={`file-${doc.id}`}
-                                                    className="hidden"
-                                                    accept=".pdf,application/pdf"
-                                                    onChange={(e) => handleMitraUpload(e, doc.id)}
-                                                    disabled={!!uploadingDoc}
-                                                />
-                                                <label
-                                                    htmlFor={`file-${doc.id}`}
-                                                    className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${uploadingDoc === doc.id ? 'bg-slate-800 text-slate-500' : 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95'
-                                                        }`}
-                                                >
-                                                    {uploadingDoc === doc.id ? (
-                                                        <>
-                                                            <div className="w-4 h-4 border-2 border-slate-600 border-t-slate-400 animate-spin rounded-full"></div>
-                                                            Uploading
-                                                        </>
-                                                    ) : 'Pilih File'}
-                                                </label>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-
-                            {mitraStatus?.is_complete && (
-                                <div className="mt-12 text-center p-8 bg-gradient-to-br from-green-500/10 to-emerald-500/5 rounded-3xl border border-green-500/20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                                    <h3 className="text-xl font-bold text-green-400 mb-2">Semua Dokumen Berhasil Diunggah!</h3>
-                                    <p className="text-slate-400 mb-6">Klik tombol di bawah untuk menyelesaikan proses pendaftaran.</p>
-                                    <button
-                                        onClick={() => window.location.reload()}
-                                        className="px-10 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-2xl hover:shadow-xl hover:shadow-green-500/20 active:scale-95 transition-all"
-                                    >
-                                        Selesaikan Pendaftaran
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // Mitra Application Form
-        return (
-            <div className="min-h-screen bg-slate-950 py-20 px-4 relative">
-                <BackButton />
-                <div className="max-w-4xl mx-auto relative">
-                    <StepIndicator steps={[
-                        { title: 'Aplikasi', desc: 'Profil Bisnis & Perusahaan' },
-                        { title: 'Dokumen', desc: 'Legalitas & Dokumen' },
-                        { title: 'Review', desc: 'Tinjauan Akhir' }
-                    ]} current={1} />
-
-                    <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-3xl p-10 shadow-2xl">
-                        {error && <div className="mb-8 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm">{error}</div>}
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {/* Company Section */}
-                            <div className="space-y-6">
-                                <h3 className="text-cyan-400 text-sm font-bold uppercase tracking-widest mb-4">Informasi Perusahaan</h3>
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-300 mb-2">Nama Perusahaan</label>
-                                    <input
-                                        type="text"
-                                        value={formData.companyName}
-                                        onChange={(e) => updateFormData('companyName', e.target.value)}
-                                        className="w-full bg-slate-800/50 border border-slate-700 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-3 text-white transition-all outline-none"
-                                        placeholder="Ex: PT Bakti Jaya"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-300 mb-2">Badan Hukum</label>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        {(['PT', 'CV', 'UD'] as const).map(type => (
-                                            <button
-                                                key={type}
-                                                onClick={() => setFormData(p => ({ ...p, companyType: type }))}
-                                                className={`py-3 rounded-xl border font-bold transition-all ${formData.companyType === type
-                                                    ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]'
-                                                    : 'bg-slate-800/50 border-slate-700 text-slate-500 hover:border-slate-500'
-                                                    }`}
-                                            >
-                                                {type}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-300 mb-2">Tahun Berdiri</label>
-                                        <input
-                                            type="number"
-                                            value={formData.yearFounded}
-                                            onChange={(e) => updateFormData('yearFounded', e.target.value)}
-                                            className="w-full bg-slate-800/50 border border-slate-700 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-3 text-white transition-all outline-none"
-                                            placeholder="2010"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-300 mb-2">NPWP</label>
-                                        <input
-                                            type="text"
-                                            value={formData.npwp}
-                                            onChange={(e) => updateFormData('npwp', e.target.value.replace(/\D/g, ''))}
-                                            className="w-full bg-slate-800/50 border border-slate-700 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-3 text-white transition-all outline-none"
-                                            placeholder="15 Digit NPWP"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-300 mb-2">Alamat Kantor Pusat</label>
-                                    <textarea
-                                        value={formData.address}
-                                        onChange={(e) => updateFormData('address', e.target.value)}
-                                        className="w-full bg-slate-800/50 border border-slate-700 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-3 text-white transition-all outline-none"
-                                        placeholder="Jalan, Kota, Kode Pos"
-                                        rows={3}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Business Profile Section */}
-                            <div className="space-y-6">
-                                <h3 className="text-teal-400 text-sm font-bold uppercase tracking-widest mb-4">Profil Bisnis</h3>
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-300 mb-2">Deskripsi Bisnis</label>
-                                    <textarea
-                                        value={formData.businessDescription}
-                                        onChange={(e) => updateFormData('businessDescription', e.target.value)}
-                                        className="w-full bg-slate-800/50 border border-slate-700 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-3 text-white transition-all outline-none"
-                                        placeholder="Apa yang perusahaan Anda tawarkan?"
-                                        rows={3}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-300 mb-2">Produk Utama</label>
-                                    <input
-                                        type="text"
-                                        value={formData.keyProducts}
-                                        onChange={(e) => updateFormData('keyProducts', e.target.value)}
-                                        className="w-full bg-slate-800/50 border border-slate-700 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-3 text-white transition-all outline-none"
-                                        placeholder="Ex: Karbon Aktif, Briket Kelapa..."
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-300 mb-2">Pasar Ekspor Utama</label>
-                                    <input
-                                        type="text"
-                                        value={formData.exportMarkets}
-                                        onChange={(e) => updateFormData('exportMarkets', e.target.value)}
-                                        className="w-full bg-slate-800/50 border border-slate-700 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-3 text-white transition-all outline-none"
-                                        placeholder="Ex: Amerika Serikat, Uni Eropa, China"
-                                    />
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-300 mb-2">Website</label>
-                                        <input
-                                            type="url"
-                                            value={formData.websiteUrl}
-                                            onChange={(e) => updateFormData('websiteUrl', e.target.value)}
-                                            className="w-full bg-slate-800/50 border border-slate-700 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-3 text-white transition-all outline-none"
-                                            placeholder="https://"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-300 mb-2">Omzet Tahunan</label>
-                                        <select
-                                            value={formData.annualRevenue}
-                                            onChange={(e) => setFormData(p => ({ ...p, annualRevenue: e.target.value as any }))}
-                                            className="w-full bg-slate-800/50 border border-slate-700 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-3 text-white transition-all outline-none appearance-none"
-                                        >
-                                            <option value="<1M">{"< Rp 1 M"}</option>
-                                            <option value="1M-5M">Rp 1 M - 5 M</option>
-                                            <option value="5M-25M">Rp 5 M - 25 M</option>
-                                            <option value="25M-100M">Rp 25 M - 100 M</option>
-                                            <option value=">100M">{"> Rp 100 M"}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-12 flex justify-center">
-                            <button
-                                onClick={handleMitraApply}
-                                disabled={isSubmitting}
-                                className="px-12 py-4 bg-gradient-to-r from-cyan-600 to-teal-600 text-white font-bold rounded-2xl hover:shadow-xl hover:shadow-cyan-500/20 active:scale-95 transition-all disabled:opacity-50"
-                            >
-                                {isSubmitting ? (
-                                    <span className="flex items-center gap-2">
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white animate-spin rounded-full"></div>
-                                        Memproses...
-                                    </span>
-                                ) : 'Lanjut ke Upload Dokumen'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     // ================== INVESTOR UI ==================
     return (
@@ -662,7 +266,7 @@ export default function CompleteProfilePage() {
                                                     <p className="font-bold text-white mb-1">{field === 'ktpPhotoUrl' ? 'Foto KTP' : 'Foto Selfie + KTP'}</p>
                                                     <p className="text-xs text-slate-500">Pastikan wajah dan teks terbaca jelas</p>
                                                 </div>
-                                                <input type="file" className="hidden" id={field} onChange={e => handleInvestorUpload(e, field)} disabled={!!uploadingField} />
+                                                <input type="file" className="hidden" id={field} onChange={e => handleUpload(e, field)} disabled={!!uploadingField} />
                                                 <label htmlFor={field} className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${uploadingField === field ? 'bg-slate-700 text-slate-500' : 'bg-slate-700 text-white hover:bg-slate-600'
                                                     }`}>
                                                     {uploadingField === field ? 'Uploading...' : 'Pilih Foto'}

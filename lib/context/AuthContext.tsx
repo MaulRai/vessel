@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { authAPI } from '../api/auth';
 import {
   User,
+  UserRole,
   AuthState,
   LoginRequest,
   RegisterRequest,
@@ -18,6 +19,7 @@ import {
 
 interface AuthContextType extends AuthState {
   login: (data: LoginRequest) => Promise<APIResponse<LoginResponse>>;
+  loginAsDemo: (role: UserRole) => Promise<void>;
   register: (data: RegisterRequest) => Promise<APIResponse<RegisterResponse>>;
   sendOTP: (data: SendOTPRequest) => Promise<APIResponse<SendOTPResponse>>;
   verifyOTP: (data: VerifyOTPRequest) => Promise<APIResponse<VerifyOTPResponse>>;
@@ -107,6 +109,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return response;
   }, [saveAuthData]);
 
+  const loginAsDemo = useCallback(async (role: UserRole) => {
+    const now = new Date().toISOString();
+    const demoUser: User = {
+      id: `demo-${role}`,
+      email: role === 'investor' ? 'demo.pendana@vessel.demo' : 'demo.eksportir@vessel.demo',
+      username: role === 'investor' ? 'demo_pendana' : 'demo_eksportir',
+      role,
+      is_verified: true,
+      is_active: true,
+      cooperative_agreement: true,
+      member_status: role === 'investor' ? 'calon_anggota_pendana' : 'member_mitra',
+      balance_idr: 125_000_000,
+      email_verified: true,
+      profile_completed: true,
+      wallet_address: 'lsq1demoaddress0000000000000000000000',
+      profile: {
+        id: `profile-demo-${role}`,
+        user_id: `demo-${role}`,
+        full_name: role === 'investor' ? 'Demo Pendana' : 'Demo Eksportir',
+        phone: '6280000000000',
+        address: 'Jl. Demo No. 1',
+        city: 'Jakarta',
+        province: 'DKI Jakarta',
+        postal_code: '12950',
+        country: 'Indonesia',
+        profile_picture: undefined,
+        created_at: now,
+        updated_at: now,
+      },
+      created_at: now,
+      updated_at: now,
+    };
+
+    saveAuthData({
+      user: demoUser,
+      access_token: `demo-access-token-${role}`,
+      refresh_token: `demo-refresh-token-${role}`,
+      expires_in: 3600,
+    });
+  }, [saveAuthData]);
+
   const register = useCallback(async (data: RegisterRequest): Promise<APIResponse<RegisterResponse>> => {
     // Register tanpa auto-login, user harus login manual setelah registrasi
     const response = await authAPI.register(data);
@@ -147,6 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextType = {
     ...state,
     login,
+    loginAsDemo,
     register,
     sendOTP,
     verifyOTP,

@@ -9,8 +9,8 @@ export default function LandingPage() {
 
   const getDashboardLink = () => {
     if (!user) return '/login';
-    if (user.role === 'investor') return '/dashboard/investor';
-    if (user.role === 'mitra') return '/dashboard/mitra';
+    if (user.role === 'investor') return '/pendana/dashboard';
+    if (user.role === 'mitra') return '/eksportir/dashboard';
     return '/dashboard';
   };
 
