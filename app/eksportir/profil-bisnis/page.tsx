@@ -1,8 +1,20 @@
 'use client';
 
-import { ReactNode, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { ReactNode, useLayoutEffect, useMemo, useRef, useState, useEffect } from 'react';
+import { AuthGuard } from '@/lib/components/AuthGuard';
+import { userAPI, MitraApplicationResponse } from '@/lib/api/user';
+import { useAuth } from '@/lib/context/AuthContext';
 
 type TabKey = 'perusahaan' | 'penanggung' | 'keuangan' | 'dokumen' | 'tandaTangan';
+
+// Document types yang akan dikirim ke backend
+type BackendDocumentType = 'nib' | 'akta_pendirian' | 'ktp_direktur';
+
+interface DocumentUploadStatus {
+  nib: boolean;
+  akta_pendirian: boolean;
+  ktp_direktur: boolean;
+}
 
 interface UploadedFile {
   name: string;
@@ -175,10 +187,22 @@ const generateId = () =>
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2, 10);
 
-export default function ProfilBisnisPage() {
+function ProfilBisnisContent() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabKey>('perusahaan');
   const [savedToast, setSavedToast] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  
+  // Backend integration state
+  const [mitraStatus, setMitraStatus] = useState<MitraApplicationResponse | null>(null);
+  const [documentUploadStatus, setDocumentUploadStatus] = useState<DocumentUploadStatus>({
+    nib: false,
+    akta_pendirian: false,
+    ktp_direktur: false,
+  });
+  const [uploadingDocs, setUploadingDocs] = useState<Record<string, boolean>>({});
 
   const [companyBasics, setCompanyBasics] = useState<CompanyBasics>({
     name: '',
@@ -313,6 +337,53 @@ export default function ProfilBisnisPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Check mitra status on mount
+  useEffect(() => {
+    const checkMitraStatus = async () => {
+      try {
+        const res = await userAPI.getMitraStatus();
+        if (res.success && res.data) {
+          setMitraStatus(res.data);
+          setDocumentUploadStatus(res.data.documents_status);
+          
+          // If already approved or pending, mark as submitted
+          if (res.data.application?.status === 'pending' || res.data.application?.status === 'approved') {
+            setSubmitted(true);
+            // Pre-fill company name if available
+            if (res.data.application?.company_name) {
+              const companyName = res.data.application.company_name;
+              setCompanyBasics(prev => ({ ...prev, name: companyName }));
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to check mitra status:', err);
+      }
+    };
+    
+    checkMitraStatus();
+  }, []);
+
+  // Function to upload document to backend (only for nib, akta_pendirian, ktp_direktur)
+  const uploadDocumentToBackend = async (file: File, documentType: BackendDocumentType): Promise<boolean> => {
+    setUploadingDocs(prev => ({ ...prev, [documentType]: true }));
+    try {
+      const res = await userAPI.uploadMitraDocument(file, documentType);
+      if (res.success) {
+        setDocumentUploadStatus(prev => ({ ...prev, [documentType]: true }));
+        return true;
+      } else {
+        setSubmitError(res.error?.message || `Gagal mengupload ${documentType}`);
+        return false;
+      }
+    } catch (err) {
+      setSubmitError(`Gagal mengupload ${documentType}`);
+      return false;
+    } finally {
+      setUploadingDocs(prev => ({ ...prev, [documentType]: false }));
+    }
+  };
 
   const fieldRefs = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | null>>({});
   const activeFieldRef = useRef<string | null>(null);
@@ -610,22 +681,113 @@ export default function ProfilBisnisPage() {
     setTimeout(() => setSavedToast(false), 4000);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors: Record<string, string> = {};
+    
+    // Validasi data perusahaan yang diperlukan backend
+    if (!companyBasics.name.trim()) {
+      newErrors.companyName = 'Nama perusahaan wajib diisi.';
+    }
+    if (!companyBasics.entityType) {
+      newErrors.entityType = 'Bentuk badan usaha wajib dipilih.';
+    }
+    if (!corporateLegal.companyNpwp.trim()) {
+      newErrors.npwp = 'NPWP perusahaan wajib diisi.';
+    }
     if (!digitalSignature.selfie) {
       newErrors.selfie = 'Mohon ambil foto selfie penanggung jawab terlebih dahulu.';
     }
     if (!membershipAgreement.membership || !membershipAgreement.savings || !membershipAgreement.adArt) {
       newErrors.membership = 'Mohon setujui seluruh akad keanggotaan sebelum melanjutkan.';
     }
+    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setActiveTab('tandaTangan');
+      if (newErrors.companyName || newErrors.entityType) {
+        setActiveTab('perusahaan');
+      } else if (newErrors.npwp) {
+        setActiveTab('dokumen');
+      } else {
+        setActiveTab('tandaTangan');
+      }
       return;
     }
+    
     setErrors({});
-    setSubmitted(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      // Step 1: Submit Mitra Application (company data)
+      // Map entityType to company_type format expected by backend
+      const companyTypeMap: Record<string, 'PT' | 'CV' | 'UD'> = {
+        'PT': 'PT',
+        'CV': 'CV',
+        'Firma': 'CV',
+        'Koperasi': 'CV',
+        'Lainnya': 'UD',
+        'UD': 'UD',
+      };
+      
+      // Map financialPerformance.sales to annual_revenue format
+      const getAnnualRevenue = (sales: string): '<1M' | '1M-5M' | '5M-25M' | '25M-100M' | '>100M' => {
+        const numericValue = parseInt(sales.replace(/\./g, ''), 10);
+        if (isNaN(numericValue)) return '<1M';
+        if (numericValue < 1000000000) return '<1M'; // < 1 Miliar
+        if (numericValue < 5000000000) return '1M-5M'; // 1-5 Miliar
+        if (numericValue < 25000000000) return '5M-25M'; // 5-25 Miliar
+        if (numericValue < 100000000000) return '25M-100M'; // 25-100 Miliar
+        return '>100M'; // > 100 Miliar
+      };
+      
+      const mitraApplicationData = {
+        company_name: companyBasics.name.trim(),
+        company_type: companyTypeMap[companyBasics.entityType] || 'PT',
+        npwp: corporateLegal.companyNpwp.replace(/\D/g, ''), // Remove non-digits
+        annual_revenue: getAnnualRevenue(financialPerformance.sales),
+        address: companyLocation.address1 || '',
+        business_description: riskList[0]?.description || 'Eksportir',
+        website_url: '',
+        year_founded: new Date().getFullYear(),
+        key_products: companyLocation.sector || 'Export Products',
+        export_markets: 'International',
+      };
+      
+      const applyRes = await userAPI.applyMitra(mitraApplicationData);
+      
+      if (!applyRes.success) {
+        setSubmitError(applyRes.error?.message || 'Gagal mengirim aplikasi mitra.');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Step 2: Upload required documents (only the three that backend supports)
+      const documentsToUpload: { file: File | null; type: BackendDocumentType; name: string }[] = [
+        { file: licensing.nibFile?.file || null, type: 'nib', name: 'NIB' },
+        { file: corporateLegal.deedFile?.file || null, type: 'akta_pendirian', name: 'Akta Pendirian' },
+        { file: responsibleDocs.ktpFile?.file || null, type: 'ktp_direktur', name: 'KTP Direktur' },
+      ];
+      
+      for (const doc of documentsToUpload) {
+        if (doc.file && !documentUploadStatus[doc.type]) {
+          const uploadSuccess = await uploadDocumentToBackend(doc.file, doc.type);
+          if (!uploadSuccess) {
+            setSubmitError(`Gagal mengupload ${doc.name}. Silakan coba lagi.`);
+            setIsSubmitting(false);
+            return;
+          }
+        }
+      }
+      
+      setSubmitted(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+    } catch (err) {
+      console.error('Submit error:', err);
+      setSubmitError('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleMembershipAgreementChange = (key: keyof MembershipAgreement, checked: boolean) => {
@@ -1151,6 +1313,7 @@ export default function ProfilBisnisPage() {
           type="button"
           onClick={handleSaveDraft}
           className="px-6 py-3 rounded-xl border border-slate-600 text-slate-300 hover:border-slate-500"
+          disabled={isSubmitting}
         >
           Simpan
         </button>
@@ -1159,15 +1322,29 @@ export default function ProfilBisnisPage() {
             type="button"
             onClick={() => setActiveTab('dokumen')}
             className="px-6 py-3 rounded-xl bg-slate-800 text-slate-200 border border-slate-700"
+            disabled={isSubmitting}
           >
             Kembali
           </button>
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 text-white font-semibold shadow-lg shadow-cyan-900/50"
+            disabled={isSubmitting || submitted}
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 text-white font-semibold shadow-lg shadow-cyan-900/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            Setuju & Daftar Anggota
+            {isSubmitting ? (
+              <>
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Mengirim...
+              </>
+            ) : submitted ? (
+              'Sudah Terkirim'
+            ) : (
+              'Setuju & Daftar Anggota'
+            )}
           </button>
         </div>
       </div>
@@ -1239,7 +1416,25 @@ export default function ProfilBisnisPage() {
               </svg>
               <div>
                 <p className="text-sm text-emerald-300 font-semibold">Permohonan verifikasi terkirim</p>
-                <p className="text-xs text-emerald-200 mt-1">Tim kami segera meninjau data dan menghubungi Anda melalui email.</p>
+                <p className="text-xs text-emerald-200 mt-1">
+                  {mitraStatus?.application?.status === 'pending' 
+                    ? 'Aplikasi Anda sedang ditinjau oleh tim kami.'
+                    : mitraStatus?.application?.status === 'approved'
+                    ? 'Selamat! Aplikasi Anda telah disetujui.'
+                    : 'Tim kami segera meninjau data dan menghubungi Anda melalui email.'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {submitError && (
+            <div className="p-4 rounded-xl border border-red-500/40 bg-red-500/10 flex items-start gap-3">
+              <svg className="w-5 h-5 text-red-400 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <p className="text-sm text-red-300 font-semibold">Terjadi Kesalahan</p>
+                <p className="text-xs text-red-200 mt-1">{submitError}</p>
               </div>
             </div>
           )}
@@ -1292,5 +1487,13 @@ export default function ProfilBisnisPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProfilBisnisPage() {
+  return (
+    <AuthGuard allowedRoles={['mitra']}>
+      <ProfilBisnisContent />
+    </AuthGuard>
   );
 }

@@ -127,8 +127,8 @@ class UserAPI {
         }
     }
 
-    async getProfile(): Promise<APIResponse<any>> {
-        return this.request<any>('/user/profile/data', {
+    async getProfile(): Promise<APIResponse<UserProfileResponse>> {
+        return this.request<UserProfileResponse>('/user/profile', {
             method: 'GET',
         });
     }
@@ -196,6 +196,18 @@ class UserAPI {
             };
         }
     }
+}
+
+export interface UserProfileResponse {
+    id: string;
+    email: string;
+    username: string;
+    role: 'mitra' | 'investor' | 'admin';
+    is_verified: boolean;
+    profile_completed: boolean;
+    email_verified: boolean;
+    balance_idr: number;
+    created_at: string;
 }
 
 export interface SubmitMitraApplicationRequest {

@@ -1,38 +1,169 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
-import { userAPI, MitraApplicationResponse } from '@/lib/api/user';
+import { userAPI, MitraApplicationResponse, UserProfileResponse } from '@/lib/api/user';
+
+type MitraApplicationStatus = 'not_applied' | 'pending' | 'approved' | 'rejected';
+
+interface MitraState {
+  hasApplied: boolean;
+  status: MitraApplicationStatus;
+  application?: MitraApplicationResponse;
+  rejectionReason?: string;
+}
+
+interface KYCStatus {
+  emailVerified: boolean;
+  kycCompleted: boolean;
+  isVerified: boolean;
+}
+
+// Component untuk status not_applied - belum mengisi profil bisnis
+function NotAppliedBanner() {
+  return (
+    <div className="mb-6 p-6 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-xl">
+      <div className="flex items-start space-x-4">
+        <div className="p-3 bg-amber-500/20 rounded-lg">
+          <svg className="w-8 h-8 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-amber-400 mb-1">Profil Bisnis Belum Lengkap</h3>
+          <p className="text-slate-300 text-sm mb-4">
+            Anda belum mengisi profil bisnis. Lengkapi profil bisnis Anda untuk dapat membuat invoice dan mengajukan pendanaan.
+          </p>
+          <Link
+            href="/eksportir/profil-bisnis"
+            className="inline-flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 rounded-lg font-medium text-sm text-white transition-all shadow-lg shadow-amber-500/25"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            <span>Lengkapi Profil Bisnis</span>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Component untuk status pending - menunggu verifikasi
+function PendingApprovalBanner({ application }: { application?: MitraApplicationResponse }) {
+  return (
+    <div className="mb-6 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/30 rounded-xl">
+      <div className="flex items-start space-x-4">
+        <div className="p-3 bg-blue-500/20 rounded-lg">
+          <svg className="w-8 h-8 text-blue-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-blue-400 mb-1">Menunggu Verifikasi</h3>
+          <p className="text-slate-300 text-sm mb-2">
+            Profil bisnis <span className="font-medium text-white">{application?.application?.company_name || 'Anda'}</span> sedang dalam proses verifikasi oleh tim kami.
+          </p>
+          <p className="text-slate-400 text-xs">
+            Proses verifikasi biasanya memakan waktu 1-3 hari kerja. Anda akan menerima notifikasi setelah proses selesai.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Component untuk status rejected - ditolak
+function RejectedBanner({ reason, application }: { reason?: string; application?: MitraApplicationResponse }) {
+  return (
+    <div className="mb-6 p-6 bg-gradient-to-r from-red-500/10 to-rose-500/10 border border-red-500/30 rounded-xl">
+      <div className="flex items-start space-x-4">
+        <div className="p-3 bg-red-500/20 rounded-lg">
+          <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-red-400 mb-1">Profil Bisnis Ditolak</h3>
+          <p className="text-slate-300 text-sm mb-2">
+            Maaf, pengajuan profil bisnis <span className="font-medium text-white">{application?.application?.company_name || 'Anda'}</span> tidak disetujui.
+          </p>
+          {reason && (
+            <div className="p-3 bg-red-500/10 rounded-lg mb-4">
+              <p className="text-xs text-slate-400 mb-1">Alasan penolakan:</p>
+              <p className="text-sm text-red-300">{reason}</p>
+            </div>
+          )}
+          <Link
+            href="/eksportir/profil-bisnis"
+            className="inline-flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-400 hover:to-rose-400 rounded-lg font-medium text-sm text-white transition-all shadow-lg shadow-red-500/25"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Ajukan Ulang</span>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function MitraDashboardContent() {
   const { user } = useAuth();
   const router = useRouter();
-  const [mitraStatus, setMitraStatus] = useState<MitraApplicationResponse | null>(null);
+  const [mitraState, setMitraState] = useState<MitraState | null>(null);
+  const [kycStatus, setKycStatus] = useState<KYCStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkStatus = async () => {
+    const fetchAllStatus = async () => {
       try {
-        const res = await userAPI.getMitraStatus();
-        if (res.success && res.data) {
-          setMitraStatus(res.data);
-          if (res.data.application?.status !== 'approved') {
-            router.push('/complete-profile');
-          }
+        // Fetch KYC status and mitra status in parallel
+        const [profileRes, mitraRes] = await Promise.all([
+          userAPI.getProfile(),
+          userAPI.getMitraStatus()
+        ]);
+
+        // Set KYC status
+        if (profileRes.success && profileRes.data) {
+          setKycStatus({
+            emailVerified: profileRes.data.email_verified,
+            kycCompleted: profileRes.data.profile_completed,
+            isVerified: profileRes.data.is_verified,
+          });
+        }
+
+        // Set mitra status
+        if (mitraRes.success && mitraRes.data) {
+          setMitraState({
+            hasApplied: true,
+            status: mitraRes.data.application?.status as MitraApplicationStatus || 'pending',
+            application: mitraRes.data,
+            rejectionReason: mitraRes.data.application?.rejection_reason,
+          });
         } else {
-          router.push('/complete-profile');
+          setMitraState({
+            hasApplied: false,
+            status: 'not_applied',
+          });
         }
       } catch (err) {
-        console.error('Failed to check mitra status', err);
-        router.push('/complete-profile');
+        console.error('Failed to fetch status', err);
+        setMitraState({
+          hasApplied: false,
+          status: 'not_applied',
+        });
       } finally {
         setLoading(false);
       }
     };
-    checkStatus();
-  }, [router]);
+    fetchAllStatus();
+  }, []);
 
   if (loading) {
     return (
@@ -41,6 +172,9 @@ function MitraDashboardContent() {
       </div>
     );
   }
+
+  // Check if mitra can create invoices (only when approved)
+  const canCreateInvoice = mitraState?.status === 'approved';
 
   const stats = [
     {
@@ -115,6 +249,11 @@ function MitraDashboardContent() {
   return (
     <DashboardLayout role="mitra">
       <div className="space-y-6">
+        {/* Status Banners */}
+        {mitraState?.status === 'not_applied' && <NotAppliedBanner />}
+        {mitraState?.status === 'pending' && <PendingApprovalBanner application={mitraState.application} />}
+        {mitraState?.status === 'rejected' && <RejectedBanner reason={mitraState.rejectionReason} application={mitraState.application} />}
+
         {/* Welcome Section */}
         <div className="flex items-center justify-between">
           <div>
@@ -125,12 +264,22 @@ function MitraDashboardContent() {
               Kelola invoice dan pendanaan ekspor Anda
             </p>
           </div>
-          <Link
-            href="/dashboard/mitra/invoices/create"
-            className="px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 rounded-lg font-medium text-sm transition-all shadow-lg shadow-teal-500/25"
-          >
-            Buat Invoice Baru
-          </Link>
+          {canCreateInvoice ? (
+            <Link
+              href="/dashboard/mitra/invoices/create"
+              className="px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 rounded-lg font-medium text-sm transition-all shadow-lg shadow-teal-500/25"
+            >
+              Buat Invoice Baru
+            </Link>
+          ) : (
+            <button
+              disabled
+              className="px-4 py-2 bg-slate-700 rounded-lg font-medium text-sm text-slate-400 cursor-not-allowed"
+              title="Lengkapi profil bisnis terlebih dahulu"
+            >
+              Buat Invoice Baru
+            </button>
+          )}
         </div>
 
         {/* Stats Grid */}
@@ -208,28 +357,97 @@ function MitraDashboardContent() {
             <div className="p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl backdrop-blur-sm">
               <h2 className="text-lg font-semibold text-white mb-4">Status Verifikasi</h2>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                {/* KYC Status */}
+                <div className={`flex items-center justify-between p-3 rounded-lg ${
+                  kycStatus?.kycCompleted 
+                    ? 'bg-green-500/10 border border-green-500/20' 
+                    : 'bg-slate-700/30 border border-slate-600/30'
+                }`}>
                   <div className="flex items-center space-x-3">
-                    <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-sm text-green-400">KYC Terverifikasi</span>
+                    {kycStatus?.kycCompleted ? (
+                      <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    )}
+                    <span className={`text-sm ${kycStatus?.kycCompleted ? 'text-green-400' : 'text-slate-500'}`}>
+                      {kycStatus?.kycCompleted ? 'KYC Terverifikasi' : 'KYC Belum Lengkap'}
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+
+                {/* Company Approval Status */}
+                <div className={`flex items-center justify-between p-3 rounded-lg ${
+                  mitraState?.status === 'approved' 
+                    ? 'bg-green-500/10 border border-green-500/20' 
+                    : mitraState?.status === 'pending'
+                      ? 'bg-yellow-500/10 border border-yellow-500/20'
+                      : mitraState?.status === 'rejected'
+                        ? 'bg-red-500/10 border border-red-500/20'
+                        : 'bg-slate-700/30 border border-slate-600/30'
+                }`}>
                   <div className="flex items-center space-x-3">
-                    <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-sm text-green-400">Perusahaan Approved</span>
+                    {mitraState?.status === 'approved' ? (
+                      <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : mitraState?.status === 'pending' ? (
+                      <svg className="w-5 h-5 text-yellow-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    ) : mitraState?.status === 'rejected' ? (
+                      <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    )}
+                    <span className={`text-sm ${
+                      mitraState?.status === 'approved' 
+                        ? 'text-green-400' 
+                        : mitraState?.status === 'pending'
+                          ? 'text-yellow-400'
+                          : mitraState?.status === 'rejected'
+                            ? 'text-red-400'
+                            : 'text-slate-500'
+                    }`}>
+                      {mitraState?.status === 'approved' 
+                        ? 'Perusahaan Approved' 
+                        : mitraState?.status === 'pending'
+                          ? 'Menunggu Approval'
+                          : mitraState?.status === 'rejected'
+                            ? 'Perusahaan Ditolak'
+                            : 'Belum Apply'}
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
+
+                {/* Tokenization Ready Status */}
+                <div className={`flex items-center justify-between p-3 rounded-lg ${
+                  kycStatus?.kycCompleted && mitraState?.status === 'approved'
+                    ? 'bg-cyan-500/10 border border-cyan-500/20' 
+                    : 'bg-slate-700/30 border border-slate-600/30'
+                }`}>
                   <div className="flex items-center space-x-3">
-                    <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    <span className="text-sm text-cyan-400">Siap Tokenisasi</span>
+                    {kycStatus?.kycCompleted && mitraState?.status === 'approved' ? (
+                      <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                      </svg>
+                    )}
+                    <span className={`text-sm ${
+                      kycStatus?.kycCompleted && mitraState?.status === 'approved' ? 'text-cyan-400' : 'text-slate-500'
+                    }`}>
+                      {kycStatus?.kycCompleted && mitraState?.status === 'approved' ? 'Siap Tokenisasi' : 'Belum Siap Tokenisasi'}
+                    </span>
                   </div>
                 </div>
               </div>
