@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { UserRole } from '../types/auth';
@@ -142,14 +143,14 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-slate-800/50">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-teal-400 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
-              VESSEL
-            </span>
+            <Image
+              src="/vessel-logo.png"
+              alt="VESSEL Logo"
+              width={120}
+              height={32}
+              className="h-10 w-auto object-contain"
+              priority
+            />
           </Link>
         </div>
 

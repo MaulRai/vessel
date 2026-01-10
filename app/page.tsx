@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/lib/context/AuthContext';
 
 export default function LandingPage() {
@@ -24,21 +25,21 @@ export default function LandingPage() {
 
       <nav className="fixed w-full z-50 border-b border-slate-800/50 backdrop-blur-xl bg-slate-950/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-teal-400 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-900/20">
-                <svg className="w-6 h-6 text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent tracking-tight">
-                VESSEL
-              </span>
+              <Image
+                src="/vessel-logo.png"
+                alt="VESSEL Logo"
+                width={120}
+                height={32}
+                className="h-12 w-auto object-contain"
+                priority
+              />
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">Features</a>
-              <a href="#how-it-works" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">How It Works</a>
-              <a href="#security" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">Security</a>
+              <a href="#features" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">Fitur</a>
+              <a href="#how-it-works" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">Cara Kerja</a>
+              <a href="#security" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">Keamanan</a>
             </div>
             <div className="flex items-center space-x-4">
               {isAuthenticated ? (
@@ -79,16 +80,16 @@ export default function LandingPage() {
               </div>
 
               <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight tracking-tight">
-                <span className="text-white">Decentralized</span>
-                <br />
                 <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent drop-shadow-sm">
-                  Export Financing
+                  Pembiayaan Ekspor
                 </span>
+                <br />
+                <span className="text-white">Terdesentralisasi</span>
               </h1>
 
               <p className="text-lg md:text-xl text-slate-400 max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed border-l-0 lg:border-l-2 border-slate-800 pl-0 lg:pl-6 text-center lg:text-left">
-                Indonesia&apos;s first Web3 platform connecting exporters with global investors.
-                Full on-chain transparency, smart contract security, and competitive returns.
+                Platform Web3 pertama di Indonesia yang menghubungkan eksportir dengan investor global.
+                Transparansi on-chain penuh, keamanan smart contract, dan imbal hasil kompetitif.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-16">
@@ -96,7 +97,7 @@ export default function LandingPage() {
                   href="/register"
                   className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-bold text-lg transition-all shadow-xl shadow-cyan-500/20 ring-1 ring-white/20 flex items-center justify-center space-x-2"
                 >
-                  <span>Start Now</span>
+                  <span>Mulai Sekarang</span>
                   <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -105,15 +106,15 @@ export default function LandingPage() {
                   href="#how-it-works"
                   className="w-full sm:w-auto px-8 py-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 rounded-xl font-bold text-lg transition-all backdrop-blur-sm text-center text-slate-300 hover:text-white"
                 >
-                  Learn More
+                  Pelajari Lebih Lanjut
                 </a>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-slate-800/50">
                 {[
                   { value: '$3M+', label: 'Total Volume' },
-                  { value: '500+', label: 'Exporters' },
-                  { value: '12%', label: 'Avg. Return' },
+                  { value: '500+', label: 'Eksportir' },
+                  { value: '12%', label: 'Rerata Imbal Hasil' },
                   { value: '100%', label: 'On-Chain' },
                 ].map((stat, i) => (
                   <div key={i}>
@@ -169,10 +170,10 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-3xl md:text-5xl font-bold mb-6">
-              Two Sides, <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">One Platform</span>
+              Dua Sisi, <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Satu Platform</span>
             </h2>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Whether you are an exporter needing working capital or an investor seeking yields, VESSEL is built for you.
+              Baik Anda eksportir yang membutuhkan modal kerja maupun investor yang mencari imbal hasil, VESSEL hadir untuk Anda.
             </p>
           </div>
 
@@ -181,20 +182,24 @@ export default function LandingPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
               <div className="relative">
                 <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-cyan-500/5 border border-cyan-500/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
-                  <svg className="w-8 h-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <Image
+                    src="/assets/landing/investor.png"
+                    alt="Ikon Investor"
+                    width={64}
+                    height={64}
+                    className="w-12 h-12 object-contain"
+                  />
                 </div>
-                <h3 className="text-3xl font-bold mb-4 text-white">For Investors</h3>
+                <h3 className="text-3xl font-bold mb-4 text-white">Untuk Investor</h3>
                 <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-                  Invest in verified export invoices with annual returns up to 15%. Direct access to real-world asset (RWA) yields.
+                  Investasikan pada invoice ekspor yang telah diverifikasi dengan imbal hasil hingga 15% per tahun. Akses langsung ke yield real-world asset (RWA).
                 </p>
                 <ul className="space-y-4 mb-10">
                   {[
-                    'Choose tranches matching your risk profile',
-                    'Automated portfolio diversification',
-                    'Real-time on-chain transparency',
-                    'Flexible withdrawal options',
+                    'Pilih tranche sesuai profil risiko Anda',
+                    'Diversifikasi portofolio otomatis',
+                    'Transparansi on-chain real-time',
+                    'Opsi penarikan yang fleksibel',
                   ].map((item, i) => (
                     <li key={i} className="flex items-center space-x-3 text-slate-300">
                       <div className="w-6 h-6 rounded-full bg-cyan-500/10 flex items-center justify-center flex-shrink-0">
@@ -210,7 +215,7 @@ export default function LandingPage() {
                   href="/register"
                   className="inline-flex items-center space-x-2 text-cyan-400 hover:text-cyan-300 font-bold tracking-wide transition-colors"
                 >
-                  <span>Start Investing</span>
+                  <span>Mulai Berinvestasi</span>
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
@@ -222,20 +227,24 @@ export default function LandingPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
               <div className="relative">
                 <div className="w-16 h-16 bg-gradient-to-br from-teal-500/20 to-teal-500/5 border border-teal-500/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
-                  <svg className="w-8 h-8 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
+                  <Image
+                    src="/assets/landing/exporter.png"
+                    alt="Ikon Eksportir"
+                    width={64}
+                    height={64}
+                    className="w-12 h-12 object-contain"
+                  />
                 </div>
-                <h3 className="text-3xl font-bold mb-4 text-white">For Exporters</h3>
+                <h3 className="text-3xl font-bold mb-4 text-white">Untuk Eksportir</h3>
                 <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-                  Get fast working capital by collateralizing your export invoices. Quick approval, competitive rates, no extra collateral.
+                  Dapatkan modal kerja cepat dengan menjaminkan invoice ekspor Anda. Persetujuan cepat, bunga kompetitif, tanpa agunan tambahan.
                 </p>
                 <ul className="space-y-4 mb-10">
                   {[
-                    'Funding disbursement within 48 hours',
-                    'Invoices tokenized as NFTs',
-                    'Rates starting from 8% p.a.',
-                    'No additional collateral required',
+                    'Pencairan dana dalam 48 jam',
+                    'Invoice ditokenisasi sebagai NFT',
+                    'Bunga mulai 8% p.a.',
+                    'Tanpa agunan tambahan',
                   ].map((item, i) => (
                     <li key={i} className="flex items-center space-x-3 text-slate-300">
                       <div className="w-6 h-6 rounded-full bg-teal-500/10 flex items-center justify-center flex-shrink-0">
@@ -251,7 +260,7 @@ export default function LandingPage() {
                   href="/register"
                   className="inline-flex items-center space-x-2 text-teal-400 hover:text-teal-300 font-bold tracking-wide transition-colors"
                 >
-                  <span>Apply for Funding</span>
+                  <span>Ajukan Pendanaan</span>
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
@@ -266,10 +275,10 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-3xl md:text-5xl font-bold mb-6">
-              How It <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Works</span>
+              Cara <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Kerja</span>
             </h2>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Simple process powered by blockchain technology for maximum efficiency and trust.
+              Proses sederhana yang didukung teknologi blockchain untuk efisiensi dan kepercayaan maksimum.
             </p>
           </div>
 
@@ -277,32 +286,32 @@ export default function LandingPage() {
             {[
               {
                 step: '01',
-                title: 'Verification',
-                desc: 'Exporters register and undergo strict identity and document verification.',
+                title: 'Verifikasi',
+                desc: 'Eksportir mendaftar dan melewati verifikasi identitas serta dokumen yang ketat.',
                 icon: (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 ),
               },
               {
                 step: '02',
-                title: 'Tokenization',
-                desc: 'Invoices are validated and tokenized as NFTs on the Lisk blockchain.',
+                title: 'Tokenisasi',
+                desc: 'Invoice divalidasi dan ditokenisasi sebagai NFT di blockchain Lisk.',
                 icon: (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 ),
               },
               {
                 step: '03',
-                title: 'Funding',
-                desc: 'Investors select pools and tranches that match their investment goals.',
+                title: 'Pendanaan',
+                desc: 'Investor memilih pool dan tranche yang sesuai dengan tujuan investasi.',
                 icon: (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                 ),
               },
               {
                 step: '04',
-                title: 'Distribution',
-                desc: 'Funds are disbursed to exporters, and returns are automatically distributed.',
+                title: 'Distribusi',
+                desc: 'Dana dicairkan ke eksportir, dan imbal hasil didistribusikan otomatis.',
                 icon: (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 ),
@@ -330,18 +339,18 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-3xl md:text-5xl font-bold mb-8">
-                Enterprise-Grade <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Security</span>
+                Keamanan <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Kelas Enterprise</span>
               </h2>
               <p className="text-slate-400 text-lg mb-10 leading-relaxed">
-                Built on the Lisk blockchain with audited smart contracts,
-                providing security and transparency that traditional finance can&apos;t match.
+                Dibangun di atas blockchain Lisk dengan smart contract yang diaudit,
+                menghadirkan keamanan dan transparansi yang sulit ditandingi finansial tradisional.
               </p>
               <div className="space-y-6">
                 {[
-                  { title: 'Smart Contract Audited', desc: 'Code audited by top-tier security firms.' },
-                  { title: 'Multi-Signature Wallets', desc: 'Funds secured by multi-sig mechanisms.' },
-                  { title: 'Regulatory Compliance', desc: 'Verified users compliant with local regulations.' },
-                  { title: 'RWA Backing', desc: 'Every investment backed by real invoice assets.' },
+                  { title: 'Smart Contract Ter-audit', desc: 'Kode diaudit oleh firma keamanan terkemuka.' },
+                  { title: 'Dompet Multi-Signature', desc: 'Dana diamankan oleh mekanisme multi-sig.' },
+                  { title: 'Kepatuhan Regulasi', desc: 'Pengguna terverifikasi sesuai regulasi lokal.' },
+                  { title: 'Dijamin Aset RWA', desc: 'Setiap investasi didukung aset invoice nyata.' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start space-x-5 p-4 rounded-xl hover:bg-slate-800/30 transition-colors">
                     <div className="w-10 h-10 bg-cyan-500/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
@@ -363,13 +372,22 @@ export default function LandingPage() {
                 <div className="bg-slate-950/90 rounded-[22px] p-8">
                   <div className="grid grid-cols-2 gap-6">
                     {[
-                      { icon: '🔒', label: 'E2E Encryption' },
-                      { icon: '⛓️', label: 'On-Chain Verify' },
-                      { icon: '🛡️', label: 'DDoS Guard' },
-                      { icon: '📝', label: 'Immutable Logs' },
+                      { icon: '/assets/landing/landing-asset-1.png', label: 'E2E Encryption' },
+                      { icon: '/assets/landing/landing-asset-2.png', label: 'On-Chain Verify' },
+                      { icon: '/assets/landing/landing-asset-3.png', label: 'DDoS Guard' },
+                      { icon: '/assets/landing/landing-asset-4.png', label: 'Immutable Logs' },
                     ].map((item, i) => (
                       <div key={i} className="aspect-square flex flex-col items-center justify-center p-6 bg-slate-900 rounded-2xl border border-slate-800 hover:border-cyan-500/30 transition-colors group">
-                        <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">{item.icon}</div>
+                        <div className="flex items-center space-x-2">
+                          <Image
+                            src={item.icon}
+                            alt="VESSEL Logo"
+                            width={120}
+                            height={120}
+                            className="h-32 w-auto object-contain"
+                            priority
+                          />
+                        </div>
                         <div className="text-sm font-medium text-slate-300">{item.label}</div>
                       </div>
                     ))}
@@ -388,24 +406,24 @@ export default function LandingPage() {
             <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-cyan-500/20 blur-[100px] group-hover:bg-cyan-500/30 transition-colors duration-700" />
             <div className="relative z-10">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-                Ready to Get Started?
+                Siap Memulai?
               </h2>
               <p className="text-slate-300 text-lg mb-12 max-w-2xl mx-auto leading-relaxed">
-                Join hundreds of exporters and investors leveraging the power of blockchain for trade finance.
-                Experience the future of financing today.
+                Bergabunglah dengan ratusan eksportir dan investor yang memanfaatkan kekuatan blockchain untuk trade finance.
+                Rasakan masa depan pembiayaan hari ini.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <Link
                   href="/register"
                   className="w-full sm:w-auto px-10 py-5 bg-white text-slate-900 hover:bg-cyan-50 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
-                  Create Free Account
+                  Buat Akun Gratis
                 </Link>
                 <Link
                   href="/login"
                   className="w-full sm:w-auto px-10 py-5 bg-transparent border-2 border-slate-600 hover:border-white text-white rounded-xl font-bold text-lg transition-all hover:bg-white/5"
                 >
-                  Login to Account
+                  Masuk ke Akun
                 </Link>
               </div>
             </div>
@@ -417,47 +435,49 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-12 mb-16">
             <div className="col-span-1 md:col-span-1">
-              <div className="flex items-center space-x-2 mb-6">
-                <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-teal-400 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <span className="text-xl font-bold text-white">VESSEL</span>
+              <div className="flex items-center space-x-2">
+                <Image
+                  src="/vessel-logo.png"
+                  alt="VESSEL Logo"
+                  width={120}
+                  height={32}
+                  className="h-12 w-auto object-contain"
+                  priority
+                />
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Indonesia&apos;s first decentralized export financing platform. Bridging the gap between global capital and local potential.
+              <p className="text-slate-400 mt-4 text-sm leading-relaxed">
+                Platform pembiayaan ekspor terdesentralisasi pertama di Indonesia. Menjembatani modal global dengan potensi lokal.
               </p>
             </div>
             <div>
-              <h4 className="font-bold text-white mb-6">Products</h4>
+              <h4 className="font-bold text-white mb-6">Produk</h4>
               <ul className="space-y-4 text-sm text-slate-400">
-                <li><a href="#" className="hover:text-cyan-400 transition-colors">For Investors</a></li>
-                <li><a href="#" className="hover:text-cyan-400 transition-colors">For Exporters</a></li>
-                <li><a href="#" className="hover:text-cyan-400 transition-colors">DeFi Protocol</a></li>
+                <li><a href="#" className="hover:text-cyan-400 transition-colors">Untuk Investor</a></li>
+                <li><a href="#" className="hover:text-cyan-400 transition-colors">Untuk Eksportir</a></li>
+                <li><a href="#" className="hover:text-cyan-400 transition-colors">Protokol DeFi</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-white mb-6">Company</h4>
+              <h4 className="font-bold text-white mb-6">Perusahaan</h4>
               <ul className="space-y-4 text-sm text-slate-400">
-                <li><a href="#" className="hover:text-cyan-400 transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-cyan-400 transition-colors">Careers</a></li>
+                <li><a href="#" className="hover:text-cyan-400 transition-colors">Tentang Kami</a></li>
+                <li><a href="#" className="hover:text-cyan-400 transition-colors">Karier</a></li>
                 <li><a href="#" className="hover:text-cyan-400 transition-colors">Blog</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold text-white mb-6">Legal</h4>
               <ul className="space-y-4 text-sm text-slate-400">
-                <li><a href="#" className="hover:text-cyan-400 transition-colors">Terms & Conditions</a></li>
-                <li><a href="#" className="hover:text-cyan-400 transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-cyan-400 transition-colors">Syarat & Ketentuan</a></li>
+                <li><a href="#" className="hover:text-cyan-400 transition-colors">Kebijakan Privasi</a></li>
                 <li><a href="#" className="hover:text-cyan-400 transition-colors">License</a></li>
               </ul>
             </div>
           </div>
           <div className="pt-8 border-t border-slate-800/50 flex flex-col md:flex-row items-center justify-between text-sm text-slate-500">
-            <p>&copy; 2024 VESSEL Finance. All rights reserved.</p>
+            <p>&copy; 2026 VESSEL Finance. All rights reserved.</p>
             <div className="flex items-center space-x-6 mt-4 md:mt-0">
-              <span>Compliance First</span>
+              <span>Kepatuhan Utama</span>
               <span>Powered by Lisk</span>
             </div>
           </div>
