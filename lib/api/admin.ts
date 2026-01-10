@@ -117,6 +117,7 @@ class AdminAPI {
         });
     }
 
+<<<<<<< HEAD
     // Mitra Application Management
     async listPendingMitraApplications(
         page: number = 1,
@@ -127,10 +128,16 @@ class AdminAPI {
             per_page: perPage.toString(),
         });
         return this.request<MitraApplicationsListResponse>(`/admin/mitra/pending?${params.toString()}`, {
+=======
+    // Mitra Management
+    async listMitraApplications(page: number = 1, perPage: number = 10): Promise<APIResponse<{ applications: any[]; total: number }>> {
+        return this.request<{ applications: any[]; total: number }>(`/admin/mitra/pending?page=${page}&per_page=${perPage}`, {
+>>>>>>> 31bf4a2 (fix)
             method: 'GET',
         });
     }
 
+<<<<<<< HEAD
     async getMitraApplicationDetail(id: string): Promise<APIResponse<MitraApplicationDetail>> {
         return this.request<MitraApplicationDetail>(`/admin/mitra/${id}`, {
             method: 'GET',
@@ -139,16 +146,26 @@ class AdminAPI {
 
     async approveMitraApplication(id: string): Promise<APIResponse<{ message: string }>> {
         return this.request<{ message: string }>(`/admin/mitra/${id}/approve`, {
+=======
+    async approveMitra(id: string): Promise<APIResponse<any>> {
+        return this.request<any>(`/admin/mitra/${id}/approve`, {
+>>>>>>> 31bf4a2 (fix)
             method: 'POST',
         });
     }
 
+<<<<<<< HEAD
     async rejectMitraApplication(id: string, reason: string): Promise<APIResponse<{ message: string }>> {
         return this.request<{ message: string }>(`/admin/mitra/${id}/reject`, {
+=======
+    async rejectMitra(id: string, reason: string): Promise<APIResponse<any>> {
+        return this.request<any>(`/admin/mitra/${id}/reject`, {
+>>>>>>> 31bf4a2 (fix)
             method: 'POST',
             body: JSON.stringify({ reason }),
         });
     }
+<<<<<<< HEAD
 }
 
 // Mitra Application Types
@@ -187,6 +204,8 @@ export interface MitraApplicationsListResponse {
 export interface MitraApplicationDetail extends MitraApplicationItem {
     updated_at?: string;
     rejection_reason?: string;
+=======
+>>>>>>> 31bf4a2 (fix)
 }
 
 export const adminAPI = new AdminAPI(API_BASE_URL);

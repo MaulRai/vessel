@@ -228,6 +228,7 @@ export interface MitraApplicationResponse {
         id: string;
         status: 'pending' | 'approved' | 'rejected';
         company_name: string;
+        company_type: string;
         rejection_reason?: string;
     };
     documents_status: {
