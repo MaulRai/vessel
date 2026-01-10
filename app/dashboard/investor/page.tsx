@@ -96,7 +96,7 @@ function InvestorDashboardContent() {
             </p>
           </div>
           <Link
-            href="/dashboard/investor/marketplace"
+            href="/dashboard/investor/pool-investment"
             className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-lg font-medium text-sm transition-all shadow-lg shadow-cyan-500/25"
           >
             Investasi Baru

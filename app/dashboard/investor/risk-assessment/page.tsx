@@ -176,7 +176,7 @@ function RiskAssessmentContent() {
                 Ulangi Assessment
               </button>
               <button
-                onClick={() => router.push('/dashboard/investor/marketplace')}
+                onClick={() => router.push('/dashboard/investor/pool-investment')}
                 className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-lg text-sm font-medium text-white transition-all"
               >
                 Mulai Investasi

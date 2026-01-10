@@ -38,7 +38,7 @@ function LoginForm() {
     if (response.success && response.data) {
       const user = response.data.user;
       if (user.role === 'admin') {
-        router.push('/admin/dashboard-verifikasi');
+        router.push('/dashboard/admin');
       } else if (!user.profile_completed) {
         router.push('/complete-profile');
       } else if (user.role === 'investor') {
