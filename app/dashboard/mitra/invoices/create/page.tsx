@@ -59,13 +59,12 @@ function Stepper({ currentStep, onStepClick }: { currentStep: number; onStepClic
             <div className="flex flex-col items-center flex-1">
               <button
                 onClick={() => onStepClick(step.number)}
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
-                  currentStep === step.number
-                    ? 'bg-teal-500 text-white ring-4 ring-teal-500/30'
-                    : currentStep > step.number
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${currentStep === step.number
+                  ? 'bg-teal-500 text-white ring-4 ring-teal-500/30'
+                  : currentStep > step.number
                     ? 'bg-teal-500 text-white hover:bg-teal-400'
                     : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
-                }`}
+                  }`}
               >
                 {currentStep > step.number ? (
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -75,9 +74,8 @@ function Stepper({ currentStep, onStepClick }: { currentStep: number; onStepClic
                   step.number
                 )}
               </button>
-              <span className={`mt-2 text-xs font-medium ${
-                currentStep === step.number ? 'text-teal-400' : currentStep > step.number ? 'text-teal-500' : 'text-slate-400'
-              }`}>
+              <span className={`mt-2 text-xs font-medium ${currentStep === step.number ? 'text-teal-400' : currentStep > step.number ? 'text-teal-500' : 'text-slate-400'
+                }`}>
                 {step.label}
               </span>
             </div>
@@ -149,9 +147,8 @@ function UploadCard({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-lg p-6 text-center transition-all ${
-            isDragging ? 'border-teal-500 bg-teal-950/30' : error ? 'border-red-500 bg-red-950/20' : 'border-slate-600 bg-slate-900/30 hover:border-slate-500'
-          }`}
+          className={`border-2 border-dashed rounded-lg p-6 text-center transition-all ${isDragging ? 'border-teal-500 bg-teal-950/30' : error ? 'border-red-500 bg-red-950/20' : 'border-slate-600 bg-slate-900/30 hover:border-slate-500'
+            }`}
         >
           <svg className="w-12 h-12 mx-auto text-slate-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -365,8 +362,8 @@ function CreateInvoiceContent() {
         idr_amount: parseFloat(step1Data.idrAmount),
         due_date: step1Data.dueDate,
         funding_duration_days: parseInt(step1Data.fundingDuration),
-        priority_ratio: parseFloat(step1Data.priorityRatio) / 100,
-        catalyst_ratio: parseFloat(step1Data.catalystRatio) / 100,
+        priority_ratio: parseFloat(step1Data.priorityRatio),
+        catalyst_ratio: parseFloat(step1Data.catalystRatio),
         priority_interest_rate: parseFloat(step1Data.priorityInterestRate),
         catalyst_interest_rate: parseFloat(step1Data.catalystInterestRate),
         is_repeat_buyer: step3Data.isRepeatBuyer,
@@ -387,6 +384,13 @@ function CreateInvoiceContent() {
         }
         if (step2Data.purchaseOrder) {
           await invoiceAPI.uploadDocument(invoiceId, step2Data.purchaseOrder.file, 'purchase_order');
+        }
+
+        // Submit invoice for admin review (changes status from 'draft' to 'pending_review')
+        const submitRes = await invoiceAPI.submitInvoice(invoiceId);
+        if (!submitRes.success) {
+          console.error('Failed to submit invoice for review:', submitRes.error);
+          alert('Invoice berhasil dibuat tetapi gagal disubmit untuk review: ' + (submitRes.error?.message || 'Unknown error'));
         }
 
         setIsSubmitted(true);

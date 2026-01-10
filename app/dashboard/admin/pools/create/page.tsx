@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { adminAPI, PendingInvoice } from '@/lib/api/admin';
-import { invoiceAPI, Invoice } from '@/lib/api/user';
+import { Invoice } from '@/lib/api/user';
 
 function CreatePoolContent() {
   const router = useRouter();
@@ -24,11 +24,17 @@ function CreatePoolContent() {
     const loadApprovedInvoices = async () => {
       setLoading(true);
       try {
-        const res = await invoiceAPI.getMyInvoices(1, 50, 'approved');
+        const res = await adminAPI.getApprovedInvoices(1, 50);
         if (res.success && res.data) {
-          setApprovedInvoices(res.data.invoices || []);
+          const invoices = (res.data.invoices || []).map(inv => ({
+            ...inv,
+            buyer_name: inv.buyer_name,
+            buyer_country: inv.buyer_country,
+            idr_amount: inv.idr_amount,
+          })) as Invoice[];
+          setApprovedInvoices(invoices);
           if (preSelectedInvoiceId) {
-            const found = res.data.invoices?.find((inv) => inv.id === preSelectedInvoiceId);
+            const found = invoices.find((inv) => inv.id === preSelectedInvoiceId);
             if (found) setSelectedInvoice(found);
           }
         }
@@ -170,11 +176,10 @@ function CreatePoolContent() {
                     <button
                       key={invoice.id}
                       onClick={() => setSelectedInvoice(invoice)}
-                      className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                        selectedInvoice?.id === invoice.id
-                          ? 'border-purple-500 bg-purple-500/10'
-                          : 'border-slate-700 bg-slate-900/30 hover:border-slate-600'
-                      }`}
+                      className={`w-full p-4 rounded-lg border-2 text-left transition-all ${selectedInvoice?.id === invoice.id
+                        ? 'border-purple-500 bg-purple-500/10'
+                        : 'border-slate-700 bg-slate-900/30 hover:border-slate-600'
+                        }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-purple-400 font-medium">{invoice.invoice_number}</span>

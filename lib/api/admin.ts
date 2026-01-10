@@ -330,8 +330,22 @@ class AdminAPIExtended extends AdminAPI {
         });
     }
 
+    async getApprovedInvoices(
+        page: number = 1,
+        perPage: number = 50
+    ): Promise<APIResponse<PendingInvoicesResponse>> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            per_page: perPage.toString(),
+            status: 'approved',
+        });
+        return this.request<PendingInvoicesResponse>(`/admin/invoices/approved?${params.toString()}`, {
+            method: 'GET',
+        });
+    }
+
     async createFundingPool(invoiceId: string): Promise<APIResponse<FundingPool>> {
-        return this.request<FundingPool>(`/admin/invoices/${invoiceId}/pool`, {
+        return this.request<FundingPool>(`/invoices/${invoiceId}/pool`, {
             method: 'POST',
         });
     }

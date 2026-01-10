@@ -41,7 +41,8 @@ function PoolListContent() {
     });
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount?: number) => {
+    if (amount === undefined || amount === null) return 'Rp 0';
     return `Rp ${amount.toLocaleString('id-ID')}`;
   };
 
@@ -134,10 +135,10 @@ function PoolListContent() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-700/50">
-                    {pools.map((pool) => {
+                    {pools.map((pool, index) => {
                       const progress = getProgress(pool);
                       return (
-                        <tr key={pool.id} className="hover:bg-slate-800/30 transition-colors">
+                        <tr key={pool.id || `pool-${index}`} className="hover:bg-slate-800/30 transition-colors">
                           <td className="px-6 py-4">
                             <div>
                               <p className="text-purple-400 font-medium">{pool.invoice?.invoice_number || '-'}</p>
