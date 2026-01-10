@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { adminAPI, MitraApplicationDetail } from '@/lib/api/admin';
 
 type DocumentItem = {
@@ -27,9 +28,8 @@ const statusStyles: Record<string, { label: string; className: string }> = {
   }
 };
 
-export default function VerifikasiPengajuanDetail() {
+export default function MitraApplicationDetailPage() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
   const applicationId = params?.id;
 
   const [application, setApplication] = useState<MitraApplicationDetail | null>(null);
@@ -143,32 +143,36 @@ export default function VerifikasiPengajuanDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
-      </div>
+      <DashboardLayout role="admin">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (error || !application) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center px-4">
-        <div className="text-center">
-          <p className="text-red-400 mb-4">{error || 'Aplikasi tidak ditemukan'}</p>
-          <Link href="/admin/dashboard-verifikasi" className="text-cyan-400 font-semibold hover:text-cyan-300">
-            Kembali ke Dashboard
-          </Link>
+      <DashboardLayout role="admin">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <p className="text-red-400 mb-4">{error || 'Aplikasi tidak ditemukan'}</p>
+            <Link href="/dashboard/admin/mitra" className="text-cyan-400 font-semibold hover:text-cyan-300">
+              Kembali ke Dashboard
+            </Link>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-8 px-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <DashboardLayout role="admin">
+      <div className="space-y-6">
         {/* Breadcrumb */}
         <nav className="text-sm text-slate-400">
-          <Link href="/admin/dashboard-verifikasi" className="text-cyan-400 hover:text-cyan-300">
-            Dashboard Verifikasi
+          <Link href="/dashboard/admin/mitra" className="text-cyan-400 hover:text-cyan-300">
+            Verifikasi Mitra
           </Link>{' '}
           / <span className="text-slate-500">{application.company_name}</span>
         </nav>
@@ -293,21 +297,58 @@ export default function VerifikasiPengajuanDetail() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-100">Dokumen</h2>
-                  <p className="text-sm text-slate-400">Klik dokumen untuk melihat pratinjau</p>
+                  <p className="text-sm text-slate-400">Pilih dokumen untuk melihat pratinjau di panel kanan</p>
                 </div>
                 <span className="text-xs text-slate-500">
                   {documents.filter(d => d.url).length}/{documents.length} terupload
                 </span>
               </div>
 
+              {/* Document Selector Tabs */}
+              <div className="flex flex-wrap gap-2">
+                {documents.map((doc) => {
+                  const isActive = selectedDocUrl === doc.url && doc.url;
+                  const hasDoc = !!doc.url;
+                  
+                  return (
+                    <button
+                      key={`tab-${doc.id}`}
+                      onClick={() => doc.url && setSelectedDocUrl(doc.url)}
+                      disabled={!hasDoc}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                        isActive
+                          ? 'bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300 shadow-lg shadow-cyan-500/10'
+                          : hasDoc
+                            ? 'bg-slate-800/60 border border-slate-700 text-slate-300 hover:border-cyan-500/50 hover:bg-slate-800'
+                            : 'bg-slate-900/50 border border-slate-800 text-slate-500 cursor-not-allowed opacity-50'
+                      }`}
+                    >
+                      {hasDoc ? (
+                        <svg className={`w-4 h-4 ${isActive ? 'text-cyan-400' : 'text-emerald-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      )}
+                      {doc.id === 'nib' ? 'NIB' : doc.id === 'akta' ? 'Akta Pendirian' : 'KTP Direktur'}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Document Details List */}
               <div className="space-y-3">
                 {documents.map((doc) => (
                   <div
                     key={doc.id}
                     className={`border rounded-xl p-4 transition-all cursor-pointer ${
                       selectedDocUrl === doc.url && doc.url
-                        ? 'border-cyan-500/50 bg-cyan-500/5'
-                        : 'border-slate-800 bg-slate-950/40 hover:border-slate-700'
+                        ? 'border-cyan-500/50 bg-cyan-500/10 ring-1 ring-cyan-500/30'
+                        : doc.url 
+                          ? 'border-slate-800 bg-slate-950/40 hover:border-slate-700 hover:bg-slate-900/60'
+                          : 'border-slate-800/50 bg-slate-950/20 opacity-60'
                     }`}
                     onClick={() => doc.url && setSelectedDocUrl(doc.url)}
                   >
@@ -386,14 +427,48 @@ export default function VerifikasiPengajuanDetail() {
           </section>
 
           {/* Right Column - Document Preview */}
-          <section className="space-y-4">
+          <section className="space-y-4 lg:sticky lg:top-6">
             <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 h-full flex flex-col min-h-[600px]">
-              <div>
-                <p className="text-sm text-slate-400">Preview Dokumen</p>
-                <h2 className="text-lg font-semibold text-slate-100">
-                  {selectedDocUrl ? documents.find(d => d.url === selectedDocUrl)?.name || 'Dokumen' : 'Pilih dokumen'}
-                </h2>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-400">Preview Dokumen</p>
+                  <h2 className="text-lg font-semibold text-slate-100">
+                    {selectedDocUrl ? documents.find(d => d.url === selectedDocUrl)?.name || 'Dokumen' : 'Pilih dokumen'}
+                  </h2>
+                </div>
+                {selectedDocUrl && (
+                  <a
+                    href={selectedDocUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-all"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    Buka Tab Baru
+                  </a>
+                )}
               </div>
+
+              {/* Document Navigation Pills */}
+              {documents.some(d => d.url) && (
+                <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+                  {documents.filter(d => d.url).map((doc) => (
+                    <button
+                      key={`preview-tab-${doc.id}`}
+                      onClick={() => doc.url && setSelectedDocUrl(doc.url)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                        selectedDocUrl === doc.url
+                          ? 'bg-cyan-500 text-white'
+                          : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                      }`}
+                    >
+                      {doc.id === 'nib' ? 'NIB' : doc.id === 'akta' ? 'Akta Pendirian' : 'KTP Direktur'}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <div className="mt-4 flex-1 border border-slate-800 rounded-xl bg-slate-950/50 overflow-hidden">
                 {selectedDocUrl ? (
@@ -449,6 +524,6 @@ export default function VerifikasiPengajuanDetail() {
           </div>
         </div>
       )}
-    </div>
+    </DashboardLayout>
   );
 }

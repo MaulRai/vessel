@@ -1,234 +1,257 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
-import { adminAPI } from '@/lib/api/admin';
+import { adminAPI, MitraApplicationItem } from '@/lib/api/admin';
 
-interface MitraApplicationItem {
-    id: string;
-    user_id: string;
-    company_name: string;
-    company_type: string;
-    status: string;
-    created_at: string;
+interface ApplicationRow {
+  id: string;
+  companyName: string;
+  companyType: string;
+  email: string;
+  username: string;
+  annualRevenue: string;
+  submittedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+  docsComplete: boolean;
 }
 
-interface Toast {
-    message: string;
-    type: 'success' | 'error' | 'info';
-}
+const statusStyles: Record<string, { label: string; className: string }> = {
+  pending: {
+    label: 'Menunggu Verifikasi',
+    className: 'bg-amber-500/15 text-amber-300 border border-amber-500/40'
+  },
+  approved: {
+    label: 'Disetujui',
+    className: 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/40'
+  },
+  rejected: {
+    label: 'Ditolak',
+    className: 'bg-rose-500/15 text-rose-300 border border-rose-500/40'
+  }
+};
 
 export default function AdminMitraPage() {
-    const [applications, setApplications] = useState<MitraApplicationItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [processingId, setProcessingId] = useState<string | null>(null);
-    const [toast, setToast] = useState<Toast | null>(null);
-    const [confirmModal, setConfirmModal] = useState<{ id: string; action: 'approve' | 'reject' } | null>(null);
-    const [rejectReason, setRejectReason] = useState('');
+  const [applications, setApplications] = useState<ApplicationRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const perPage = 10;
 
-    useEffect(() => {
-        fetchApplications();
-    }, []);
-
-    useEffect(() => {
-        if (toast) {
-            const timer = setTimeout(() => setToast(null), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [toast]);
-
+  useEffect(() => {
     const fetchApplications = async () => {
-        try {
-            const res = await adminAPI.listMitraApplications();
-            if (res.success && res.data) {
-                setApplications(res.data.applications || []);
-            } else {
-                setApplications([]);
-            }
-        } catch (error) {
-            console.error('Failed to fetch applications', error);
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await adminAPI.listPendingMitraApplications(page, perPage);
+        
+        // Handle successful response
+        if (res.success) {
+          const applications = res.data?.applications || [];
+          const mapped: ApplicationRow[] = applications.map((app: MitraApplicationItem) => ({
+            id: app.id,
+            companyName: app.company_name,
+            companyType: app.company_type,
+            email: app.user?.email || '-',
+            username: app.user?.username || '-',
+            annualRevenue: app.annual_revenue,
+            submittedAt: new Date(app.created_at).toLocaleDateString('id-ID', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            }),
+            status: app.status,
+            docsComplete: !!(app.nib_document_url && app.akta_pendirian_url && app.ktp_direktur_url)
+          }));
+          setApplications(mapped);
+          setTotal(res.data?.total || 0);
+        } else {
+          // Check if it's a "no data" scenario vs actual error
+          const errorMsg = res.error?.message || '';
+          if (errorMsg.toLowerCase().includes('not found') || errorMsg.toLowerCase().includes('no ')) {
+            // No applications found - this is not an error
             setApplications([]);
-        } finally {
-            setLoading(false);
+            setTotal(0);
+          } else {
+            setError(errorMsg || 'Gagal memuat data');
+          }
         }
+      } catch (err) {
+        console.error('Error fetching applications:', err);
+        setError('Terjadi kesalahan saat memuat data');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const handleApprove = async () => {
-        if (!confirmModal) return;
-        setProcessingId(confirmModal.id);
-        try {
-            const res = await adminAPI.approveMitra(confirmModal.id);
-            if (res.success) {
-                setToast({ message: 'Application approved successfully!', type: 'success' });
-                fetchApplications();
-            } else {
-                setToast({ message: res.error?.message || 'Failed to approve', type: 'error' });
-            }
-        } catch (error) {
-            setToast({ message: 'Error processing request', type: 'error' });
-        } finally {
-            setProcessingId(null);
-            setConfirmModal(null);
-        }
-    };
+    fetchApplications();
+  }, [page]);
 
-    const handleReject = async () => {
-        if (!confirmModal || !rejectReason.trim()) {
-            setToast({ message: 'Rejection reason is required', type: 'error' });
-            return;
-        }
-        setProcessingId(confirmModal.id);
-        try {
-            const res = await adminAPI.rejectMitra(confirmModal.id, rejectReason);
-            if (res.success) {
-                setToast({ message: 'Application rejected', type: 'success' });
-                fetchApplications();
-            } else {
-                setToast({ message: res.error?.message || 'Failed to reject', type: 'error' });
-            }
-        } catch (error) {
-            setToast({ message: 'Error processing request', type: 'error' });
-        } finally {
-            setProcessingId(null);
-            setConfirmModal(null);
-            setRejectReason('');
-        }
-    };
+  const totalPages = Math.ceil(total / perPage);
+  const pendingCount = applications.filter(a => a.status === 'pending').length;
+  const incompleteDocsCount = applications.filter(a => !a.docsComplete).length;
 
+  if (loading) {
     return (
-        <DashboardLayout role="admin">
-            <div className="space-y-6">
-                {/* Toast Notification */}
-                {toast && (
-                    <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg border backdrop-blur-sm transition-all animate-in fade-in slide-in-from-top-2 ${toast.type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-400' :
-                            toast.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
-                                'bg-blue-500/20 border-blue-500/30 text-blue-400'
-                        }`}>
-                        <div className="flex items-center space-x-2">
-                            {toast.type === 'success' && (
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                            )}
-                            {toast.type === 'error' && (
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            )}
-                            <span className="font-medium">{toast.message}</span>
-                        </div>
-                    </div>
-                )}
-
-                {/* Confirmation Modal */}
-                {confirmModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-md shadow-2xl">
-                            <h3 className="text-lg font-semibold text-white mb-2">
-                                {confirmModal.action === 'approve' ? 'Approve Application' : 'Reject Application'}
-                            </h3>
-                            <p className="text-slate-400 text-sm mb-4">
-                                {confirmModal.action === 'approve'
-                                    ? 'Are you sure you want to approve this mitra application? The user will be granted mitra privileges.'
-                                    : 'Please provide a reason for rejecting this application.'}
-                            </p>
-                            {confirmModal.action === 'reject' && (
-                                <textarea
-                                    value={rejectReason}
-                                    onChange={(e) => setRejectReason(e.target.value)}
-                                    placeholder="Enter rejection reason..."
-                                    className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all mb-4"
-                                    rows={3}
-                                />
-                            )}
-                            <div className="flex justify-end space-x-3">
-                                <button
-                                    onClick={() => { setConfirmModal(null); setRejectReason(''); }}
-                                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-sm font-medium transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={confirmModal.action === 'approve' ? handleApprove : handleReject}
-                                    disabled={processingId !== null}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${confirmModal.action === 'approve'
-                                            ? 'bg-green-500 hover:bg-green-400 text-white'
-                                            : 'bg-red-500 hover:bg-red-400 text-white'
-                                        }`}
-                                >
-                                    {processingId ? 'Processing...' : confirmModal.action === 'approve' ? 'Approve' : 'Reject'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                <div>
-                    <h1 className="text-2xl font-bold text-white">Review Mitra Applications</h1>
-                    <p className="text-slate-400 mt-1">Approve or reject pending mitra applications</p>
-                </div>
-
-                <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-                    {loading ? (
-                        <div className="p-8 text-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-400 mx-auto"></div>
-                        </div>
-                    ) : !applications || applications.length === 0 ? (
-                        <div className="p-8 text-center text-slate-400">
-                            No pending applications found.
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="text-left text-slate-400 text-sm border-b border-slate-700/50 bg-slate-800/50">
-                                        <th className="px-6 py-3 font-medium">Company</th>
-                                        <th className="px-6 py-3 font-medium">Type</th>
-                                        <th className="px-6 py-3 font-medium">Applied At</th>
-                                        <th className="px-6 py-3 font-medium">Status</th>
-                                        <th className="px-6 py-3 font-medium text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-700/50">
-                                    {applications.map((app) => (
-                                        <tr key={app.id} className="hover:bg-slate-700/30 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <p className="text-white font-medium">{app.company_name}</p>
-                                                <p className="text-xs text-slate-400">ID: {app.id.substring(0, 8)}...</p>
-                                            </td>
-                                            <td className="px-6 py-4 text-slate-300">{app.company_type}</td>
-                                            <td className="px-6 py-4 text-slate-400">
-                                                {new Date(app.created_at).toLocaleDateString()}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="px-2 py-1 bg-yellow-500/10 text-yellow-400 rounded text-xs font-medium border border-yellow-500/20">
-                                                    {app.status}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-right space-x-2">
-                                                <button
-                                                    onClick={() => setConfirmModal({ id: app.id, action: 'approve' })}
-                                                    disabled={processingId === app.id}
-                                                    className="px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg text-sm font-medium transition-colors border border-green-500/30"
-                                                >
-                                                    Approve
-                                                </button>
-                                                <button
-                                                    onClick={() => setConfirmModal({ id: app.id, action: 'reject' })}
-                                                    disabled={processingId === app.id}
-                                                    className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition-colors border border-red-500/30"
-                                                >
-                                                    Reject
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </DashboardLayout>
+      <DashboardLayout role="admin">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
+        </div>
+      </DashboardLayout>
     );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="admin">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <p className="text-red-400 mb-4">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-cyan-600 text-white rounded-lg"
+            >
+              Coba Lagi
+            </button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  return (
+    <DashboardLayout role="admin">
+      <div className="space-y-8">
+        <header className="space-y-2">
+          <h1 className="text-3xl font-bold text-slate-50">Verifikasi Mitra</h1>
+          <p className="text-slate-400 max-w-2xl">
+            Tinjau pengajuan profil bisnis mitra, verifikasi dokumen, dan setujui atau tolak aplikasi.
+          </p>
+        </header>
+
+        {/* Stats Cards */}
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <article className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+            <p className="text-sm text-slate-400">Menunggu Verifikasi</p>
+            <p className="text-3xl font-bold text-amber-400 mt-2">{pendingCount}</p>
+          </article>
+          <article className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+            <p className="text-sm text-slate-400">Total Pengajuan</p>
+            <p className="text-3xl font-bold text-slate-50 mt-2">{total}</p>
+          </article>
+          <article className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+            <p className="text-sm text-slate-400">Dokumen Belum Lengkap</p>
+            <p className="text-3xl font-bold text-rose-400 mt-2">{incompleteDocsCount}</p>
+          </article>
+        </section>
+
+        {/* Applications Table */}
+        <section className="bg-slate-900/40 border border-slate-800 rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-100">Daftar Pengajuan Profil Bisnis</h2>
+              <p className="text-sm text-slate-400">Klik detail untuk memverifikasi dokumen dan data perusahaan</p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-800">
+              <thead className="bg-slate-900/70">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Perusahaan</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Tipe</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Pendapatan Tahunan</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Dokumen</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {applications.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                      Tidak ada pengajuan yang perlu diverifikasi
+                    </td>
+                  </tr>
+                ) : (
+                  applications.map((app) => (
+                    <tr key={app.id} className="hover:bg-slate-900/30">
+                      <td className="px-6 py-4">
+                        <p className="text-slate-100 font-semibold">{app.companyName}</p>
+                        <p className="text-sm text-slate-400">{app.email}</p>
+                        <p className="text-xs text-slate-500">Masuk pada {app.submittedAt}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-1 bg-slate-700/50 text-slate-200 rounded text-sm font-medium">
+                          {app.companyType}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-slate-200">{app.annualRevenue}</td>
+                      <td className="px-6 py-4">
+                        {app.docsComplete ? (
+                          <span className="inline-flex items-center gap-1 text-emerald-400 text-sm">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Lengkap
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-rose-400 text-sm">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            Belum Lengkap
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[app.status]?.className || statusStyles.pending.className}`}>
+                          {statusStyles[app.status]?.label || app.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Link
+                          href={`/dashboard/admin/mitra/${app.id}`}
+                          className="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 text-white text-sm font-semibold hover:from-cyan-500 hover:to-teal-500"
+                        >
+                          Lihat Detail
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="px-6 py-4 border-t border-slate-800 flex items-center justify-between">
+              <p className="text-sm text-slate-400">
+                Halaman {page} dari {totalPages} ({total} total)
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-3 py-1.5 text-sm rounded-lg bg-slate-800 text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Sebelumnya
+                </button>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="px-3 py-1.5 text-sm rounded-lg bg-slate-800 text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Selanjutnya
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
+    </DashboardLayout>
+  );
 }
