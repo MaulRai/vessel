@@ -1,12 +1,32 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
+import { riskQuestionnaireAPI, RiskQuestionnaireStatusResponse } from '@/lib/api/user';
 import Link from 'next/link';
 
 function InvestorDashboardContent() {
   const { user } = useAuth();
+  const [riskStatus, setRiskStatus] = useState<RiskQuestionnaireStatusResponse | null>(null);
+  const [loadingRisk, setLoadingRisk] = useState(true);
+
+  useEffect(() => {
+    const loadRiskStatus = async () => {
+      try {
+        const res = await riskQuestionnaireAPI.getStatus();
+        if (res.success && res.data) {
+          setRiskStatus(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to load risk status', err);
+      } finally {
+        setLoadingRisk(false);
+      }
+    };
+    loadRiskStatus();
+  }, []);
 
   const stats = [
     {
@@ -203,24 +223,65 @@ function InvestorDashboardContent() {
             {/* Risk Status */}
             <div className="p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl backdrop-blur-sm">
               <h2 className="text-lg font-semibold text-white mb-4">Status Risiko</h2>
-              <div className="flex items-center space-x-3 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                <svg className="w-6 h-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <div>
-                  <p className="text-sm font-medium text-yellow-400">Catalyst Terkunci</p>
-                  <p className="text-xs text-slate-400">Lengkapi assessment</p>
+              {loadingRisk ? (
+                <div className="flex items-center justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-cyan-400"></div>
                 </div>
-              </div>
-              <Link
-                href="/dashboard/investor/risk-assessment"
-                className="mt-3 w-full flex items-center justify-center space-x-2 px-4 py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-medium text-slate-200 transition-all"
-              >
-                <span>Mulai Assessment</span>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
+              ) : riskStatus?.completed ? (
+                <>
+                  <div className={`flex items-center space-x-3 p-3 rounded-lg ${
+                    riskStatus.catalyst_unlocked
+                      ? 'bg-green-500/10 border border-green-500/20'
+                      : 'bg-cyan-500/10 border border-cyan-500/20'
+                  }`}>
+                    <svg className={`w-6 h-6 ${riskStatus.catalyst_unlocked ? 'text-green-400' : 'text-cyan-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      {riskStatus.catalyst_unlocked ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      )}
+                    </svg>
+                    <div>
+                      <p className={`text-sm font-medium ${riskStatus.catalyst_unlocked ? 'text-green-400' : 'text-cyan-400'}`}>
+                        {riskStatus.catalyst_unlocked ? 'Semua Tranche Terbuka' : 'Priority Tranche Aktif'}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {riskStatus.catalyst_unlocked ? 'Priority & Catalyst' : 'Catalyst Terkunci'}
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/dashboard/investor/risk-assessment"
+                    className="mt-3 w-full flex items-center justify-center space-x-2 px-4 py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-medium text-slate-200 transition-all"
+                  >
+                    <span>Lihat Detail</span>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center space-x-3 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                    <svg className="w-6 h-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-medium text-yellow-400">Catalyst Terkunci</p>
+                      <p className="text-xs text-slate-400">Lengkapi assessment</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/dashboard/investor/risk-assessment"
+                    className="mt-3 w-full flex items-center justify-center space-x-2 px-4 py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-medium text-slate-200 transition-all"
+                  >
+                    <span>Mulai Assessment</span>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

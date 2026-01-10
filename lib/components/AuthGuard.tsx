@@ -38,6 +38,8 @@ export function AuthGuard({
           router.push('/dashboard/investor');
         } else if (user.role === 'mitra') {
           router.push('/dashboard/mitra');
+        } else if (user.role === 'admin') {
+          router.push('/dashboard/admin');
         } else {
           router.push('/');
         }

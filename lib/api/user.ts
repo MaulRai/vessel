@@ -226,4 +226,113 @@ export interface MitraApplicationResponse {
     is_complete: boolean;
 }
 
+// Risk Questionnaire Types
+export interface RiskQuestion {
+    id: number;
+    question: string;
+    options: { value: number; label: string }[];
+    required_for_catalyst?: boolean;
+    required_answer?: number;
+}
+
+export interface RiskQuestionsResponse {
+    questions: RiskQuestion[];
+    catalyst_unlock_rules: {
+        description: string;
+        required_q1: number;
+        required_q2: number;
+        required_q3: number;
+    };
+}
+
+export interface RiskQuestionnaireRequest {
+    q1_answer: number;
+    q2_answer: number;
+    q3_answer: number;
+}
+
+export interface RiskQuestionnaireStatusResponse {
+    completed: boolean;
+    catalyst_unlocked: boolean;
+    completed_at?: string;
+    message: string;
+}
+
+class RiskQuestionnaireAPI {
+    private baseURL: string;
+
+    constructor(baseURL: string) {
+        this.baseURL = baseURL;
+    }
+
+    private getAuthHeaders(): HeadersInit {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('vessel_access_token') : null;
+        return {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        };
+    }
+
+    private async request<T>(
+        endpoint: string,
+        options: RequestInit = {}
+    ): Promise<APIResponse<T>> {
+        const url = `${this.baseURL}${endpoint}`;
+
+        const config: RequestInit = {
+            ...options,
+            headers: {
+                ...this.getAuthHeaders(),
+                ...options.headers,
+            },
+        };
+
+        try {
+            const response = await fetch(url, config);
+            const data = await response.json();
+
+            if (!response.ok) {
+                const errorMessage = typeof data.error === 'string' ? data.error : (data.error?.message || 'Terjadi kesalahan');
+                return {
+                    success: false,
+                    error: {
+                        code: 'API_ERROR',
+                        message: errorMessage,
+                    },
+                };
+            }
+
+            return data;
+        } catch (error) {
+            return {
+                success: false,
+                error: {
+                    code: 'NETWORK_ERROR',
+                    message: 'Gagal terhubung ke server',
+                },
+            };
+        }
+    }
+
+    async getQuestions(): Promise<APIResponse<RiskQuestionsResponse>> {
+        return this.request<RiskQuestionsResponse>('/risk-questionnaire/questions', {
+            method: 'GET',
+        });
+    }
+
+    async submit(data: RiskQuestionnaireRequest): Promise<APIResponse<RiskQuestionnaireStatusResponse>> {
+        return this.request<RiskQuestionnaireStatusResponse>('/risk-questionnaire', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async getStatus(): Promise<APIResponse<RiskQuestionnaireStatusResponse>> {
+        return this.request<RiskQuestionnaireStatusResponse>('/risk-questionnaire/status', {
+            method: 'GET',
+        });
+    }
+}
+
 export const userAPI = new UserAPI(API_BASE_URL);
+export const riskQuestionnaireAPI = new RiskQuestionnaireAPI(API_BASE_URL);
