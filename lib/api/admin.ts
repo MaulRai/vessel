@@ -116,6 +116,77 @@ class AdminAPI {
             body: JSON.stringify(data),
         });
     }
+
+    // Mitra Application Management
+    async listPendingMitraApplications(
+        page: number = 1,
+        perPage: number = 10
+    ): Promise<APIResponse<MitraApplicationsListResponse>> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            per_page: perPage.toString(),
+        });
+        return this.request<MitraApplicationsListResponse>(`/admin/mitra/pending?${params.toString()}`, {
+            method: 'GET',
+        });
+    }
+
+    async getMitraApplicationDetail(id: string): Promise<APIResponse<MitraApplicationDetail>> {
+        return this.request<MitraApplicationDetail>(`/admin/mitra/${id}`, {
+            method: 'GET',
+        });
+    }
+
+    async approveMitraApplication(id: string): Promise<APIResponse<{ message: string }>> {
+        return this.request<{ message: string }>(`/admin/mitra/${id}/approve`, {
+            method: 'POST',
+        });
+    }
+
+    async rejectMitraApplication(id: string, reason: string): Promise<APIResponse<{ message: string }>> {
+        return this.request<{ message: string }>(`/admin/mitra/${id}/reject`, {
+            method: 'POST',
+            body: JSON.stringify({ reason }),
+        });
+    }
+}
+
+// Mitra Application Types
+export interface MitraApplicationItem {
+    id: string;
+    user_id: string;
+    company_name: string;
+    company_type: 'PT' | 'CV' | 'UD';
+    npwp: string;
+    annual_revenue: string;
+    address: string;
+    business_description: string;
+    website_url?: string;
+    year_founded: number;
+    key_products: string;
+    export_markets: string;
+    nib_document_url?: string;
+    akta_pendirian_url?: string;
+    ktp_direktur_url?: string;
+    status: 'pending' | 'approved' | 'rejected';
+    created_at: string;
+    user?: {
+        id: string;
+        email: string;
+        username: string;
+    };
+}
+
+export interface MitraApplicationsListResponse {
+    applications: MitraApplicationItem[];
+    total: number;
+    page: number;
+    per_page: number;
+}
+
+export interface MitraApplicationDetail extends MitraApplicationItem {
+    updated_at?: string;
+    rejection_reason?: string;
 }
 
 export const adminAPI = new AdminAPI(API_BASE_URL);
