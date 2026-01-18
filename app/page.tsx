@@ -2,10 +2,105 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion, useInView, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTime, useTransform } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
+
+const ease = [0.16, 1, 0.3, 1];
+
+const useReveal = (delay = 0, distance = 12) => {
+  const prefersReduced = useReducedMotion();
+  const ref = useRef<HTMLDivElement | null>(null);
+  const inView = useInView(ref, { once: true, margin: '-10% 0px' });
+
+  const animate = prefersReduced
+    ? { opacity: 1, y: 0 }
+    : inView
+    ? { opacity: 1, y: 0 }
+    : { opacity: 0, y: distance };
+
+  const transition = { duration: 0.5, ease, delay };
+
+  return { ref, animate, transition };
+};
+
+function CountUp({ target, start }: { target: number; start: boolean }) {
+  const prefersReduced = useReducedMotion();
+  const motionVal = useMotionValue(0);
+  const spring = useSpring(motionVal, { duration: 1, bounce: 0 });
+  const rounded = useTransform(spring, (v) => Math.round(v));
+
+  useEffect(() => {
+    if (!start) {
+      motionVal.set(0);
+      return;
+    }
+    if (prefersReduced) {
+      motionVal.set(target);
+    } else {
+      motionVal.set(0);
+      // useSpring animates toward the latest set value
+      requestAnimationFrame(() => motionVal.set(target));
+    }
+  }, [start, target, motionVal, prefersReduced]);
+
+  return <motion.span>{rounded}</motion.span>;
+}
 
 export default function LandingPage() {
   const { isAuthenticated, user } = useAuth();
+  const prefersReduced = useReducedMotion();
+  const heroRef = useRef<HTMLDivElement | null>(null);
+  const featuresRef = useRef<HTMLDivElement | null>(null);
+  const statsRef = useRef<HTMLDivElement | null>(null);
+  const howRef = useRef<HTMLDivElement | null>(null);
+  const securityRef = useRef<HTMLDivElement | null>(null);
+  const ctaRef = useRef<HTMLDivElement | null>(null);
+  const [securityActive, setSecurityActive] = useState(false);
+  const [activeFeature, setActiveFeature] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  const { scrollYProgress: heroProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const time = useTime();
+  const heroHueA = useTransform(time, (t) => 185 + Math.sin(t / 450) * 14);
+  const heroHueB = useTransform(time, (t) => 195 + Math.cos(t / 520) * 14);
+  const heroParallax = useTransform(heroProgress, [0, 1], [0, -80]);
+
+  const { scrollYProgress: howProgress } = useScroll({ target: howRef, offset: ['start 80%', 'end 20%'] });
+
+  const { scrollYProgress: featuresProgress } = useScroll({ target: featuresRef, offset: ['start end', 'end start'] });
+  useMotionValueEvent(featuresProgress, 'change', (v) => {
+    if (prefersReduced || !isMobile) return;
+    setActiveFeature(v > 0.5 ? 1 : 0);
+  });
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const statsInView = useInView(statsRef, { once: true, margin: '-10% 0px' });
+  const securityInView = useInView(securityRef, { margin: '-20% 0px' });
+  const [activeStep, setActiveStep] = useState(0);
+
+  useEffect(() => {
+    setSecurityActive(securityInView);
+  }, [securityInView]);
+
+  const heroPill = useReveal(0);
+  const heroTitle = useReveal(0.05);
+  const heroSub = useReveal(0.1);
+  const heroCta = useReveal(0.15);
+  const stats = useMemo(() => (
+    [
+      { value: 3, suffix: 'M+', label: 'Total Volume', prefix: '$' },
+      { value: 500, suffix: '+', label: 'Eksportir' },
+      { value: 12, suffix: '%', label: 'Rerata Imbal Hasil' },
+      { value: 100, suffix: '%', label: 'On-Chain' },
+    ]
+  ), []);
 
   const getDashboardLink = () => {
     if (!user) return '/login';
@@ -70,29 +165,59 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <section className="relative z-10 min-h-screen flex items-center pt-20 px-4 sm:px-6 lg:px-8">
+      <motion.section
+        ref={heroRef}
+        className="relative z-10 min-h-screen flex items-center pt-20 px-4 sm:px-6 lg:px-8"
+        style={{ opacity: securityActive ? 0.95 : 1 }}
+      >
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-center lg:text-left">
-              <div className="inline-flex items-center space-x-2 px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-full mb-8 backdrop-blur-sm shadow-xl shadow-cyan-900/10 hover:border-cyan-500/30 transition-colors">
+              <motion.div
+                {...heroPill}
+                className="inline-flex items-center space-x-2 px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-full mb-8 backdrop-blur-sm shadow-xl shadow-cyan-900/10 hover:border-cyan-500/30 transition-colors"
+              >
                 <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
                 <span className="text-sm text-slate-300 font-medium">Powered by Lisk Blockchain</span>
-              </div>
+              </motion.div>
 
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight tracking-tight">
-                <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent drop-shadow-sm">
+              <motion.h1
+                ref={heroTitle.ref}
+                initial={{ opacity: 0, y: 12 }}
+                animate={heroTitle.animate}
+                transition={heroTitle.transition}
+                className="text-3xl md:text-6xl font-bold mb-6 leading-tight tracking-tight"
+              >
+                <motion.span
+                  className="bg-clip-text text-transparent drop-shadow-sm bg-gradient-to-r from-cyan-400 to-teal-400"
+                  style={{
+                    backgroundImage: useMotionTemplate`linear-gradient(90deg, hsl(${heroHueA} 80% 60%), hsl(${heroHueB} 75% 58%), hsl(${heroHueA} 70% 55%))`,
+                  }}
+                >
                   Pembiayaan Ekspor
-                </span>
+                </motion.span>
                 <br />
                 <span className="text-white">Terdesentralisasi</span>
-              </h1>
+              </motion.h1>
 
-              <p className="text-lg md:text-xl text-slate-400 max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed border-l-0 lg:border-l-2 border-slate-800 pl-0 lg:pl-6 text-center lg:text-left">
+              <motion.p
+                ref={heroSub.ref}
+                initial={{ opacity: 0, y: 12 }}
+                animate={heroSub.animate}
+                transition={heroSub.transition}
+                className="text-md md:text-lg text-slate-400 max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed border-l-0 lg:border-l-2 border-slate-800 pl-0 lg:pl-6 text-center lg:text-left"
+              >
                 Platform Web3 pertama di Indonesia yang menghubungkan eksportir dengan investor global.
                 Transparansi on-chain penuh, keamanan smart contract, dan imbal hasil kompetitif.
-              </p>
+              </motion.p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-16">
+              <motion.div
+                ref={heroCta.ref}
+                initial={{ opacity: 0, y: 12 }}
+                animate={heroCta.animate}
+                transition={heroCta.transition}
+                className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8"
+              >
                 <Link
                   href="/register"
                   className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-bold text-lg transition-all shadow-xl shadow-cyan-500/20 ring-1 ring-white/20 flex items-center justify-center space-x-2"
@@ -108,28 +233,37 @@ export default function LandingPage() {
                 >
                   Pelajari Lebih Lanjut
                 </a>
-              </div>
+              </motion.div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-slate-800/50">
-                {[
-                  { value: '$3M+', label: 'Total Volume' },
-                  { value: '500+', label: 'Eksportir' },
-                  { value: '12%', label: 'Rerata Imbal Hasil' },
-                  { value: '100%', label: 'On-Chain' },
-                ].map((stat, i) => (
-                  <div key={i}>
-                    <div className="text-2xl md:text-3xl font-bold text-white mb-1">
-                      {stat.value}
+              <motion.div
+                ref={statsRef}
+                initial={{ opacity: 0, y: 12 }}
+                animate={statsInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, ease }}
+                className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-slate-800/50"
+              >
+                {stats.map((stat, i) => (
+                  <div key={stat.label} className="space-y-1">
+                    <div className="text-2xl md:text-3xl font-bold text-white">
+                      {stat.prefix || ''}<CountUp target={stat.value} start={statsInView} />{stat.suffix}
                     </div>
                     <div className="text-sm text-slate-500 font-medium uppercase tracking-wider">{stat.label}</div>
                   </div>
                 ))}
-              </div>
+              </motion.div>
             </div>
 
             <div className="relative hidden lg:block h-full min-h-[600px]">
-              <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 to-teal-500/20 rounded-full blur-[100px] animate-pulse" />
-              <div className="relative bg-slate-900/80 border border-slate-800/50 backdrop-blur-md rounded-3xl p-8 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500 max-w-md mx-auto mt-12">
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 to-teal-500/20 rounded-full blur-[100px]"
+                style={{ y: prefersReduced ? 0 : heroParallax }}
+              />
+              <motion.div
+                initial={{ opacity: 0, y: 24, rotate: 3 }}
+                animate={{ opacity: 1, y: 0, rotate: 0 }}
+                transition={{ duration: 0.6, ease }}
+                className="relative bg-slate-900/80 border border-slate-800/50 backdrop-blur-md rounded-3xl p-8 shadow-2xl max-w-md mx-auto mt-12"
+              >
                 <div className="flex items-center justify-between mb-8">
                   <div>
                     <div className="text-xs text-slate-400 uppercase tracking-widest mb-1">Current Yield</div>
@@ -143,7 +277,12 @@ export default function LandingPage() {
                 </div>
                 <div className="space-y-4">
                   <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full w-3/4 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full" />
+                    <motion.div
+                      initial={{ width: '0%' }}
+                      animate={{ width: '75%' }}
+                      transition={{ duration: 0.8, ease }}
+                      className="h-full bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full"
+                    />
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-400">Pool Filled</span>
@@ -151,138 +290,171 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div className="mt-8 grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, ease }}
+                    className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50"
+                  >
                     <div className="text-xs text-slate-400 mb-1">Risk Rating</div>
                     <div className="text-lg font-bold text-emerald-400">A+ (Low)</div>
-                  </div>
-                  <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, ease, delay: 0.06 }}
+                    className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50"
+                  >
                     <div className="text-xs text-slate-400 mb-1">Term</div>
                     <div className="text-lg font-bold text-white">45 Days</div>
-                  </div>
+                  </motion.div>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section id="features" className="relative z-10 py-32 px-4 sm:px-6 lg:px-8 bg-slate-900/30">
+      <motion.section
+        id="features"
+        ref={featuresRef}
+        className="relative z-10 py-12 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-slate-900/30"
+        style={{ opacity: securityActive ? 0.95 : 1 }}
+      >
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease }}
+            viewport={{ once: true, margin: '-10% 0px' }}
+            className="text-center mb-8 md:sticky md:top-24"
+          >
+            <h2 className="text-3xl md:text-5xl font-bold mb-3">
               Dua Sisi, <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Satu Platform</span>
             </h2>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
               Baik Anda eksportir yang membutuhkan modal kerja maupun investor yang mencari imbal hasil, VESSEL hadir untuk Anda.
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="group relative p-10 bg-gradient-to-br from-slate-800/40 to-slate-900/40 border border-slate-700/50 rounded-3xl backdrop-blur-sm hover:border-cyan-500/40 transition-all duration-500 hover:shadow-2xl hover:shadow-cyan-900/20">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
-              <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-cyan-500/5 border border-cyan-500/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
-                  <Image
-                    src="/assets/landing/investor.png"
-                    alt="Ikon Investor"
-                    width={64}
-                    height={64}
-                    className="w-12 h-12 object-contain"
-                  />
-                </div>
-                <h3 className="text-3xl font-bold mb-4 text-white">Untuk Investor</h3>
-                <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-                  Investasikan pada invoice ekspor yang telah diverifikasi dengan imbal hasil hingga 15% per tahun. Akses langsung ke yield real-world asset (RWA).
-                </p>
-                <ul className="space-y-4 mb-10">
-                  {[
-                    'Pilih tranche sesuai profil risiko Anda',
-                    'Diversifikasi portofolio otomatis',
-                    'Transparansi on-chain real-time',
-                    'Opsi penarikan yang fleksibel',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center space-x-3 text-slate-300">
-                      <div className="w-6 h-6 rounded-full bg-cyan-500/10 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-3.5 h-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="font-medium">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/register"
-                  className="inline-flex items-center space-x-2 text-cyan-400 hover:text-cyan-300 font-bold tracking-wide transition-colors"
+            {[
+              {
+                title: 'Untuk Investor',
+                color: 'cyan',
+                blur: 'from-cyan-500/5',
+                img: '/assets/landing/investor.png',
+                bulletColor: 'cyan',
+                bullets: [
+                  'Pilih tranche sesuai profil risiko Anda',
+                  'Diversifikasi portofolio otomatis',
+                  'Transparansi on-chain real-time',
+                  'Opsi penarikan yang fleksibel',
+                ],
+                cta: 'Mulai Berinvestasi',
+                href: '/register',
+              },
+              {
+                title: 'Untuk Eksportir',
+                color: 'teal',
+                blur: 'from-teal-500/5',
+                img: '/assets/landing/exporter.png',
+                bulletColor: 'teal',
+                bullets: [
+                  'Pencairan dana dalam 48 jam',
+                  'Invoice ditokenisasi sebagai NFT',
+                  'Bunga mulai 8% p.a.',
+                  'Tanpa agunan tambahan',
+                ],
+                cta: 'Ajukan Pendanaan',
+                href: '/register',
+              },
+            ].map((card, idx) => {
+              const active = activeFeature === idx;
+              const dimClass = active ? 'opacity-100 blur-0 scale-[1.03] border-opacity-70' : 'opacity-70 blur-[1px]';
+              return (
+                <motion.div
+                  key={card.title}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, ease, delay: idx * 0.1 }}
+                  viewport={{ once: true, margin: '-10% 0px' }}
+                  className={`group relative p-6 bg-gradient-to-br from-slate-800/40 to-slate-900/40 border border-slate-700/50 rounded-3xl backdrop-blur-sm transition-all duration-500 hover:shadow-2xl ${dimClass} ${card.color === 'cyan' ? 'hover:border-cyan-500/40 hover:shadow-cyan-900/20' : 'hover:border-teal-500/40 hover:shadow-teal-900/20'}`}
+                  onMouseEnter={() => !isMobile && setActiveFeature(idx)}
                 >
-                  <span>Mulai Berinvestasi</span>
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-
-            <div className="group relative p-10 bg-gradient-to-br from-slate-800/40 to-slate-900/40 border border-slate-700/50 rounded-3xl backdrop-blur-sm hover:border-teal-500/40 transition-all duration-500 hover:shadow-2xl hover:shadow-teal-900/20">
-              <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
-              <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-br from-teal-500/20 to-teal-500/5 border border-teal-500/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
-                  <Image
-                    src="/assets/landing/exporter.png"
-                    alt="Ikon Eksportir"
-                    width={64}
-                    height={64}
-                    className="w-12 h-12 object-contain"
-                  />
-                </div>
-                <h3 className="text-3xl font-bold mb-4 text-white">Untuk Eksportir</h3>
-                <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-                  Dapatkan modal kerja cepat dengan menjaminkan invoice ekspor Anda. Persetujuan cepat, bunga kompetitif, tanpa agunan tambahan.
-                </p>
-                <ul className="space-y-4 mb-10">
-                  {[
-                    'Pencairan dana dalam 48 jam',
-                    'Invoice ditokenisasi sebagai NFT',
-                    'Bunga mulai 8% p.a.',
-                    'Tanpa agunan tambahan',
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center space-x-3 text-slate-300">
-                      <div className="w-6 h-6 rounded-full bg-teal-500/10 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-3.5 h-3.5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="font-medium">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/register"
-                  className="inline-flex items-center space-x-2 text-teal-400 hover:text-teal-300 font-bold tracking-wide transition-colors"
-                >
-                  <span>Ajukan Pendanaan</span>
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Link>
-              </div>
-            </div>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${card.blur} to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl`} />
+                  <div className="relative">
+                    <motion.div
+                      className={`w-16 h-16 bg-gradient-to-br ${card.color === 'cyan' ? 'from-cyan-500/20 to-cyan-500/5 border-cyan-500/20' : 'from-teal-500/20 to-teal-500/5 border-teal-500/20'} border rounded-2xl flex items-center justify-center mb-4`}
+                      animate={active ? { rotate: 0, y: 0, scale: 1.03 } : { rotate: 0, y: 4, scale: 1 }}
+                      transition={{ duration: 0.45, ease }}
+                    >
+                      <Image src={card.img} alt={card.title} width={64} height={64} className="w-12 h-12 object-contain" />
+                    </motion.div>
+                    <h3 className="text-3xl font-bold mb-2 text-white">{card.title}</h3>
+                    <p className="text-slate-400 text-md mb-4 leading-relaxed">
+                      {idx === 0
+                        ? 'Investasikan pada invoice ekspor yang telah diverifikasi dengan imbal hasil hingga 15% per tahun. Akses langsung ke yield real-world asset (RWA).'
+                        : 'Dapatkan modal kerja cepat dengan menjaminkan invoice ekspor Anda. Persetujuan cepat, bunga kompetitif, tanpa agunan tambahan.'}
+                    </p>
+                    <ul className="space-y-4 mb-10">
+                      {card.bullets.map((item) => (
+                        <li key={item} className="flex items-center space-x-3 text-slate-300">
+                          <div className={`w-6 h-6 rounded-full ${card.color === 'cyan' ? 'bg-cyan-500/10' : 'bg-teal-500/10'} flex items-center justify-center flex-shrink-0`}>
+                            <svg className={`w-3.5 h-3.5 ${card.color === 'cyan' ? 'text-cyan-400' : 'text-teal-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                          <span className="font-medium">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href={card.href}
+                      className={`inline-flex items-center space-x-2 font-bold tracking-wide transition-colors ${card.color === 'cyan' ? 'text-cyan-400 hover:text-cyan-300' : 'text-teal-400 hover:text-teal-300'}`}
+                    >
+                      <span>{card.cta}</span>
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </Link>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section id="how-it-works" className="relative z-10 py-32 px-4 sm:px-6 lg:px-8">
+      <motion.section
+        id="how-it-works"
+        ref={howRef}
+        className="relative z-10 py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8"
+        style={{ opacity: securityActive ? 0.95 : 1 }}
+      >
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-10% 0px' }}
+            transition={{ duration: 0.5, ease }}
+            className="text-center mb-8 md:mb-20"
+          >
+            <h2 className="text-3xl md:text-5xl font-bold mb-3 md:mb-6">
               Cara <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Kerja</span>
             </h2>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
               Proses sederhana yang didukung teknologi blockchain untuk efisiensi dan kepercayaan maksimum.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="relative grid md:grid-cols-4 gap-8">
+            <div className="hidden md:block absolute left-1/2 -translate-x-1/2 top-6 bottom-6 w-0.5 bg-slate-800/60">
+              <motion.div
+                className="absolute left-0 top-0 w-full origin-top bg-gradient-to-b from-cyan-400 via-teal-400 to-emerald-400"
+                style={{ scaleY: howProgress }}
+              />
+            </div>
             {[
               {
                 step: '01',
@@ -316,43 +488,84 @@ export default function LandingPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 ),
               },
-            ].map((item, i) => (
-              <div key={i} className="relative group">
-                <div className="p-8 bg-slate-800/30 border border-slate-700/50 rounded-2xl backdrop-blur-sm h-full hover:bg-slate-800/50 transition-colors">
-                  <div className="absolute top-6 right-6 text-slate-800 text-6xl font-bold opacity-50 group-hover:text-cyan-900/50 transition-colors pointer-events-none select-none">{item.step}</div>
-                  <div className="w-14 h-14 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border border-cyan-500/20 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-cyan-900/20">
-                    <svg className="w-7 h-7 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      {item.icon}
-                    </svg>
+            ].map((item, i) => {
+              const faded = i < activeStep;
+              return (
+                <motion.div
+                  key={item.step}
+                  className="relative group"
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-20% 0px' }}
+                  transition={{ duration: 0.45, ease, delay: i * 0.08 }}
+                  onViewportEnter={() => setActiveStep(i)}
+                  animate={{ opacity: faded ? 0.4 : 1 }}
+                >
+                  <div className="p-8 bg-slate-800/30 border border-slate-700/50 rounded-2xl backdrop-blur-sm h-full transition-colors">
+                    <div className="absolute top-6 right-6 text-slate-800 text-6xl font-bold opacity-40 pointer-events-none select-none">{item.step}</div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: '-20% 0px' }}
+                      transition={{ duration: 0.45, ease }}
+                      className="w-14 h-14 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border border-cyan-500/20 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-cyan-900/20"
+                    >
+                      <svg className="w-7 h-7 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        {item.icon}
+                      </svg>
+                    </motion.div>
+                    <h3 className="text-xl font-bold mb-3 text-white relative z-10">{item.title}</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed relative z-10">{item.desc}</p>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-white relative z-10">{item.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed relative z-10">{item.desc}</p>
-                </div>
-              </div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section id="security" className="relative z-10 py-32 px-4 sm:px-6 lg:px-8 bg-slate-900/30">
+      <motion.section
+        id="security"
+        ref={securityRef}
+        className="relative z-10 py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-slate-900/30"
+      >
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl md:text-5xl font-bold mb-8">
+            <div className="lg:sticky lg:top-28 self-start">
+              <motion.h2
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-10% 0px' }}
+                transition={{ duration: 0.5, ease }}
+                className="text-3xl md:text-5xl font-bold mb-4"
+              >
                 Keamanan <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Kelas Enterprise</span>
-              </h2>
-              <p className="text-slate-400 text-lg mb-10 leading-relaxed">
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-10% 0px' }}
+                transition={{ duration: 0.5, ease, delay: 0.08 }}
+                className="text-slate-400 text-md mb-2 leading-relaxed"
+              >
                 Dibangun di atas blockchain Lisk dengan smart contract yang diaudit,
                 menghadirkan keamanan dan transparansi yang sulit ditandingi finansial tradisional.
-              </p>
-              <div className="space-y-6">
+              </motion.p>
+              <div className="space-y-2">
                 {[
                   { title: 'Smart Contract Ter-audit', desc: 'Kode diaudit oleh firma keamanan terkemuka.' },
                   { title: 'Dompet Multi-Signature', desc: 'Dana diamankan oleh mekanisme multi-sig.' },
                   { title: 'Kepatuhan Regulasi', desc: 'Pengguna terverifikasi sesuai regulasi lokal.' },
                   { title: 'Dijamin Aset RWA', desc: 'Setiap investasi didukung aset invoice nyata.' },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-start space-x-5 p-4 rounded-xl hover:bg-slate-800/30 transition-colors">
+                  <motion.div
+                    key={item.title}
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-10% 0px' }}
+                    transition={{ duration: 0.45, ease, delay: i * 0.05 }}
+                    className="flex items-start space-x-5 p-4 rounded-xl border border-slate-800/60 bg-slate-900/40"
+                  >
                     <div className="w-10 h-10 bg-cyan-500/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                       <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -362,12 +575,12 @@ export default function LandingPage() {
                       <h4 className="font-bold text-white text-lg mb-1">{item.title}</h4>
                       <p className="text-slate-400">{item.desc}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-teal-500/20 rounded-full blur-[80px]" />
+            <div className="relative max-w-lg mx-auto lg:mx-0 hidden md:block">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-teal-500/10 rounded-full blur-[80px]" />
               <div className="relative p-1 bg-gradient-to-br from-slate-700/50 to-slate-900/50 rounded-3xl backdrop-blur-xl">
                 <div className="bg-slate-950/90 rounded-[22px] p-8">
                   <div className="grid grid-cols-2 gap-6">
@@ -377,7 +590,14 @@ export default function LandingPage() {
                       { icon: '/assets/landing/landing-asset-3.png', label: 'DDoS Guard' },
                       { icon: '/assets/landing/landing-asset-4.png', label: 'Immutable Logs' },
                     ].map((item, i) => (
-                      <div key={i} className="aspect-square flex flex-col items-center justify-center p-6 bg-slate-900 rounded-2xl border border-slate-800 hover:border-cyan-500/30 transition-colors group">
+                      <motion.div
+                        key={item.label}
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: '-10% 0px' }}
+                        transition={{ duration: 0.45, ease, delay: i * 0.08 }}
+                        className="aspect-square flex flex-col items-center justify-center p-6 bg-slate-900 rounded-2xl border border-slate-800 hover:border-cyan-500/30 transition-colors group"
+                      >
                         <div className="flex items-center space-x-2">
                           <Image
                             src={item.icon}
@@ -388,8 +608,8 @@ export default function LandingPage() {
                             priority
                           />
                         </div>
-                        <div className="text-sm font-medium text-slate-300">{item.label}</div>
-                      </div>
+                        <div className="text-sm font-medium text-slate-300 mt-2">{item.label}</div>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
@@ -397,18 +617,30 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="relative z-10 py-32 px-4 sm:px-6 lg:px-8">
+      <motion.section
+        ref={ctaRef}
+        className="relative z-10 py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8"
+        style={{ opacity: securityActive ? 0.95 : 1 }}
+        initial={{ opacity: 0, scale: 0.98 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, margin: '-10% 0px' }}
+        transition={{ duration: 0.6, ease }}
+      >
         <div className="max-w-5xl mx-auto text-center">
-          <div className="p-16 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
-            <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-cyan-500/20 blur-[100px] group-hover:bg-cyan-500/30 transition-colors duration-700" />
+          <div className="p-8 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 rounded-[2.5rem] shadow-2xl relative overflow-hidden group transition-colors duration-700">
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150" />
+            <motion.div
+              className="absolute -top-1/2 -right-1/2 w-full h-full bg-cyan-500/20 blur-[100px]"
+              animate={{ opacity: [0.5, 0.7, 0.5] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            />
             <div className="relative z-10">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
                 Siap Memulai?
               </h2>
-              <p className="text-slate-300 text-lg mb-12 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-slate-300 text-lg mb-12 max-w-3xl mx-auto leading-relaxed">
                 Bergabunglah dengan ratusan eksportir dan investor yang memanfaatkan kekuatan blockchain untuk trade finance.
                 Rasakan masa depan pembiayaan hari ini.
               </p>
@@ -429,7 +661,7 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       <footer className="relative z-10 border-t border-slate-800/50 bg-slate-950 pt-20 pb-10 px-4">
         <div className="max-w-7xl mx-auto">
