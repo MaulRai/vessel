@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useInView, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTime, useTransform } from 'framer-motion';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
 
 const ease = [0.16, 1, 0.3, 1];
@@ -66,6 +66,11 @@ export default function LandingPage() {
   const heroHueB = useTransform(time, (t) => 195 + Math.cos(t / 520) * 14);
   const heroParallax = useTransform(heroProgress, [0, 1], [0, -80]);
 
+  const cardX = useMotionValue(0.5);
+  const cardY = useMotionValue(0.5);
+  const cardTiltX = useTransform(cardY, [0, 1], [8, -8]);
+  const cardTiltY = useTransform(cardX, [0, 1], [-8, 8]);
+
   const { scrollYProgress: howProgress } = useScroll({ target: howRef, offset: ['start 80%', 'end 20%'] });
 
   const { scrollYProgress: featuresProgress } = useScroll({ target: featuresRef, offset: ['start end', 'end start'] });
@@ -88,6 +93,20 @@ export default function LandingPage() {
   useEffect(() => {
     setSecurityActive(securityInView);
   }, [securityInView]);
+
+  const handleCardMouseMove = (event: MouseEvent<HTMLDivElement>) => {
+    if (prefersReduced) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    cardX.set(Math.min(Math.max(x, 0), 1));
+    cardY.set(Math.min(Math.max(y, 0), 1));
+  };
+
+  const handleCardMouseLeave = () => {
+    cardX.set(0.5);
+    cardY.set(0.5);
+  };
 
   const heroPill = useReveal(0);
   const heroTitle = useReveal(0.05);
@@ -253,7 +272,7 @@ export default function LandingPage() {
               </motion.div>
             </div>
 
-            <div className="relative hidden lg:block h-full min-h-[600px]">
+            <div className="relative hidden lg:block h-full min-h-[600px] [perspective:1400px]">
               <motion.div
                 className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 to-teal-500/20 rounded-full blur-[100px]"
                 style={{ y: prefersReduced ? 0 : heroParallax }}
@@ -262,8 +281,30 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 24, rotate: 3 }}
                 animate={{ opacity: 1, y: 0, rotate: 0 }}
                 transition={{ duration: 0.6, ease }}
-                className="relative bg-slate-900/80 border border-slate-800/50 backdrop-blur-md rounded-3xl p-8 shadow-2xl max-w-md mx-auto mt-12"
+                className="relative bg-slate-950/80 border border-slate-800/60 backdrop-blur-md rounded-3xl p-8 shadow-2xl max-w-md mx-auto mt-12 overflow-hidden ring-1 ring-cyan-500/10"
+                style={{
+                  rotateX: prefersReduced ? 0 : cardTiltX,
+                  rotateY: prefersReduced ? 0 : cardTiltY,
+                  transformStyle: 'preserve-3d',
+                }}
+                onMouseMove={handleCardMouseMove}
+                onMouseLeave={handleCardMouseLeave}
               >
+                <div
+                  className="pointer-events-none absolute inset-0 rounded-3xl"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(34,211,238,0.1), rgba(45,212,191,0.06) 55%, rgba(14,165,233,0.04))',
+                    opacity: 0.45,
+                  }}
+                />
+                <motion.div
+                  className="absolute -inset-px rounded-3xl opacity-60"
+                  animate={{ opacity: prefersReduced ? 0.25 : [0.35, 0.55, 0.35] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(34,211,238,0.1), rgba(45,212,191,0.06), rgba(15,118,110,0.04))',
+                  }}
+                />
                 <div className="flex items-center justify-between mb-8">
                   <div>
                     <div className="text-xs text-slate-400 uppercase tracking-widest mb-1">Current Yield</div>
@@ -318,7 +359,7 @@ export default function LandingPage() {
       <motion.section
         id="features"
         ref={featuresRef}
-        className="relative z-10 py-12 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-slate-900/30"
+        className="relative z-10 py-12 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-transparent"
         style={{ opacity: securityActive ? 0.95 : 1 }}
       >
         <div className="max-w-7xl mx-auto">
@@ -527,7 +568,7 @@ export default function LandingPage() {
       <motion.section
         id="security"
         ref={securityRef}
-        className="relative z-10 py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-slate-900/30"
+        className="relative z-10 py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-transparent"
       >
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -647,9 +688,11 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <Link
                   href="/register"
-                  className="w-full sm:w-auto px-10 py-5 bg-white text-slate-900 hover:bg-cyan-50 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                  className="relative w-full sm:w-auto rounded-xl p-[3px] bg-gradient-to-r from-cyan-500 to-teal-500 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
-                  Buat Akun Gratis
+                  <span className="block rounded-[10px] bg-white text-slate-900 px-10 py-5 font-bold text-lg transition-all duration-200 ease-out hover:bg-transparent hover:text-white">
+                    Buat Akun Gratis
+                  </span>
                 </Link>
                 <Link
                   href="/login"
