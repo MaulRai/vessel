@@ -427,14 +427,16 @@ export default function RegisterPage() {
           <div className="p-6 md:p-8 lg:p-10 flex flex-col justify-center overflow-y-auto">
             <div className="max-w-sm mx-auto w-full">
               {/* Logo/Brand */}
-              <div className="mb-4">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent mb-1">
-                  Vessel Finance
-                </h1>
-                <p className="text-slate-300 text-sm">
-                  Pembiayaan ekspor yang terpercaya
-                </p>
-              </div>
+              <div className="mb-6 flex items-center space-x-2">
+                      <Image
+                        src="/vessel-logo.png"
+                        alt="VESSEL Logo"
+                        width={120}
+                        height={32}
+                        className="h-12 w-auto object-contain"
+                        priority
+                      />
+                    </div>
 
               {/* Step Indicator */}
               {renderStepIndicator()}
