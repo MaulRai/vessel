@@ -16,8 +16,8 @@ const useReveal = (delay = 0, distance = 12) => {
   const animate = prefersReduced
     ? { opacity: 1, y: 0 }
     : inView
-    ? { opacity: 1, y: 0 }
-    : { opacity: 0, y: distance };
+      ? { opacity: 1, y: 0 }
+      : { opacity: 0, y: distance };
 
   const transition = { duration: 0.5, ease, delay };
 
@@ -387,13 +387,13 @@ export default function LandingPage() {
                 img: '/assets/landing/investor.png',
                 bulletColor: 'cyan',
                 bullets: [
-                  'Pilih tranche sesuai profil risiko Anda',
+                  'Langsung connect wallet, tanpa registrasi',
                   'Diversifikasi portofolio otomatis',
                   'Transparansi on-chain real-time',
                   'Opsi penarikan yang fleksibel',
                 ],
-                cta: 'Mulai Berinvestasi',
-                href: '/register',
+                cta: 'Connect Wallet',
+                href: '/pendana/connect',
               },
               {
                 title: 'Untuk Eksportir',

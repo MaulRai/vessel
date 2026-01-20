@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import { useInvestorWallet } from '../context/InvestorWalletContext';
 import { UserRole } from '../types/auth';
 
 interface AuthGuardProps {
@@ -19,21 +20,65 @@ export function AuthGuard({
   redirectTo = '/login',
 }: AuthGuardProps) {
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { isConnected, investor } = useInvestorWallet();
   const router = useRouter();
+
+  // Determine if user has valid access
+  const isInvestorRoute = allowedRoles?.includes('investor') && allowedRoles.length === 1;
+  const isMitraRoute = allowedRoles?.includes('mitra') && allowedRoles.length === 1;
+
+  // For investor-only routes, check wallet connection
+  const hasInvestorAccess = isInvestorRoute && isConnected && investor;
+
+  // For mitra routes or mixed routes, check traditional auth
+  const hasTraditionalAccess = isAuthenticated && user;
+
+  // Combined access check
+  const hasAccess = hasInvestorAccess || hasTraditionalAccess;
 
   useEffect(() => {
     if (isLoading) return;
 
-    // Jika memerlukan autentikasi tapi user belum login
-    if (requireAuth && !isAuthenticated) {
+    // For investor-only routes
+    if (isInvestorRoute) {
+      if (!isConnected) {
+        router.push('/pendana/connect');
+        return;
+      }
+      // Investor is connected via wallet, allow access
+      return;
+    }
+
+    // For mitra-only routes
+    if (isMitraRoute) {
+      if (!isAuthenticated) {
+        router.push(redirectTo);
+        return;
+      }
+      if (user && user.role !== 'mitra') {
+        // Redirect to appropriate dashboard
+        if (user.role === 'investor') {
+          router.push('/pendana/dashboard');
+        } else if (user.role === 'admin') {
+          router.push('/dashboard/admin');
+        } else {
+          router.push('/');
+        }
+        return;
+      }
+      return;
+    }
+
+    // For general protected routes
+    if (requireAuth && !hasAccess) {
       router.push(redirectTo);
       return;
     }
 
-    // Jika ada pembatasan role dan user tidak memiliki role yang diizinkan
+    // Role-based access check for traditional auth
     if (allowedRoles && allowedRoles.length > 0 && user) {
       if (!allowedRoles.includes(user.role)) {
-        // Redirect ke dashboard sesuai role
+        // Redirect to dashboard based on role
         if (user.role === 'investor') {
           router.push('/pendana/dashboard');
         } else if (user.role === 'mitra') {
@@ -45,7 +90,7 @@ export function AuthGuard({
         }
       }
     }
-  }, [isAuthenticated, isLoading, user, allowedRoles, requireAuth, redirectTo, router]);
+  }, [isAuthenticated, isLoading, user, isConnected, investor, allowedRoles, requireAuth, redirectTo, router, isInvestorRoute, isMitraRoute, hasAccess]);
 
   // Loading state
   if (isLoading) {
@@ -59,8 +104,48 @@ export function AuthGuard({
     );
   }
 
-  // Belum login tapi memerlukan autentikasi
-  if (requireAuth && !isAuthenticated) {
+  // For investor routes - check wallet connection
+  if (isInvestorRoute) {
+    if (!isConnected) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" />
+            <p className="text-slate-400">Mengalihkan ke halaman connect wallet...</p>
+          </div>
+        </div>
+      );
+    }
+    // Wallet connected, render children
+    return <>{children}</>;
+  }
+
+  // For mitra routes - check traditional auth
+  if (isMitraRoute) {
+    if (!isAuthenticated) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" />
+            <p className="text-slate-400">Mengalihkan ke halaman login...</p>
+          </div>
+        </div>
+      );
+    }
+    if (user && user.role !== 'mitra') {
+      return (
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" />
+            <p className="text-slate-400">Mengalihkan...</p>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // General auth check
+  if (requireAuth && !hasAccess) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
@@ -71,7 +156,7 @@ export function AuthGuard({
     );
   }
 
-  // Role tidak diizinkan
+  // Role check for traditional auth
   if (allowedRoles && allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -105,3 +190,4 @@ export function withAuth<P extends object>(
     );
   };
 }
+

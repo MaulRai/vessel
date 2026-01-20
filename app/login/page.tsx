@@ -88,9 +88,13 @@ function LoginForm() {
 
       {/* Login Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <h2 className="text-xl font-semibold text-slate-100 mb-4">
-          Masuk ke Akun Anda
+        <h2 className="text-xl font-semibold text-slate-100 mb-2">
+          Masuk ke Akun Mitra
         </h2>
+        <p className="text-slate-400 text-sm mb-4">
+          Halaman ini khusus untuk eksportir/mitra. Investor dapat langsung{' '}
+          <Link href="/pendana/connect" className="text-cyan-400 hover:text-cyan-300 underline">connect wallet</Link>.
+        </p>
 
         {/* Success Message */}
         {successMessage && (
@@ -120,25 +124,15 @@ function LoginForm() {
           Masuk dengan Google
         </button>
 
-        {/* Demo Accounts */}
-        <div className="grid sm:grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('mitra')}
-            disabled={isLoading}
-            className="w-full px-4 py-2.5 bg-teal-600/20 border border-teal-500/40 text-teal-100 hover:bg-teal-600/30 rounded-lg text-sm font-medium transition-all"
-          >
-            Login dengan akun dummy Eksportir
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('investor')}
-            disabled={isLoading}
-            className="w-full px-4 py-2.5 bg-cyan-600/20 border border-cyan-500/40 text-cyan-100 hover:bg-cyan-600/30 rounded-lg text-sm font-medium transition-all"
-          >
-            Login dengan akun dummy Pendana
-          </button>
-        </div>
+        {/* Demo Account - Eksportir Only */}
+        <button
+          type="button"
+          onClick={() => handleDemoLogin('mitra')}
+          disabled={isLoading}
+          className="w-full px-4 py-2.5 bg-teal-600/20 border border-teal-500/40 text-teal-100 hover:bg-teal-600/30 rounded-lg text-sm font-medium transition-all"
+        >
+          Login dengan akun demo Eksportir
+        </button>
 
         {/* Divider */}
         <div className="relative">

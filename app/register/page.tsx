@@ -18,7 +18,7 @@ export default function RegisterPage() {
   const [otpCode, setOtpCode] = useState('');
   const [otpToken, setOtpToken] = useState('');
   const [username, setUsername] = useState('');
-  const [role, setRole] = useState<UserRole>('investor');
+  const [role, setRole] = useState<UserRole>('mitra');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [cooperativeAgreement, setCooperativeAgreement] = useState(false);
@@ -137,23 +137,21 @@ export default function RegisterPage() {
       {['email', 'otp', 'details'].map((s, index) => (
         <div key={s} className="flex items-center">
           <div
-            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
-              step === s
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${step === s
                 ? 'bg-cyan-500 text-white'
                 : ['email', 'otp', 'details'].indexOf(step) > index
-                ? 'bg-cyan-500/30 text-cyan-300'
-                : 'bg-slate-700 text-slate-400'
-            }`}
+                  ? 'bg-cyan-500/30 text-cyan-300'
+                  : 'bg-slate-700 text-slate-400'
+              }`}
           >
             {index + 1}
           </div>
           {index < 2 && (
             <div
-              className={`w-8 h-0.5 ${
-                ['email', 'otp', 'details'].indexOf(step) > index
+              className={`w-8 h-0.5 ${['email', 'otp', 'details'].indexOf(step) > index
                   ? 'bg-cyan-500/50'
                   : 'bg-slate-700'
-              }`}
+                }`}
             />
           )}
         </div>
@@ -163,9 +161,13 @@ export default function RegisterPage() {
 
   const renderEmailStep = () => (
     <form onSubmit={handleSendOTP} className="space-y-4">
-      <h2 className="text-xl font-semibold text-slate-100 mb-4">
-        Daftar Akun Baru
+      <h2 className="text-xl font-semibold text-slate-100 mb-2">
+        Daftar sebagai Mitra/Eksportir
       </h2>
+      <p className="text-slate-400 text-sm mb-4">
+        Halaman ini untuk eksportir yang ingin mengajukan pendanaan. Investor dapat langsung{' '}
+        <Link href="/pendana/connect" className="text-cyan-400 hover:text-cyan-300 underline">connect wallet</Link>.
+      </p>
 
       {/* Error Message */}
       {error && (
@@ -326,35 +328,11 @@ export default function RegisterPage() {
         <p className="text-xs text-slate-500 mt-1">3-50 karakter, huruf kecil, angka, dan underscore</p>
       </div>
 
-      {/* Account Type Selector */}
-      <div className="p-3 bg-slate-900/40 border border-slate-700 rounded-lg space-y-2">
-        <p className="text-xs text-slate-300">Pilih tipe akun:</p>
-        <div className="grid grid-cols-2 gap-2 text-sm font-medium">
-          <button
-            type="button"
-            onClick={() => setRole('investor')}
-            className={`rounded-lg border px-3 py-2 text-left transition-all ${
-              role === 'investor'
-                ? 'border-cyan-500 bg-cyan-500/10 text-cyan-100'
-                : 'border-slate-700 bg-slate-900/50 text-slate-200 hover:border-cyan-600/60'
-            }`}
-          >
-            <span className="block text-sm font-semibold">Pendana</span>
-            <span className="block text-xs text-slate-400">Beri pendanaan</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setRole('mitra')}
-            className={`rounded-lg border px-3 py-2 text-left transition-all ${
-              role === 'mitra'
-                ? 'border-cyan-500 bg-cyan-500/10 text-cyan-100'
-                : 'border-slate-700 bg-slate-900/50 text-slate-200 hover:border-cyan-600/60'
-            }`}
-          >
-            <span className="block text-sm font-semibold">Eksportir</span>
-            <span className="block text-xs text-slate-400">Ajukan pendanaan</span>
-          </button>
-        </div>
+      {/* Info: Mitra Only */}
+      <div className="p-3 bg-teal-500/10 border border-teal-500/30 rounded-lg">
+        <p className="text-xs text-teal-200">
+          <span className="font-semibold">Anda mendaftar sebagai Eksportir/Mitra.</span> Setelah registrasi, Anda dapat mengajukan pendanaan untuk invoice ekspor Anda.
+        </p>
       </div>
 
       {/* Password Fields */}
@@ -428,15 +406,15 @@ export default function RegisterPage() {
             <div className="max-w-sm mx-auto w-full">
               {/* Logo/Brand */}
               <div className="mb-6 flex items-center space-x-2">
-                      <Image
-                        src="/vessel-logo.png"
-                        alt="VESSEL Logo"
-                        width={120}
-                        height={32}
-                        className="h-12 w-auto object-contain"
-                        priority
-                      />
-                    </div>
+                <Image
+                  src="/vessel-logo.png"
+                  alt="VESSEL Logo"
+                  width={120}
+                  height={32}
+                  className="h-12 w-auto object-contain"
+                  priority
+                />
+              </div>
 
               {/* Step Indicator */}
               {renderStepIndicator()}
