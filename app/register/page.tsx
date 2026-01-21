@@ -24,7 +24,7 @@ declare global {
   }
 }
 
-type RegistrationStep = 'email' | 'otp' | 'details';
+type RegistrationStep = 'email' | 'otp' | 'account';
 
 export default function RegisterPage() {
   // Step state
@@ -37,14 +37,9 @@ export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+
   const [cooperativeAgreement, setCooperativeAgreement] = useState(false);
-
-  // Company fields (mitra-specific)
-  const [companyName, setCompanyName] = useState('');
-  const [companyType, setCompanyType] = useState('PT');
-  const [npwp, setNpwp] = useState('');
-  const [annualRevenue, setAnnualRevenue] = useState('');
-
   // UI state
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -68,15 +63,23 @@ export default function RegisterPage() {
         setEmail(result.data.email);
         setOtpToken(result.data.otp_token);
         // Skip directly to details step (no OTP needed)
-        setUsername('');
-        setPassword('');
-        setConfirmPassword('');
-        setCooperativeAgreement(false);
-        setCompanyName('');
-        setCompanyType('PT');
-        setNpwp('');
-        setAnnualRevenue('');
-        setStep('details');
+        // For Google Auth, we treat it as auto-registration/login in backend for now or skip to simple agreement
+        // But per new flow, we just want to register.
+        // If Google Auth returns success, we likely have an account or partial data.
+        // For simplicity in this refactor, if Google Auth succeeds, we consider them registered unless we need agreement.
+        // Let's assume Google Auth flow might need adjustment, but for now let's just complete the flow.
+
+        // Actually, Google Auth endpoint returns otp_token. We need to call register.
+        // But since we removed details step, we should show a simple "Complete Registration" form with Agreement checkbox if needed.
+        // OR, just auto-register if we don't strictly enforce agreement checkbox for Google users (usually implied).
+        // Let's redirect to a "finish" step or just call register immediately if possible? 
+        // For now, let's keep it simple: set step to 'details' (RENAME to 'finish') or similar.
+        // Wait, requirements say "username, pass, conf password, check agreement".
+        // So we still need a final step for username/password setting if Google doesn't provide it?
+        // Google auth usually provides email/name. We might need username?
+        // Let's keep a simplified 'details' step just for User/Pass/Agreement.
+
+        setStep('account');
       } else {
         setError(result.error?.message || 'Google authentication failed');
       }
@@ -155,23 +158,7 @@ export default function RegisterPage() {
 
     if (response.success && response.data) {
       setOtpToken(response.data.otp_token);
-      setUsername('');
-      setPassword('');
-      setConfirmPassword('');
-      setCooperativeAgreement(false);
-      setCompanyName('');
-      setCompanyType('PT');
-      setNpwp('');
-      setAnnualRevenue('');
-      setUsername('');
-      setPassword('');
-      setConfirmPassword('');
-      setCooperativeAgreement(false);
-      setCompanyName('');
-      setCompanyType('PT');
-      setNpwp('');
-      setAnnualRevenue('');
-      setStep('details');
+      setStep('account');
     } else {
       setError(response.error?.message || t('common.errorOccurred'));
     }
@@ -196,20 +183,8 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!companyName.trim()) {
-      setError(t('auth.companyNameRequired') || 'Company name is required');
-      return;
-    }
+    // Company validation removed
 
-    if (npwp.length < 15 || npwp.length > 16) {
-      setError(t('auth.npwpError') || 'NPWP must be 15-16 characters');
-      return;
-    }
-
-    if (!annualRevenue) {
-      setError(t('auth.annualRevenueRequired') || 'Annual revenue is required');
-      return;
-    }
 
     setIsLoading(true);
 
@@ -220,17 +195,18 @@ export default function RegisterPage() {
       confirm_password: confirmPassword,
       cooperative_agreement: cooperativeAgreement,
       otp_token: otpToken,
-      company_name: companyName,
-      company_type: companyType,
-      npwp: npwp,
-      annual_revenue: annualRevenue,
+      // Company fields now empty/optional
+      company_name: '',
+      company_type: '',
+      npwp: '',
+      annual_revenue: '',
     });
 
     setIsLoading(false);
 
     if (response.success) {
-      // Registrasi berhasil, redirect ke pending page
-      router.push('/eksportir/pending');
+      // Registrasi berhasil, redirect ke login page
+      router.push('/login?registered=true');
     } else {
       setError(response.error?.message || t('common.errorOccurred'));
     }
@@ -259,12 +235,12 @@ export default function RegisterPage() {
 
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-6 space-x-2">
-      {['email', 'otp', 'details'].map((s, index) => (
+      {['email', 'otp', 'account'].map((s, index) => (
         <div key={s} className="flex items-center">
           <div
             className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${step === s
               ? 'bg-cyan-500 text-white'
-              : ['email', 'otp', 'details'].indexOf(step) > index
+              : ['email', 'otp', 'account'].indexOf(step) > index
                 ? 'bg-cyan-500/30 text-cyan-300'
                 : 'bg-slate-700 text-slate-400'
               }`}
@@ -273,7 +249,7 @@ export default function RegisterPage() {
           </div>
           {index < 2 && (
             <div
-              className={`w-8 h-0.5 ${['email', 'otp', 'details'].indexOf(step) > index
+              className={`w-8 h-0.5 ${['email', 'otp', 'account'].indexOf(step) > index
                 ? 'bg-cyan-500/50'
                 : 'bg-slate-700'
                 }`}
@@ -422,7 +398,7 @@ export default function RegisterPage() {
     </form>
   );
 
-  const renderDetailsStep = () => (
+  const renderAccountSetupStep = () => (
     <form onSubmit={handleRegister} className="space-y-3">
       <h2 className="text-xl font-semibold text-slate-100 mb-3">
         {t('auth.completeDetails')}
@@ -455,87 +431,7 @@ export default function RegisterPage() {
         <p className="text-xs text-slate-500 mt-1">{t('auth.usernameHint')}</p>
       </div>
 
-      {/* Company Name */}
-      <div>
-        <label htmlFor="companyName" className="block text-sm font-medium text-slate-300 mb-1">
-          {t('auth.companyName') || 'Company Name'}
-        </label>
-        <input
-          type="text"
-          id="companyName"
-          value={companyName}
-          onChange={(e) => setCompanyName(e.target.value)}
-          className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm placeholder:text-slate-500"
-          placeholder={t('auth.companyNamePlaceholder') || 'PT Example Indonesia'}
-          required
-          disabled={isLoading}
-        />
-      </div>
 
-      {/* Company Type & NPWP */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label htmlFor="companyType" className="block text-sm font-medium text-slate-300 mb-1">
-            {t('auth.companyType') || 'Company Type'}
-          </label>
-          <select
-            id="companyType"
-            value={companyType}
-            onChange={(e) => setCompanyType(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm"
-            disabled={isLoading}
-          >
-            <option value="PT">PT</option>
-            <option value="CV">CV</option>
-            <option value="UD">UD</option>
-            <option value="Firma">Firma</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="npwp" className="block text-sm font-medium text-slate-300 mb-1">
-            NPWP
-          </label>
-          <input
-            type="text"
-            id="npwp"
-            value={npwp}
-            onChange={(e) => setNpwp(e.target.value.replace(/\D/g, '').slice(0, 16))}
-            className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm placeholder:text-slate-500"
-            placeholder="15-16 digits"
-            required
-            disabled={isLoading}
-          />
-        </div>
-      </div>
-
-      {/* Annual Revenue */}
-      <div>
-        <label htmlFor="annualRevenue" className="block text-sm font-medium text-slate-300 mb-1">
-          {t('auth.annualRevenue') || 'Annual Revenue'}
-        </label>
-        <select
-          id="annualRevenue"
-          value={annualRevenue}
-          onChange={(e) => setAnnualRevenue(e.target.value)}
-          className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm"
-          required
-          disabled={isLoading}
-        >
-          <option value="">{t('auth.selectAnnualRevenue') || 'Select annual revenue'}</option>
-          <option value="< 1 Miliar">&lt; 1 Miliar</option>
-          <option value="1-5 Miliar">1-5 Miliar</option>
-          <option value="5-25 Miliar">5-25 Miliar</option>
-          <option value="25-50 Miliar">25-50 Miliar</option>
-          <option value="> 50 Miliar">&gt; 50 Miliar</option>
-        </select>
-      </div>
-
-      {/* Info: Mitra Only */}
-      <div className="p-3 bg-teal-500/10 border border-teal-500/30 rounded-lg">
-        <p className="text-xs text-teal-200">
-          {t('auth.exporterRoleInfo')}
-        </p>
-      </div>
 
       {/* Password Fields */}
       <div className="grid grid-cols-2 gap-3">
@@ -624,7 +520,7 @@ export default function RegisterPage() {
               {/* Form Steps */}
               {step === 'email' && renderEmailStep()}
               {step === 'otp' && renderOTPStep()}
-              {step === 'details' && renderDetailsStep()}
+              {step === 'account' && renderAccountSetupStep()}
 
               {/* Login Link */}
               <div className="text-center pt-4">

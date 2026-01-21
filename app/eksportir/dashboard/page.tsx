@@ -33,7 +33,7 @@ function NotAppliedBanner() {
             Anda belum mengisi profil bisnis. Lengkapi profil bisnis Anda untuk dapat membuat invoice dan mengajukan pendanaan.
           </p>
           <Link
-            href="/eksportir/profil-bisnis"
+            href="/eksportir/complete-profile"
             className="inline-flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 rounded-lg font-medium text-sm text-white transition-all shadow-lg shadow-amber-500/25"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,7 +93,7 @@ function RejectedBanner({ reason, application }: { reason?: string; application?
             </div>
           )}
           <Link
-            href="/eksportir/profil-bisnis"
+            href="/eksportir/complete-profile"
             className="inline-flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-400 hover:to-rose-400 rounded-lg font-medium text-sm text-white transition-all shadow-lg shadow-red-500/25"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -336,15 +336,14 @@ function MitraDashboardContent() {
               <h2 className="text-lg font-semibold text-white mb-4">Status Verifikasi</h2>
               <div className="space-y-3">
                 {/* Company Approval Status */}
-                <div className={`flex items-center justify-between p-3 rounded-lg ${
-                  mitraState?.status === 'approved'
+                <div className={`flex items-center justify-between p-3 rounded-lg ${mitraState?.status === 'approved'
                     ? 'bg-green-500/10 border border-green-500/20'
                     : mitraState?.status === 'pending'
                       ? 'bg-yellow-500/10 border border-yellow-500/20'
                       : mitraState?.status === 'rejected'
                         ? 'bg-red-500/10 border border-red-500/20'
                         : 'bg-slate-700/30 border border-slate-600/30'
-                }`}>
+                  }`}>
                   <div className="flex items-center space-x-3">
                     {mitraState?.status === 'approved' ? (
                       <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -363,15 +362,14 @@ function MitraDashboardContent() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     )}
-                    <span className={`text-sm ${
-                      mitraState?.status === 'approved'
+                    <span className={`text-sm ${mitraState?.status === 'approved'
                         ? 'text-green-400'
                         : mitraState?.status === 'pending'
                           ? 'text-yellow-400'
                           : mitraState?.status === 'rejected'
                             ? 'text-red-400'
                             : 'text-slate-500'
-                    }`}>
+                      }`}>
                       {mitraState?.status === 'approved'
                         ? 'Profil Bisnis Terverifikasi'
                         : mitraState?.status === 'pending'
@@ -384,11 +382,10 @@ function MitraDashboardContent() {
                 </div>
 
                 {/* Tokenization Ready Status */}
-                <div className={`flex items-center justify-between p-3 rounded-lg ${
-                  mitraState?.status === 'approved'
+                <div className={`flex items-center justify-between p-3 rounded-lg ${mitraState?.status === 'approved'
                     ? 'bg-cyan-500/10 border border-cyan-500/20'
                     : 'bg-slate-700/30 border border-slate-600/30'
-                }`}>
+                  }`}>
                   <div className="flex items-center space-x-3">
                     {mitraState?.status === 'approved' ? (
                       <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -399,9 +396,8 @@ function MitraDashboardContent() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                       </svg>
                     )}
-                    <span className={`text-sm ${
-                      mitraState?.status === 'approved' ? 'text-cyan-400' : 'text-slate-500'
-                    }`}>
+                    <span className={`text-sm ${mitraState?.status === 'approved' ? 'text-cyan-400' : 'text-slate-500'
+                      }`}>
                       {mitraState?.status === 'approved' ? 'Siap Tokenisasi Invoice' : 'Belum Siap Tokenisasi'}
                     </span>
                   </div>

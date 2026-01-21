@@ -42,7 +42,9 @@ function LoginForm() {
       if (user.role === 'admin') {
         router.push('/dashboard/admin');
       } else if (user.role === 'mitra') {
-        if (user.member_status === 'member_mitra' || user.member_status === 'admin') {
+        if (!user.profile_completed) {
+          router.push('/eksportir/complete-profile');
+        } else if (user.member_status === 'member_mitra' || user.member_status === 'admin') {
           router.push('/eksportir/dashboard');
         } else {
           router.push('/eksportir/pending');

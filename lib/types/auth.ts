@@ -57,10 +57,10 @@ export interface RegisterRequest {
   cooperative_agreement: boolean;
   otp_token: string;
   // Mitra company fields
-  company_name: string;
+  company_name?: string;
   company_type?: string;
-  npwp: string;
-  annual_revenue: string;
+  npwp?: string;
+  annual_revenue?: string;
   address?: string;
   business_description?: string;
   website_url?: string;

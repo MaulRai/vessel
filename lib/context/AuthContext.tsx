@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { authAPI } from '../api/auth';
+import { userAPI } from '../api/user';
 import {
   User,
   UserRole,
@@ -25,6 +26,7 @@ interface AuthContextType extends AuthState {
   verifyOTP: (data: VerifyOTPRequest) => Promise<APIResponse<VerifyOTPResponse>>;
   logout: () => void;
   refreshAccessToken: () => Promise<boolean>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -187,6 +189,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return false;
   }, [saveAuthData, clearAuthData]);
 
+  const refreshProfile = useCallback(async () => {
+    try {
+      const response = await userAPI.getProfile();
+      if (response.success && response.data) {
+        // Update user in state and localStorage
+        const updatedUser = { ...state.user, ...response.data } as User;
+
+        localStorage.setItem(USER_KEY, JSON.stringify(updatedUser)); // Update stored user
+
+        setState((prev) => ({
+          ...prev,
+          user: updatedUser,
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to refresh profile:', error);
+    }
+  }, [state.user]);
+
   const value: AuthContextType = {
     ...state,
     login,
@@ -196,6 +217,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     verifyOTP,
     logout,
     refreshAccessToken,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
