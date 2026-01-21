@@ -4,7 +4,7 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 
-export interface CompleteProfileRequest {
+interface CompleteProfileRequest {
     full_name: string;
     phone?: string;
     nik: string;
@@ -17,11 +17,11 @@ export interface CompleteProfileRequest {
     country?: string;
 }
 
-export interface CompleteProfileResponse {
+interface CompleteProfileResponse {
     message: string;
 }
 
-export interface UploadFileResponse {
+interface UploadFileResponse {
     url: string;
     hash: string;
 }
@@ -71,7 +71,7 @@ class UserAPI {
             }
 
             return data;
-        } catch (error) {
+        } catch {
             return {
                 success: false,
                 error: {
@@ -116,7 +116,7 @@ class UserAPI {
             }
 
             return data;
-        } catch (error) {
+        } catch {
             return {
                 success: false,
                 error: {
@@ -133,8 +133,8 @@ class UserAPI {
         });
     }
 
-    async getBankAccount(): Promise<APIResponse<any>> {
-        return this.request<any>('/user/profile/bank-account', {
+    async getBankAccount(): Promise<APIResponse<unknown>> {
+        return this.request<unknown>('/user/profile/bank-account', {
             method: 'GET',
         });
     }
@@ -146,8 +146,8 @@ class UserAPI {
     }
 
     // Mitra Methods
-    async applyMitra(data: SubmitMitraApplicationRequest): Promise<APIResponse<any>> {
-        return this.request<any>('/user/mitra/apply', {
+    async applyMitra(data: SubmitMitraApplicationRequest): Promise<APIResponse<unknown>> {
+        return this.request<unknown>('/user/mitra/apply', {
             method: 'POST',
             body: JSON.stringify(data),
         });
@@ -159,7 +159,7 @@ class UserAPI {
         });
     }
 
-    async uploadMitraDocument(file: File, type: string): Promise<APIResponse<any>> {
+    async uploadMitraDocument(file: File, type: string): Promise<APIResponse<unknown>> {
         const token = typeof window !== 'undefined' ? localStorage.getItem('vessel_access_token') : null;
         const formData = new FormData();
         formData.append('file', file);
@@ -186,7 +186,7 @@ class UserAPI {
             }
 
             return { success: true, data };
-        } catch (error) {
+        } catch {
             return {
                 success: false,
                 error: {
@@ -248,7 +248,7 @@ export interface RiskQuestion {
     required_answer?: number;
 }
 
-export interface RiskQuestionsResponse {
+interface RiskQuestionsResponse {
     questions: RiskQuestion[];
     catalyst_unlock_rules: {
         description: string;
@@ -258,7 +258,7 @@ export interface RiskQuestionsResponse {
     };
 }
 
-export interface RiskQuestionnaireRequest {
+interface RiskQuestionnaireRequest {
     q1_answer: number;
     q2_answer: number;
     q3_answer: number;
@@ -316,7 +316,7 @@ class RiskQuestionnaireAPI {
             }
 
             return data;
-        } catch (error) {
+        } catch {
             return {
                 success: false,
                 error: {
@@ -388,92 +388,9 @@ export interface MarketplaceFilters {
     per_page?: number;
 }
 
-export interface MarketplaceResponse {
-    pools: MarketplacePool[];
-    total: number;
-    page: number;
-    per_page: number;
-    total_pages: number;
-}
 
-class MarketplaceAPI {
-    private baseURL: string;
 
-    constructor(baseURL: string) {
-        this.baseURL = baseURL;
-    }
 
-    private getAuthHeaders(): HeadersInit {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('vessel_access_token') : null;
-        return {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        };
-    }
-
-    private async request<T>(
-        endpoint: string,
-        options: RequestInit = {}
-    ): Promise<APIResponse<T>> {
-        const url = `${this.baseURL}${endpoint}`;
-
-        const config: RequestInit = {
-            ...options,
-            headers: {
-                ...this.getAuthHeaders(),
-                ...options.headers,
-            },
-        };
-
-        try {
-            const response = await fetch(url, config);
-            const data = await response.json();
-
-            if (!response.ok) {
-                const errorMessage = typeof data.error === 'string' ? data.error : (data.error?.message || 'Terjadi kesalahan');
-                return {
-                    success: false,
-                    error: {
-                        code: 'API_ERROR',
-                        message: errorMessage,
-                    },
-                };
-            }
-
-            return data;
-        } catch (error) {
-            return {
-                success: false,
-                error: {
-                    code: 'NETWORK_ERROR',
-                    message: 'Gagal terhubung ke server',
-                },
-            };
-        }
-    }
-
-    async getPools(filters?: MarketplaceFilters): Promise<APIResponse<MarketplaceResponse>> {
-        const params = new URLSearchParams();
-        if (filters?.grade) params.append('grade', filters.grade);
-        if (filters?.is_insured !== undefined) params.append('is_insured', String(filters.is_insured));
-        if (filters?.min_amount) params.append('min_amount', String(filters.min_amount));
-        if (filters?.max_amount) params.append('max_amount', String(filters.max_amount));
-        if (filters?.sort_by) params.append('sort_by', filters.sort_by);
-        if (filters?.page) params.append('page', String(filters.page));
-        if (filters?.per_page) params.append('per_page', String(filters.per_page));
-
-        const queryString = params.toString();
-        return this.request<MarketplaceResponse>(`/marketplace${queryString ? `?${queryString}` : ''}`, {
-            method: 'GET',
-        });
-    }
-
-    async getPoolDetail(poolId: string): Promise<APIResponse<any>> {
-        return this.request<any>(`/marketplace/${poolId}/detail`, {
-            method: 'GET',
-        });
-    }
-}
 
 export interface InvestorPortfolio {
     total_funding: number;
@@ -507,7 +424,7 @@ export interface ActiveInvestment {
     invested_at: string;
 }
 
-export interface ActiveInvestmentListResponse {
+interface ActiveInvestmentListResponse {
     investments: ActiveInvestment[];
     total: number;
     page: number;
@@ -560,7 +477,7 @@ class InvestmentAPI {
             }
 
             return data;
-        } catch (error) {
+        } catch {
             return {
                 success: false,
                 error: {
@@ -584,11 +501,9 @@ class InvestmentAPI {
     }
 }
 
-export interface WalletUpdateRequest {
-    wallet_address: string;
-}
 
-export interface WalletUpdateResponse {
+
+interface WalletUpdateResponse {
     message: string;
     wallet_address: string;
 }
@@ -638,7 +553,7 @@ class WalletAPI {
             }
 
             return data;
-        } catch (error) {
+        } catch {
             return {
                 success: false,
                 error: {
@@ -706,7 +621,7 @@ export interface Invoice {
     updated_at: string;
 }
 
-export interface InvoiceListResponse {
+interface InvoiceListResponse {
     invoices: Invoice[];
     total: number;
     page: number;
@@ -714,14 +629,14 @@ export interface InvoiceListResponse {
     total_pages: number;
 }
 
-export interface RepeatBuyerCheckResponse {
+interface RepeatBuyerCheckResponse {
     is_repeat_buyer: boolean;
     message: string;
     previous_transactions?: number;
     funding_limit: number;
 }
 
-export interface CurrencyConvertResponse {
+interface CurrencyConvertResponse {
     original_currency: string;
     original_amount: number;
     target_currency: string;
@@ -777,7 +692,7 @@ class InvoiceAPI {
             }
 
             return data;
-        } catch (error) {
+        } catch {
             return {
                 success: false,
                 error: {
@@ -853,7 +768,7 @@ class InvoiceAPI {
             }
 
             return { success: true, data };
-        } catch (error) {
+        } catch {
             return {
                 success: false,
                 error: {
@@ -887,6 +802,6 @@ class InvoiceAPI {
 export const userAPI = new UserAPI(API_BASE_URL);
 export const invoiceAPI = new InvoiceAPI(API_BASE_URL);
 export const riskQuestionnaireAPI = new RiskQuestionnaireAPI(API_BASE_URL);
-export const marketplaceAPI = new MarketplaceAPI(API_BASE_URL);
+
 export const investmentAPI = new InvestmentAPI(API_BASE_URL);
 export const walletAPI = new WalletAPI(API_BASE_URL);

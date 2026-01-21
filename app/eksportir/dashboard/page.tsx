@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
-import { userAPI, MitraApplicationResponse, UserProfileResponse } from '@/lib/api/user';
+import { userAPI, MitraApplicationResponse } from '@/lib/api/user';
 
 type MitraApplicationStatus = 'not_applied' | 'pending' | 'approved' | 'rejected';
 
@@ -17,11 +16,6 @@ interface MitraState {
   rejectionReason?: string;
 }
 
-interface KYCStatus {
-  emailVerified: boolean;
-  kycCompleted: boolean;
-  isVerified: boolean;
-}
 
 // Component untuk status not_applied - belum mengisi profil bisnis
 function NotAppliedBanner() {
@@ -115,30 +109,14 @@ function RejectedBanner({ reason, application }: { reason?: string; application?
 
 function MitraDashboardContent() {
   const { user } = useAuth();
-  const router = useRouter();
   const [mitraState, setMitraState] = useState<MitraState | null>(null);
-  const [kycStatus, setKycStatus] = useState<KYCStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAllStatus = async () => {
+    const fetchMitraStatus = async () => {
       try {
-        // Fetch KYC status and mitra status in parallel
-        const [profileRes, mitraRes] = await Promise.all([
-          userAPI.getProfile(),
-          userAPI.getMitraStatus()
-        ]);
+        const mitraRes = await userAPI.getMitraStatus();
 
-        // Set KYC status
-        if (profileRes.success && profileRes.data) {
-          setKycStatus({
-            emailVerified: profileRes.data.email_verified,
-            kycCompleted: profileRes.data.profile_completed,
-            isVerified: profileRes.data.is_verified,
-          });
-        }
-
-        // Set mitra status
         if (mitraRes.success && mitraRes.data) {
           setMitraState({
             hasApplied: true,
@@ -153,7 +131,7 @@ function MitraDashboardContent() {
           });
         }
       } catch (err) {
-        console.error('Failed to fetch status', err);
+        console.error('Failed to fetch mitra status', err);
         setMitraState({
           hasApplied: false,
           status: 'not_applied',
@@ -162,7 +140,7 @@ function MitraDashboardContent() {
         setLoading(false);
       }
     };
-    fetchAllStatus();
+    fetchMitraStatus();
   }, []);
 
   if (loading) {
@@ -357,32 +335,10 @@ function MitraDashboardContent() {
             <div className="p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl backdrop-blur-sm">
               <h2 className="text-lg font-semibold text-white mb-4">Status Verifikasi</h2>
               <div className="space-y-3">
-                {/* KYC Status */}
-                <div className={`flex items-center justify-between p-3 rounded-lg ${
-                  kycStatus?.kycCompleted 
-                    ? 'bg-green-500/10 border border-green-500/20' 
-                    : 'bg-slate-700/30 border border-slate-600/30'
-                }`}>
-                  <div className="flex items-center space-x-3">
-                    {kycStatus?.kycCompleted ? (
-                      <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    )}
-                    <span className={`text-sm ${kycStatus?.kycCompleted ? 'text-green-400' : 'text-slate-500'}`}>
-                      {kycStatus?.kycCompleted ? 'KYC Terverifikasi' : 'KYC Belum Lengkap'}
-                    </span>
-                  </div>
-                </div>
-
                 {/* Company Approval Status */}
                 <div className={`flex items-center justify-between p-3 rounded-lg ${
-                  mitraState?.status === 'approved' 
-                    ? 'bg-green-500/10 border border-green-500/20' 
+                  mitraState?.status === 'approved'
+                    ? 'bg-green-500/10 border border-green-500/20'
                     : mitraState?.status === 'pending'
                       ? 'bg-yellow-500/10 border border-yellow-500/20'
                       : mitraState?.status === 'rejected'
@@ -408,33 +364,33 @@ function MitraDashboardContent() {
                       </svg>
                     )}
                     <span className={`text-sm ${
-                      mitraState?.status === 'approved' 
-                        ? 'text-green-400' 
+                      mitraState?.status === 'approved'
+                        ? 'text-green-400'
                         : mitraState?.status === 'pending'
                           ? 'text-yellow-400'
                           : mitraState?.status === 'rejected'
                             ? 'text-red-400'
                             : 'text-slate-500'
                     }`}>
-                      {mitraState?.status === 'approved' 
-                        ? 'Perusahaan Approved' 
+                      {mitraState?.status === 'approved'
+                        ? 'Profil Bisnis Terverifikasi'
                         : mitraState?.status === 'pending'
-                          ? 'Menunggu Approval'
+                          ? 'Menunggu Verifikasi'
                           : mitraState?.status === 'rejected'
-                            ? 'Perusahaan Ditolak'
-                            : 'Belum Apply'}
+                            ? 'Profil Bisnis Ditolak'
+                            : 'Belum Mengajukan'}
                     </span>
                   </div>
                 </div>
 
                 {/* Tokenization Ready Status */}
                 <div className={`flex items-center justify-between p-3 rounded-lg ${
-                  kycStatus?.kycCompleted && mitraState?.status === 'approved'
-                    ? 'bg-cyan-500/10 border border-cyan-500/20' 
+                  mitraState?.status === 'approved'
+                    ? 'bg-cyan-500/10 border border-cyan-500/20'
                     : 'bg-slate-700/30 border border-slate-600/30'
                 }`}>
                   <div className="flex items-center space-x-3">
-                    {kycStatus?.kycCompleted && mitraState?.status === 'approved' ? (
+                    {mitraState?.status === 'approved' ? (
                       <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
@@ -444,9 +400,9 @@ function MitraDashboardContent() {
                       </svg>
                     )}
                     <span className={`text-sm ${
-                      kycStatus?.kycCompleted && mitraState?.status === 'approved' ? 'text-cyan-400' : 'text-slate-500'
+                      mitraState?.status === 'approved' ? 'text-cyan-400' : 'text-slate-500'
                     }`}>
-                      {kycStatus?.kycCompleted && mitraState?.status === 'approved' ? 'Siap Tokenisasi' : 'Belum Siap Tokenisasi'}
+                      {mitraState?.status === 'approved' ? 'Siap Tokenisasi Invoice' : 'Belum Siap Tokenisasi'}
                     </span>
                   </div>
                 </div>

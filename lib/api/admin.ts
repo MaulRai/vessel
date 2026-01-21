@@ -15,7 +15,7 @@ export interface UserListItem {
     created_at: string;
 }
 
-export interface ListUsersResponse {
+interface ListUsersResponse {
     users: UserListItem[];
     total: number;
     page: number;
@@ -23,7 +23,7 @@ export interface ListUsersResponse {
     total_pages: number;
 }
 
-export interface GrantBalanceRequest {
+interface GrantBalanceRequest {
     user_id: string;
     amount: number;
 }
@@ -81,7 +81,7 @@ class AdminAPI {
             }
 
             return data;
-        } catch (error) {
+        } catch {
             return {
                 success: false,
                 error: {
@@ -177,7 +177,7 @@ export interface MitraApplicationItem {
     };
 }
 
-export interface MitraApplicationsListResponse {
+interface MitraApplicationsListResponse {
     applications: MitraApplicationItem[];
     total: number;
     page: number;
@@ -210,7 +210,7 @@ export interface PendingInvoice {
     };
 }
 
-export interface PendingInvoicesResponse {
+interface PendingInvoicesResponse {
     invoices: PendingInvoice[];
     total: number;
     page: number;
@@ -263,7 +263,7 @@ export interface InvoiceReviewData {
     grade_suggestion: GradeSuggestion;
 }
 
-export interface ApproveInvoiceRequest {
+interface ApproveInvoiceRequest {
     grade: string;
     priority_interest_rate?: number;
     catalyst_interest_rate?: number;

@@ -2,7 +2,7 @@
 
 export type UserRole = 'investor' | 'mitra' | 'admin';
 
-export type MemberStatus = 'calon_anggota_pendana' | 'member_mitra' | 'admin';
+export type MemberStatus = 'calon_anggota_pendana' | 'member_mitra' | 'admin' | 'calon_anggota_mitra';
 
 export interface User {
   id: string;
@@ -46,6 +46,7 @@ export interface SendOTPRequest {
 export interface VerifyOTPRequest {
   email: string;
   code: string;
+  purpose: 'registration' | 'login' | 'password_reset';
 }
 
 export interface RegisterRequest {
@@ -53,9 +54,19 @@ export interface RegisterRequest {
   username: string;
   password: string;
   confirm_password: string;
-  role: UserRole;
   cooperative_agreement: boolean;
   otp_token: string;
+  // Mitra company fields
+  company_name: string;
+  company_type?: string;
+  npwp: string;
+  annual_revenue: string;
+  address?: string;
+  business_description?: string;
+  website_url?: string;
+  year_founded?: number;
+  key_products?: string;
+  export_markets?: string;
 }
 
 export interface LoginRequest {
@@ -65,6 +76,16 @@ export interface LoginRequest {
 
 export interface RefreshTokenRequest {
   refresh_token: string;
+}
+
+export interface GoogleAuthRequest {
+  id_token: string;
+}
+
+export interface GoogleAuthResponse {
+  email: string;
+  otp_token: string;
+  expires_in_minutes: number;
 }
 
 // Response Types
@@ -83,13 +104,13 @@ export interface APIError {
 
 export interface SendOTPResponse {
   message: string;
-  expires_at: string;
+  expires_in_minutes: number;
 }
 
 export interface VerifyOTPResponse {
-  verified: boolean;
   message: string;
-  token: string;
+  otp_token: string;
+  expires_in_minutes: number;
 }
 
 export interface LoginResponse {
@@ -99,7 +120,7 @@ export interface LoginResponse {
   expires_in: number;
 }
 
-export interface RegisterResponse extends LoginResponse { }
+export type RegisterResponse = LoginResponse;
 
 // Auth State
 export interface AuthState {

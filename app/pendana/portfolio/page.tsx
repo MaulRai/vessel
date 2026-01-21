@@ -32,7 +32,7 @@ function PortfolioContent() {
           setInvestments(investmentsRes.data.investments || []);
           setTotalPages(investmentsRes.data.total_pages || 1);
         }
-      } catch (err) {
+      } catch {
         setError('Gagal memuat data portfolio');
       } finally {
         setLoading(false);

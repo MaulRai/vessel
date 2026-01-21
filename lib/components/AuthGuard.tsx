@@ -172,22 +172,5 @@ export function AuthGuard({
 }
 
 // Higher Order Component untuk protected routes
-export function withAuth<P extends object>(
-  Component: React.ComponentType<P>,
-  options?: {
-    allowedRoles?: UserRole[];
-    redirectTo?: string;
-  }
-) {
-  return function ProtectedComponent(props: P) {
-    return (
-      <AuthGuard
-        allowedRoles={options?.allowedRoles}
-        redirectTo={options?.redirectTo}
-      >
-        <Component {...props} />
-      </AuthGuard>
-    );
-  };
-}
+
 

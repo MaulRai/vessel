@@ -1,11 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/lib/context/AuthContext';
-import { UserRole } from '@/lib/types/auth';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { authAPI } from '@/lib/api/auth';
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: { credential: string }) => void;
+          }) => void;
+          prompt: () => void;
+        };
+      };
+    };
+  }
+}
 
 type RegistrationStep = 'email' | 'otp' | 'details';
 
@@ -18,18 +35,90 @@ export default function RegisterPage() {
   const [otpCode, setOtpCode] = useState('');
   const [otpToken, setOtpToken] = useState('');
   const [username, setUsername] = useState('');
-  const [role, setRole] = useState<UserRole>('mitra');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [cooperativeAgreement, setCooperativeAgreement] = useState(false);
 
+  // Company fields (mitra-specific)
+  const [companyName, setCompanyName] = useState('');
+  const [companyType, setCompanyType] = useState('PT');
+  const [npwp, setNpwp] = useState('');
+  const [annualRevenue, setAnnualRevenue] = useState('');
+
   // UI state
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [otpExpiresAt, setOtpExpiresAt] = useState<string>('');
+
 
   const router = useRouter();
   const { sendOTP, verifyOTP, register } = useAuth();
+  const { t } = useLanguage();
+
+
+  // Google Sign-In handler
+  const handleGoogleCallback = useCallback(async (response: { credential: string }) => {
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const result = await authAPI.googleAuth({ id_token: response.credential });
+
+      if (result.success && result.data) {
+        // Set email and OTP token from Google auth
+        setEmail(result.data.email);
+        setOtpToken(result.data.otp_token);
+        // Skip directly to details step (no OTP needed)
+        setUsername('');
+        setPassword('');
+        setConfirmPassword('');
+        setCooperativeAgreement(false);
+        setCompanyName('');
+        setCompanyType('PT');
+        setNpwp('');
+        setAnnualRevenue('');
+        setStep('details');
+      } else {
+        setError(result.error?.message || 'Google authentication failed');
+      }
+    } catch {
+      setError('Failed to authenticate with Google');
+    }
+
+    setIsLoading(false);
+  }, []);
+
+  // Load Google Sign-In script
+  useEffect(() => {
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!googleClientId) return;
+
+    // Load Google Sign-In script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleGoogleCallback,
+        });
+      }
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, [handleGoogleCallback]);
+
+  const handleGoogleSignUp = () => {
+    if (window.google) {
+      window.google.accounts.id.prompt();
+    } else {
+      setError('Google Sign-In is not available');
+    }
+  };
 
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,10 +133,10 @@ export default function RegisterPage() {
     setIsLoading(false);
 
     if (response.success && response.data) {
-      setOtpExpiresAt(response.data.expires_at);
+
       setStep('otp');
     } else {
-      setError(response.error?.message || 'Gagal mengirim OTP. Silakan coba lagi.');
+      setError(response.error?.message || t('common.errorOccurred')); // Fallback
     }
   };
 
@@ -59,15 +148,32 @@ export default function RegisterPage() {
     const response = await verifyOTP({
       email: email,
       code: otpCode,
+      purpose: 'registration',
     });
 
     setIsLoading(false);
 
     if (response.success && response.data) {
-      setOtpToken(response.data.token);
+      setOtpToken(response.data.otp_token);
+      setUsername('');
+      setPassword('');
+      setConfirmPassword('');
+      setCooperativeAgreement(false);
+      setCompanyName('');
+      setCompanyType('PT');
+      setNpwp('');
+      setAnnualRevenue('');
+      setUsername('');
+      setPassword('');
+      setConfirmPassword('');
+      setCooperativeAgreement(false);
+      setCompanyName('');
+      setCompanyType('PT');
+      setNpwp('');
+      setAnnualRevenue('');
       setStep('details');
     } else {
-      setError(response.error?.message || 'Kode OTP tidak valid. Silakan coba lagi.');
+      setError(response.error?.message || t('common.errorOccurred'));
     }
   };
 
@@ -76,17 +182,32 @@ export default function RegisterPage() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Password tidak cocok');
+      setError(t('auth.passwordMatchError'));
       return;
     }
 
     if (password.length < 8) {
-      setError('Password minimal 8 karakter');
+      setError(t('auth.passwordLengthError'));
       return;
     }
 
     if (!cooperativeAgreement) {
-      setError('Anda harus menyetujui ketentuan keanggotaan koperasi');
+      setError(t('auth.terms'));
+      return;
+    }
+
+    if (!companyName.trim()) {
+      setError(t('auth.companyNameRequired') || 'Company name is required');
+      return;
+    }
+
+    if (npwp.length < 15 || npwp.length > 16) {
+      setError(t('auth.npwpError') || 'NPWP must be 15-16 characters');
+      return;
+    }
+
+    if (!annualRevenue) {
+      setError(t('auth.annualRevenueRequired') || 'Annual revenue is required');
       return;
     }
 
@@ -97,18 +218,21 @@ export default function RegisterPage() {
       username: username,
       password: password,
       confirm_password: confirmPassword,
-      role: role,
       cooperative_agreement: cooperativeAgreement,
       otp_token: otpToken,
+      company_name: companyName,
+      company_type: companyType,
+      npwp: npwp,
+      annual_revenue: annualRevenue,
     });
 
     setIsLoading(false);
 
     if (response.success) {
-      // Registrasi berhasil, redirect ke login page
-      router.push('/login?registered=true');
+      // Registrasi berhasil, redirect ke pending page
+      router.push('/eksportir/pending');
     } else {
-      setError(response.error?.message || 'Registrasi gagal. Silakan coba lagi.');
+      setError(response.error?.message || t('common.errorOccurred'));
     }
   };
 
@@ -124,11 +248,12 @@ export default function RegisterPage() {
     setIsLoading(false);
 
     if (response.success && response.data) {
-      setOtpExpiresAt(response.data.expires_at);
+
+
       setOtpCode('');
       setError('');
     } else {
-      setError(response.error?.message || 'Gagal mengirim ulang OTP.');
+      setError(response.error?.message || t('common.errorOccurred')); // Fallback
     }
   };
 
@@ -138,10 +263,10 @@ export default function RegisterPage() {
         <div key={s} className="flex items-center">
           <div
             className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${step === s
-                ? 'bg-cyan-500 text-white'
-                : ['email', 'otp', 'details'].indexOf(step) > index
-                  ? 'bg-cyan-500/30 text-cyan-300'
-                  : 'bg-slate-700 text-slate-400'
+              ? 'bg-cyan-500 text-white'
+              : ['email', 'otp', 'details'].indexOf(step) > index
+                ? 'bg-cyan-500/30 text-cyan-300'
+                : 'bg-slate-700 text-slate-400'
               }`}
           >
             {index + 1}
@@ -149,8 +274,8 @@ export default function RegisterPage() {
           {index < 2 && (
             <div
               className={`w-8 h-0.5 ${['email', 'otp', 'details'].indexOf(step) > index
-                  ? 'bg-cyan-500/50'
-                  : 'bg-slate-700'
+                ? 'bg-cyan-500/50'
+                : 'bg-slate-700'
                 }`}
             />
           )}
@@ -162,11 +287,11 @@ export default function RegisterPage() {
   const renderEmailStep = () => (
     <form onSubmit={handleSendOTP} className="space-y-4">
       <h2 className="text-xl font-semibold text-slate-100 mb-2">
-        Daftar sebagai Mitra/Eksportir
+        {t('auth.registerTitle')}
       </h2>
       <p className="text-slate-400 text-sm mb-4">
-        Halaman ini untuk eksportir yang ingin mengajukan pendanaan. Investor dapat langsung{' '}
-        <Link href="/pendana/connect" className="text-cyan-400 hover:text-cyan-300 underline">connect wallet</Link>.
+        {t('auth.registerSubtitle')}{' '}
+        <Link href="/pendana/connect" className="text-cyan-400 hover:text-cyan-300 underline">{t('auth.connectWallet')}</Link>.
       </p>
 
       {/* Error Message */}
@@ -179,7 +304,9 @@ export default function RegisterPage() {
       {/* Google Sign Up Button */}
       <button
         type="button"
-        className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-800 font-medium rounded-lg transition-all border border-slate-300 shadow-sm text-sm"
+        onClick={handleGoogleSignUp}
+        disabled={isLoading}
+        className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white hover:bg-slate-50 disabled:bg-slate-200 text-slate-800 font-medium rounded-lg transition-all border border-slate-300 shadow-sm text-sm"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -187,7 +314,7 @@ export default function RegisterPage() {
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
         </svg>
-        Daftar dengan Google
+        {t('auth.registerGoogle')}
       </button>
 
       {/* Divider */}
@@ -196,14 +323,14 @@ export default function RegisterPage() {
           <div className="w-full border-t border-slate-700"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-slate-800/50 text-slate-400 text-xs">atau</span>
+          <span className="px-2 bg-slate-800/50 text-slate-400 text-xs">{t('common.or')}</span>
         </div>
       </div>
 
       {/* Email Field */}
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1.5">
-          Email
+          {t('auth.email')}
         </label>
         <input
           type="email"
@@ -211,14 +338,14 @@ export default function RegisterPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full px-3 py-2.5 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm placeholder:text-slate-500"
-          placeholder="nama@perusahaan.com"
+          placeholder={t('auth.emailPlaceholder')}
           required
           disabled={isLoading}
         />
       </div>
 
       <p className="text-xs text-slate-400">
-        Kami akan mengirim kode verifikasi ke email Anda
+        {t('auth.otpInfo')}
       </p>
 
       {/* Submit Button */}
@@ -227,7 +354,7 @@ export default function RegisterPage() {
         disabled={isLoading}
         className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-medium py-2.5 px-4 rounded-lg transition-all text-sm shadow-lg shadow-cyan-900/50"
       >
-        {isLoading ? 'Mengirim...' : 'Kirim Kode OTP'}
+        {isLoading ? t('common.sending') : t('auth.sendOtp')}
       </button>
     </form>
   );
@@ -235,10 +362,10 @@ export default function RegisterPage() {
   const renderOTPStep = () => (
     <form onSubmit={handleVerifyOTP} className="space-y-4">
       <h2 className="text-xl font-semibold text-slate-100 mb-2">
-        Verifikasi Email
+        {t('auth.verifyEmail')}
       </h2>
       <p className="text-slate-400 text-sm mb-4">
-        Masukkan kode 6 digit yang dikirim ke <span className="text-cyan-400">{email}</span>
+        {t('auth.enterOtp')} <span className="text-cyan-400">{email}</span>
       </p>
 
       {/* Error Message */}
@@ -251,7 +378,7 @@ export default function RegisterPage() {
       {/* OTP Field */}
       <div>
         <label htmlFor="otpCode" className="block text-sm font-medium text-slate-300 mb-1.5">
-          Kode OTP
+          {t('auth.otpCode')}
         </label>
         <input
           type="text"
@@ -272,7 +399,7 @@ export default function RegisterPage() {
           onClick={() => setStep('email')}
           className="text-slate-400 hover:text-slate-300"
         >
-          Ubah email
+          {t('auth.changeEmail')}
         </button>
         <button
           type="button"
@@ -280,7 +407,7 @@ export default function RegisterPage() {
           disabled={isLoading}
           className="text-cyan-400 hover:text-cyan-300 disabled:text-slate-500"
         >
-          Kirim ulang kode
+          {t('auth.resendCode')}
         </button>
       </div>
 
@@ -290,7 +417,7 @@ export default function RegisterPage() {
         disabled={isLoading || otpCode.length !== 6}
         className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-medium py-2.5 px-4 rounded-lg transition-all text-sm shadow-lg shadow-cyan-900/50"
       >
-        {isLoading ? 'Memverifikasi...' : 'Verifikasi'}
+        {isLoading ? t('common.verifying') : t('auth.verify')}
       </button>
     </form>
   );
@@ -298,7 +425,7 @@ export default function RegisterPage() {
   const renderDetailsStep = () => (
     <form onSubmit={handleRegister} className="space-y-3">
       <h2 className="text-xl font-semibold text-slate-100 mb-3">
-        Lengkapi Data Anda
+        {t('auth.completeDetails')}
       </h2>
 
       {/* Error Message */}
@@ -311,7 +438,7 @@ export default function RegisterPage() {
       {/* Username Field */}
       <div>
         <label htmlFor="username" className="block text-sm font-medium text-slate-300 mb-1">
-          Username
+          {t('auth.username')}
         </label>
         <input
           type="text"
@@ -319,19 +446,94 @@ export default function RegisterPage() {
           value={username}
           onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
           className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm placeholder:text-slate-500"
-          placeholder="username_anda"
+          placeholder={t('auth.usernamePlaceholder')}
           required
           minLength={3}
           maxLength={50}
           disabled={isLoading}
         />
-        <p className="text-xs text-slate-500 mt-1">3-50 karakter, huruf kecil, angka, dan underscore</p>
+        <p className="text-xs text-slate-500 mt-1">{t('auth.usernameHint')}</p>
+      </div>
+
+      {/* Company Name */}
+      <div>
+        <label htmlFor="companyName" className="block text-sm font-medium text-slate-300 mb-1">
+          {t('auth.companyName') || 'Company Name'}
+        </label>
+        <input
+          type="text"
+          id="companyName"
+          value={companyName}
+          onChange={(e) => setCompanyName(e.target.value)}
+          className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm placeholder:text-slate-500"
+          placeholder={t('auth.companyNamePlaceholder') || 'PT Example Indonesia'}
+          required
+          disabled={isLoading}
+        />
+      </div>
+
+      {/* Company Type & NPWP */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label htmlFor="companyType" className="block text-sm font-medium text-slate-300 mb-1">
+            {t('auth.companyType') || 'Company Type'}
+          </label>
+          <select
+            id="companyType"
+            value={companyType}
+            onChange={(e) => setCompanyType(e.target.value)}
+            className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm"
+            disabled={isLoading}
+          >
+            <option value="PT">PT</option>
+            <option value="CV">CV</option>
+            <option value="UD">UD</option>
+            <option value="Firma">Firma</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="npwp" className="block text-sm font-medium text-slate-300 mb-1">
+            NPWP
+          </label>
+          <input
+            type="text"
+            id="npwp"
+            value={npwp}
+            onChange={(e) => setNpwp(e.target.value.replace(/\D/g, '').slice(0, 16))}
+            className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm placeholder:text-slate-500"
+            placeholder="15-16 digits"
+            required
+            disabled={isLoading}
+          />
+        </div>
+      </div>
+
+      {/* Annual Revenue */}
+      <div>
+        <label htmlFor="annualRevenue" className="block text-sm font-medium text-slate-300 mb-1">
+          {t('auth.annualRevenue') || 'Annual Revenue'}
+        </label>
+        <select
+          id="annualRevenue"
+          value={annualRevenue}
+          onChange={(e) => setAnnualRevenue(e.target.value)}
+          className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm"
+          required
+          disabled={isLoading}
+        >
+          <option value="">{t('auth.selectAnnualRevenue') || 'Select annual revenue'}</option>
+          <option value="< 1 Miliar">&lt; 1 Miliar</option>
+          <option value="1-5 Miliar">1-5 Miliar</option>
+          <option value="5-25 Miliar">5-25 Miliar</option>
+          <option value="25-50 Miliar">25-50 Miliar</option>
+          <option value="> 50 Miliar">&gt; 50 Miliar</option>
+        </select>
       </div>
 
       {/* Info: Mitra Only */}
       <div className="p-3 bg-teal-500/10 border border-teal-500/30 rounded-lg">
         <p className="text-xs text-teal-200">
-          <span className="font-semibold">Anda mendaftar sebagai Eksportir/Mitra.</span> Setelah registrasi, Anda dapat mengajukan pendanaan untuk invoice ekspor Anda.
+          {t('auth.exporterRoleInfo')}
         </p>
       </div>
 
@@ -339,7 +541,7 @@ export default function RegisterPage() {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-1">
-            Password
+            {t('auth.password')}
           </label>
           <input
             type="password"
@@ -347,7 +549,7 @@ export default function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm placeholder:text-slate-500"
-            placeholder="Min 8 karakter"
+            placeholder="Min 8 chars"
             required
             minLength={8}
             disabled={isLoading}
@@ -355,7 +557,7 @@ export default function RegisterPage() {
         </div>
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-300 mb-1">
-            Konfirmasi
+            {t('auth.confirmPassword')}
           </label>
           <input
             type="password"
@@ -363,7 +565,7 @@ export default function RegisterPage() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm placeholder:text-slate-500"
-            placeholder="Ulangi password"
+            placeholder={t('auth.confirmPasswordPlaceholder')}
             required
             minLength={8}
             disabled={isLoading}
@@ -382,7 +584,7 @@ export default function RegisterPage() {
           required
         />
         <label htmlFor="cooperativeAgreement" className="text-xs text-slate-300 leading-relaxed cursor-pointer">
-          Saya setuju mendaftar menjadi Anggota Koperasi Jasa VESSEL dan tunduk pada AD/ART yang berlaku.
+          {t('auth.terms')}
         </label>
       </div>
 
@@ -392,7 +594,7 @@ export default function RegisterPage() {
         disabled={isLoading}
         className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-medium py-2.5 px-4 rounded-lg transition-all text-sm shadow-lg shadow-cyan-900/50"
       >
-        {isLoading ? 'Memproses...' : 'Daftar & Lanjutkan'}
+        {isLoading ? t('common.processing') : t('auth.registerAndContinue')}
       </button>
     </form>
   );
@@ -402,7 +604,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-5xl h-[calc(100vh-2rem)] max-h-[700px] bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
         <div className="grid md:grid-cols-2 h-full">
           {/* Left Column - Form */}
-          <div className="p-6 md:p-8 lg:p-10 flex flex-col justify-center overflow-y-auto">
+          <div className="p-6 md:p-8 lg:p-10 flex flex-col justify-center overflow-y-auto scrollbar-hide">
             <div className="max-w-sm mx-auto w-full">
               {/* Logo/Brand */}
               <div className="mb-6 flex items-center space-x-2">
@@ -427,12 +629,12 @@ export default function RegisterPage() {
               {/* Login Link */}
               <div className="text-center pt-4">
                 <p className="text-slate-400 text-sm">
-                  Sudah punya akun?{' '}
+                  {t('auth.alreadyRegistered')}{' '}
                   <Link
                     href="/login"
                     className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
                   >
-                    Masuk
+                    {t('auth.login')}
                   </Link>
                 </p>
               </div>
@@ -444,13 +646,13 @@ export default function RegisterPage() {
                     <svg className="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                     </svg>
-                    <span>Koneksi Aman</span>
+                    <span>{t('auth.secureConnection')}</span>
                   </div>
                   <div className="flex items-center space-x-1">
                     <svg className="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    <span>Terdaftar & Berizin</span>
+                    <span>{t('auth.registeredLicensed')}</span>
                   </div>
                 </div>
               </div>

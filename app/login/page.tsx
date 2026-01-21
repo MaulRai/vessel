@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/lib/context/AuthContext';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 function LoginForm() {
   const [emailOrUsername, setEmailOrUsername] = useState('');
@@ -15,12 +16,13 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, loginAsDemo } = useAuth();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {
-      setSuccessMessage('Registrasi berhasil! Silakan login dengan akun Anda.');
+      setSuccessMessage(t('auth.registrationSuccess'));
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,17 +41,20 @@ function LoginForm() {
       const user = response.data.user;
       if (user.role === 'admin') {
         router.push('/dashboard/admin');
-      } else if (!user.profile_completed) {
-        router.push('/complete-profile');
-      } else if (user.role === 'investor') {
-        router.push('/pendana/dashboard');
       } else if (user.role === 'mitra') {
-        router.push('/eksportir/dashboard');
+        if (user.member_status === 'member_mitra' || user.member_status === 'admin') {
+          router.push('/eksportir/dashboard');
+        } else {
+          router.push('/eksportir/pending');
+        }
+      } else if (user.role === 'investor') {
+        // Investor seharusnya login via wallet, redirect ke connect page
+        router.push('/pendana/connect');
       } else {
         router.push('/');
       }
     } else {
-      setError(response.error?.message || 'Login gagal. Silakan coba lagi.');
+      setError(response.error?.message || t('auth.loginError'));
     }
   };
 
@@ -66,7 +71,7 @@ function LoginForm() {
       }
     } catch (err) {
       console.error(err);
-      setError('Gagal masuk sebagai demo.');
+      setError(t('auth.demoError'));
     } finally {
       setIsLoading(false);
     }
@@ -89,11 +94,11 @@ function LoginForm() {
       {/* Login Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <h2 className="text-xl font-semibold text-slate-100 mb-2">
-          Masuk ke Akun Mitra
+          {t('auth.loginTitle')}
         </h2>
         <p className="text-slate-400 text-sm mb-4">
-          Halaman ini khusus untuk eksportir/mitra. Investor dapat langsung{' '}
-          <Link href="/pendana/connect" className="text-cyan-400 hover:text-cyan-300 underline">connect wallet</Link>.
+          {t('auth.loginSubtitle')}{' '}
+          <Link href="/pendana/connect" className="text-cyan-400 hover:text-cyan-300 underline">{t('auth.connectWallet')}</Link>.
         </p>
 
         {/* Success Message */}
@@ -121,7 +126,7 @@ function LoginForm() {
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
           </svg>
-          Masuk dengan Google
+          {t('auth.loginGoogle')}
         </button>
 
         {/* Demo Account - Eksportir Only */}
@@ -131,7 +136,7 @@ function LoginForm() {
           disabled={isLoading}
           className="w-full px-4 py-2.5 bg-teal-600/20 border border-teal-500/40 text-teal-100 hover:bg-teal-600/30 rounded-lg text-sm font-medium transition-all"
         >
-          Login dengan akun demo Eksportir
+          {t('auth.loginDemoExporter')}
         </button>
 
         {/* Divider */}
@@ -140,7 +145,7 @@ function LoginForm() {
             <div className="w-full border-t border-slate-700"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-slate-800/50 text-slate-400 text-xs">atau</span>
+            <span className="px-2 bg-slate-800/50 text-slate-400 text-xs">{t('common.or')}</span>
           </div>
         </div>
 
@@ -150,7 +155,7 @@ function LoginForm() {
             htmlFor="emailOrUsername"
             className="block text-sm font-medium text-slate-300 mb-1.5"
           >
-            Email atau Username
+            {t('auth.emailOrUsernameLabel')}
           </label>
           <input
             type="text"
@@ -158,7 +163,7 @@ function LoginForm() {
             value={emailOrUsername}
             onChange={(e) => setEmailOrUsername(e.target.value)}
             className="w-full px-3 py-2.5 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm placeholder:text-slate-500"
-            placeholder="nama@perusahaan.com atau username"
+            placeholder={t('auth.emailOrUsernamePlaceholder')}
             required
             disabled={isLoading}
           />
@@ -170,7 +175,7 @@ function LoginForm() {
             htmlFor="password"
             className="block text-sm font-medium text-slate-300 mb-1.5"
           >
-            Password
+            {t('auth.password')}
           </label>
           <input
             type="password"
@@ -178,7 +183,7 @@ function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-3 py-2.5 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-slate-100 text-sm placeholder:text-slate-500"
-            placeholder="Masukkan password"
+            placeholder={t('auth.passwordPlaceholder')}
             required
             disabled={isLoading}
           />
@@ -190,7 +195,7 @@ function LoginForm() {
             href="/forgot-password"
             className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
           >
-            Lupa password?
+            {t('auth.forgotPassword')}
           </Link>
         </div>
 
@@ -200,18 +205,18 @@ function LoginForm() {
           disabled={isLoading}
           className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-medium py-2.5 px-4 rounded-lg transition-all text-sm shadow-lg shadow-cyan-900/50"
         >
-          {isLoading ? 'Memproses...' : 'Masuk'}
+          {isLoading ? t('common.processing') : t('auth.login')}
         </button>
 
         {/* Register Link */}
         <div className="text-center pt-2">
           <p className="text-slate-400 text-sm">
-            Belum punya akun?{' '}
+            {t('auth.notRegistered')}{' '}
             <Link
               href="/register"
               className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
             >
-              Daftar
+              {t('auth.register')}
             </Link>
           </p>
         </div>
@@ -224,13 +229,13 @@ function LoginForm() {
             <svg className="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
             </svg>
-            <span>Koneksi Aman</span>
+            <span>{t('auth.secureConnection')}</span>
           </div>
           <div className="flex items-center space-x-1">
             <svg className="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Terdaftar & Berizin</span>
+            <span>{t('auth.registeredLicensed')}</span>
           </div>
         </div>
       </div>

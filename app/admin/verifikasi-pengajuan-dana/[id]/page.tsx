@@ -126,6 +126,15 @@ export default function VerifikasiPengajuanDanaDetail() {
   const [status, setStatus] = useState<SubmissionDetail['status']>(submission?.status ?? 'Menunggu Verifikasi');
   const [toast, setToast] = useState<string | null>(null);
 
+  const statusBadge = useMemo(
+    () => (
+      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${badgeStyles[status]}`}>
+        {status}
+      </span>
+    ),
+    [status]
+  );
+
   if (!submission) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-center px-4">
@@ -147,10 +156,10 @@ export default function VerifikasiPengajuanDanaDetail() {
       prev.map((doc) =>
         doc.id === targetId
           ? {
-              ...doc,
-              status: nextStatus,
-              note: nextStatus === 'valid' ? '' : doc.note
-            }
+            ...doc,
+            status: nextStatus,
+            note: nextStatus === 'valid' ? '' : doc.note
+          }
           : doc
       )
     );
@@ -180,14 +189,7 @@ export default function VerifikasiPengajuanDanaDetail() {
     setRotation(0);
   };
 
-  const statusBadge = useMemo(
-    () => (
-      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${badgeStyles[status]}`}>
-        {status}
-      </span>
-    ),
-    [status]
-  );
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-8 px-4">
@@ -319,21 +321,19 @@ export default function VerifikasiPengajuanDanaDetail() {
                     <div className="flex flex-wrap gap-3 mt-3">
                       <button
                         onClick={() => handleDocStatus(doc.id, 'valid')}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                          doc.status === 'valid'
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
-                        }`}
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${doc.status === 'valid'
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+                          }`}
                       >
                         Valid
                       </button>
                       <button
                         onClick={() => handleDocStatus(doc.id, 'revisi')}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                          doc.status === 'revisi'
-                            ? 'bg-rose-500 text-white'
-                            : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
-                        }`}
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${doc.status === 'revisi'
+                          ? 'bg-rose-500 text-white'
+                          : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+                          }`}
                       >
                         Revisi
                       </button>
@@ -366,7 +366,7 @@ export default function VerifikasiPengajuanDanaDetail() {
                   Setujui & Buka Pendanaan
                 </button>
                 <p className="text-xs text-slate-500">
-                  Tombol hanya aktif bila seluruh dokumen telah valid. Sistem otomatis memanggil smart contract minting ketika status berubah menjadi "Open for Investment".
+                  Tombol hanya aktif bila seluruh dokumen telah valid. Sistem otomatis memanggil smart contract minting ketika status berubah menjadi &quot;Open for Investment&quot;.
                 </p>
               </div>
             </article>

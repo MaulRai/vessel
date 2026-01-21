@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useInView, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTime, useTransform } from 'framer-motion';
-import { MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
+import { LanguageSwitcher } from '@/lib/components/LanguageSwitcher';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -49,6 +51,7 @@ function CountUp({ target, start }: { target: number; start: boolean }) {
 
 export default function LandingPage() {
   const { isAuthenticated, user } = useAuth();
+  const { t } = useLanguage();
   const prefersReduced = useReducedMotion();
   const heroRef = useRef<HTMLDivElement | null>(null);
   const featuresRef = useRef<HTMLDivElement | null>(null);
@@ -112,14 +115,12 @@ export default function LandingPage() {
   const heroTitle = useReveal(0.05);
   const heroSub = useReveal(0.1);
   const heroCta = useReveal(0.15);
-  const stats = useMemo(() => (
-    [
-      { value: 3, suffix: 'M+', label: 'Total Volume', prefix: '$' },
-      { value: 500, suffix: '+', label: 'Eksportir' },
-      { value: 12, suffix: '%', label: 'Rerata Imbal Hasil' },
-      { value: 100, suffix: '%', label: 'On-Chain' },
-    ]
-  ), []);
+  const getStats = () => [
+    { value: 3, suffix: 'M+', labelKey: 'landing.totalVolume', prefix: '$' },
+    { value: 500, suffix: '+', labelKey: 'landing.exporters' },
+    { value: 12, suffix: '%', labelKey: 'landing.avgYield' },
+    { value: 100, suffix: '%', labelKey: 'landing.onChain' },
+  ];
 
   const getDashboardLink = () => {
     if (!user) return '/login';
@@ -151,11 +152,12 @@ export default function LandingPage() {
               />
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">Fitur</a>
-              <a href="#how-it-works" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">Cara Kerja</a>
-              <a href="#security" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">Keamanan</a>
+              <a href="#features" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">{t('landing.features')}</a>
+              <a href="#how-it-works" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">{t('landing.howItWorks')}</a>
+              <a href="#security" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">{t('landing.security')}</a>
             </div>
             <div className="flex items-center space-x-4">
+              <LanguageSwitcher />
               {isAuthenticated ? (
                 <Link
                   href={getDashboardLink()}
@@ -169,13 +171,13 @@ export default function LandingPage() {
                     href="/login"
                     className="text-slate-300 hover:text-white transition-colors text-sm font-medium"
                   >
-                    Login
+                    {t('auth.login')}
                   </Link>
                   <Link
                     href="/register"
-                    className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-cyan-500/25 ring-1 ring-white/10"
+                    className="px-6 py-2.5 min-w-[140px] text-center bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-cyan-500/25 ring-1 ring-white/10"
                   >
-                    Get Started
+                    {t('landing.getStarted')}
                   </Link>
                 </>
               )}
@@ -197,7 +199,7 @@ export default function LandingPage() {
                 className="inline-flex items-center space-x-2 px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-full mb-8 backdrop-blur-sm shadow-xl shadow-cyan-900/10 hover:border-cyan-500/30 transition-colors"
               >
                 <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
-                <span className="text-sm text-slate-300 font-medium">Powered by Lisk Blockchain</span>
+                <span className="text-sm text-slate-300 font-medium">{t('landing.poweredBy')}</span>
               </motion.div>
 
               <motion.h1
@@ -213,10 +215,10 @@ export default function LandingPage() {
                     backgroundImage: useMotionTemplate`linear-gradient(90deg, hsl(${heroHueA} 80% 60%), hsl(${heroHueB} 75% 58%), hsl(${heroHueA} 70% 55%))`,
                   }}
                 >
-                  Pembiayaan Ekspor
+                  {t('landing.heroTitle1')}
                 </motion.span>
                 <br />
-                <span className="text-white">Terdesentralisasi</span>
+                <span className="text-white">{t('landing.heroTitle2')}</span>
               </motion.h1>
 
               <motion.p
@@ -226,8 +228,7 @@ export default function LandingPage() {
                 transition={heroSub.transition}
                 className="text-md md:text-lg text-slate-400 max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed border-l-0 lg:border-l-2 border-slate-800 pl-0 lg:pl-6 text-center lg:text-left"
               >
-                Platform Web3 pertama di Indonesia yang menghubungkan eksportir dengan investor global.
-                Transparansi on-chain penuh, keamanan smart contract, dan imbal hasil kompetitif.
+                {t('landing.heroSubtitle')}
               </motion.p>
 
               <motion.div
@@ -239,18 +240,18 @@ export default function LandingPage() {
               >
                 <Link
                   href="/register"
-                  className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-bold text-lg transition-all shadow-xl shadow-cyan-500/20 ring-1 ring-white/20 flex items-center justify-center space-x-2"
+                  className="group w-full sm:w-auto min-w-[200px] px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-bold text-lg transition-all shadow-xl shadow-cyan-500/20 ring-1 ring-white/20 flex items-center justify-center space-x-2"
                 >
-                  <span>Mulai Sekarang</span>
+                  <span>{t('landing.startNow')}</span>
                   <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </Link>
                 <a
                   href="#how-it-works"
-                  className="w-full sm:w-auto px-8 py-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 rounded-xl font-bold text-lg transition-all backdrop-blur-sm text-center text-slate-300 hover:text-white"
+                  className="w-full sm:w-auto min-w-[200px] px-8 py-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 rounded-xl font-bold text-lg transition-all backdrop-blur-sm text-center text-slate-300 hover:text-white"
                 >
-                  Pelajari Lebih Lanjut
+                  {t('landing.learnMore')}
                 </a>
               </motion.div>
 
@@ -261,12 +262,12 @@ export default function LandingPage() {
                 transition={{ duration: 0.6, ease }}
                 className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-slate-800/50"
               >
-                {stats.map((stat, i) => (
-                  <div key={stat.label} className="space-y-1">
+                {getStats().map((stat) => (
+                  <div key={stat.labelKey} className="space-y-1">
                     <div className="text-2xl md:text-3xl font-bold text-white">
                       {stat.prefix || ''}<CountUp target={stat.value} start={statsInView} />{stat.suffix}
                     </div>
-                    <div className="text-sm text-slate-500 font-medium uppercase tracking-wider">{stat.label}</div>
+                    <div className="text-sm text-slate-500 font-medium uppercase tracking-wider">{t(stat.labelKey)}</div>
                   </div>
                 ))}
               </motion.div>
@@ -307,7 +308,7 @@ export default function LandingPage() {
                 />
                 <div className="flex items-center justify-between mb-8">
                   <div>
-                    <div className="text-xs text-slate-400 uppercase tracking-widest mb-1">Current Yield</div>
+                    <div className="text-xs text-slate-400 uppercase tracking-widest mb-1">{t('landing.currentYield')}</div>
                     <div className="text-3xl font-bold text-cyan-400">12.5% APY</div>
                   </div>
                   <div className="w-12 h-12 bg-cyan-500/10 rounded-full flex items-center justify-center">
@@ -326,7 +327,7 @@ export default function LandingPage() {
                     />
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">Pool Filled</span>
+                    <span className="text-slate-400">{t('landing.poolFilled')}</span>
                     <span className="text-white font-medium">75%</span>
                   </div>
                 </div>
@@ -337,7 +338,7 @@ export default function LandingPage() {
                     transition={{ duration: 0.45, ease }}
                     className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50"
                   >
-                    <div className="text-xs text-slate-400 mb-1">Risk Rating</div>
+                    <div className="text-xs text-slate-400 mb-1">{t('landing.riskRating')}</div>
                     <div className="text-lg font-bold text-emerald-400">A+ (Low)</div>
                   </motion.div>
                   <motion.div
@@ -346,8 +347,8 @@ export default function LandingPage() {
                     transition={{ duration: 0.45, ease, delay: 0.06 }}
                     className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50"
                   >
-                    <div className="text-xs text-slate-400 mb-1">Term</div>
-                    <div className="text-lg font-bold text-white">45 Days</div>
+                    <div className="text-xs text-slate-400 mb-1">{t('landing.term')}</div>
+                    <div className="text-lg font-bold text-white">45 {t('common.days')}</div>
                   </motion.div>
                 </div>
               </motion.div>
@@ -371,43 +372,45 @@ export default function LandingPage() {
             className="text-center mb-8 md:sticky md:top-24"
           >
             <h2 className="text-3xl md:text-5xl font-bold mb-3">
-              Dua Sisi, <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Satu Platform</span>
+              {t('landing.twoSides')} <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{t('landing.onePlatform')}</span>
             </h2>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Baik Anda eksportir yang membutuhkan modal kerja maupun investor yang mencari imbal hasil, VESSEL hadir untuk Anda.
+              {t('landing.twoSidesSubtitle')}
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-8">
             {[
               {
-                title: 'Untuk Investor',
+                titleKey: 'landing.forInvestor',
                 color: 'cyan',
                 blur: 'from-cyan-500/5',
                 img: '/assets/landing/investor.png',
                 bulletColor: 'cyan',
-                bullets: [
-                  'Langsung connect wallet, tanpa registrasi',
-                  'Diversifikasi portofolio otomatis',
-                  'Transparansi on-chain real-time',
-                  'Opsi penarikan yang fleksibel',
+                bulletKeys: [
+                  'landing.investorBullet1',
+                  'landing.investorBullet2',
+                  'landing.investorBullet3',
+                  'landing.investorBullet4',
                 ],
-                cta: 'Connect Wallet',
+                descKey: 'landing.investorDesc',
+                ctaKey: 'landing.connectWallet',
                 href: '/pendana/connect',
               },
               {
-                title: 'Untuk Eksportir',
+                titleKey: 'landing.forExporter',
                 color: 'teal',
                 blur: 'from-teal-500/5',
                 img: '/assets/landing/exporter.png',
                 bulletColor: 'teal',
-                bullets: [
-                  'Pencairan dana dalam 48 jam',
-                  'Invoice ditokenisasi sebagai NFT',
-                  'Bunga mulai 8% p.a.',
-                  'Tanpa agunan tambahan',
+                bulletKeys: [
+                  'landing.exporterBullet1',
+                  'landing.exporterBullet2',
+                  'landing.exporterBullet3',
+                  'landing.exporterBullet4',
                 ],
-                cta: 'Ajukan Pendanaan',
+                descKey: 'landing.exporterDesc',
+                ctaKey: 'landing.applyFunding',
                 href: '/register',
               },
             ].map((card, idx) => {
@@ -415,7 +418,7 @@ export default function LandingPage() {
               const dimClass = active ? 'opacity-100 blur-0 scale-[1.03] border-opacity-70' : 'opacity-70 blur-[1px]';
               return (
                 <motion.div
-                  key={card.title}
+                  key={card.titleKey}
                   initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease, delay: idx * 0.1 }}
@@ -430,31 +433,29 @@ export default function LandingPage() {
                       animate={active ? { rotate: 0, y: 0, scale: 1.03 } : { rotate: 0, y: 4, scale: 1 }}
                       transition={{ duration: 0.45, ease }}
                     >
-                      <Image src={card.img} alt={card.title} width={64} height={64} className="w-12 h-12 object-contain" />
+                      <Image src={card.img} alt={t(card.titleKey)} width={64} height={64} className="w-12 h-12 object-contain" />
                     </motion.div>
-                    <h3 className="text-3xl font-bold mb-2 text-white">{card.title}</h3>
+                    <h3 className="text-3xl font-bold mb-2 text-white">{t(card.titleKey)}</h3>
                     <p className="text-slate-400 text-md mb-4 leading-relaxed">
-                      {idx === 0
-                        ? 'Investasikan pada invoice ekspor yang telah diverifikasi dengan imbal hasil hingga 15% per tahun. Akses langsung ke yield real-world asset (RWA).'
-                        : 'Dapatkan modal kerja cepat dengan menjaminkan invoice ekspor Anda. Persetujuan cepat, bunga kompetitif, tanpa agunan tambahan.'}
+                      {t(card.descKey)}
                     </p>
                     <ul className="space-y-4 mb-10">
-                      {card.bullets.map((item) => (
-                        <li key={item} className="flex items-center space-x-3 text-slate-300">
+                      {card.bulletKeys.map((key) => (
+                        <li key={key} className="flex items-center space-x-3 text-slate-300">
                           <div className={`w-6 h-6 rounded-full ${card.color === 'cyan' ? 'bg-cyan-500/10' : 'bg-teal-500/10'} flex items-center justify-center flex-shrink-0`}>
                             <svg className={`w-3.5 h-3.5 ${card.color === 'cyan' ? 'text-cyan-400' : 'text-teal-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
                           </div>
-                          <span className="font-medium">{item}</span>
+                          <span className="font-medium">{t(key)}</span>
                         </li>
                       ))}
                     </ul>
                     <Link
                       href={card.href}
-                      className={`inline-flex items-center space-x-2 font-bold tracking-wide transition-colors ${card.color === 'cyan' ? 'text-cyan-400 hover:text-cyan-300' : 'text-teal-400 hover:text-teal-300'}`}
+                      className={`inline-flex items-center space-x-2 font-bold tracking-wide transition-colors ${card.color === 'cyan' ? 'text-cyan-400 hover:text-cyan-300' : 'text-teal-400 hover:text-teal-300'} min-w-[160px]`}
                     >
-                      <span>{card.cta}</span>
+                      <span>{t(card.ctaKey)}</span>
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
@@ -482,10 +483,10 @@ export default function LandingPage() {
             className="text-center mb-8 md:mb-20"
           >
             <h2 className="text-3xl md:text-5xl font-bold mb-3 md:mb-6">
-              Cara <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Kerja</span>
+              {t('landing.howItWorksTitle')} <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{t('landing.howItWorksHighlight')}</span>
             </h2>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Proses sederhana yang didukung teknologi blockchain untuk efisiensi dan kepercayaan maksimum.
+              {t('landing.howItWorksSubtitle')}
             </p>
           </motion.div>
 
@@ -499,32 +500,32 @@ export default function LandingPage() {
             {[
               {
                 step: '01',
-                title: 'Verifikasi',
-                desc: 'Eksportir mendaftar dan melewati verifikasi identitas serta dokumen yang ketat.',
+                titleKey: 'landing.step1Title',
+                descKey: 'landing.step1Desc',
                 icon: (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 ),
               },
               {
                 step: '02',
-                title: 'Tokenisasi',
-                desc: 'Invoice divalidasi dan ditokenisasi sebagai NFT di blockchain Lisk.',
+                titleKey: 'landing.step2Title',
+                descKey: 'landing.step2Desc',
                 icon: (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 ),
               },
               {
                 step: '03',
-                title: 'Pendanaan',
-                desc: 'Investor memilih pool dan tranche yang sesuai dengan tujuan investasi.',
+                titleKey: 'landing.step3Title',
+                descKey: 'landing.step3Desc',
                 icon: (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                 ),
               },
               {
                 step: '04',
-                title: 'Distribusi',
-                desc: 'Dana dicairkan ke eksportir, dan imbal hasil didistribusikan otomatis.',
+                titleKey: 'landing.step4Title',
+                descKey: 'landing.step4Desc',
                 icon: (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 ),
@@ -555,8 +556,8 @@ export default function LandingPage() {
                         {item.icon}
                       </svg>
                     </motion.div>
-                    <h3 className="text-xl font-bold mb-3 text-white relative z-10">{item.title}</h3>
-                    <p className="text-slate-400 text-sm leading-relaxed relative z-10">{item.desc}</p>
+                    <h3 className="text-xl font-bold mb-3 text-white relative z-10">{t(item.titleKey)}</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed relative z-10">{t(item.descKey)}</p>
                   </div>
                 </motion.div>
               );
@@ -580,7 +581,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, ease }}
                 className="text-3xl md:text-5xl font-bold mb-4"
               >
-                Keamanan <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Kelas Enterprise</span>
+                {t('landing.securityTitle')} <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{t('landing.securityHighlight')}</span>
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, y: 12 }}
@@ -589,18 +590,17 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, ease, delay: 0.08 }}
                 className="text-slate-400 text-md mb-2 leading-relaxed"
               >
-                Dibangun di atas blockchain Lisk dengan smart contract yang diaudit,
-                menghadirkan keamanan dan transparansi yang sulit ditandingi finansial tradisional.
+                {t('landing.securitySubtitle')}
               </motion.p>
               <div className="space-y-2">
                 {[
-                  { title: 'Smart Contract Ter-audit', desc: 'Kode diaudit oleh firma keamanan terkemuka.' },
-                  { title: 'Dompet Multi-Signature', desc: 'Dana diamankan oleh mekanisme multi-sig.' },
-                  { title: 'Kepatuhan Regulasi', desc: 'Pengguna terverifikasi sesuai regulasi lokal.' },
-                  { title: 'Dijamin Aset RWA', desc: 'Setiap investasi didukung aset invoice nyata.' },
+                  { titleKey: 'landing.security1Title', descKey: 'landing.security1Desc' },
+                  { titleKey: 'landing.security2Title', descKey: 'landing.security2Desc' },
+                  { titleKey: 'landing.security3Title', descKey: 'landing.security3Desc' },
+                  { titleKey: 'landing.security4Title', descKey: 'landing.security4Desc' },
                 ].map((item, i) => (
                   <motion.div
-                    key={item.title}
+                    key={item.titleKey}
                     initial={{ opacity: 0, y: 8 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: '-10% 0px' }}
@@ -613,8 +613,8 @@ export default function LandingPage() {
                       </svg>
                     </div>
                     <div>
-                      <h4 className="font-bold text-white text-lg mb-1">{item.title}</h4>
-                      <p className="text-slate-400">{item.desc}</p>
+                      <h4 className="font-bold text-white text-lg mb-1">{t(item.titleKey)}</h4>
+                      <p className="text-slate-400">{t(item.descKey)}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -679,26 +679,25 @@ export default function LandingPage() {
             />
             <div className="relative z-10">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-                Siap Memulai?
+                {t('landing.ctaTitle')}
               </h2>
               <p className="text-slate-300 text-lg mb-12 max-w-3xl mx-auto leading-relaxed">
-                Bergabunglah dengan ratusan eksportir dan investor yang memanfaatkan kekuatan blockchain untuk trade finance.
-                Rasakan masa depan pembiayaan hari ini.
+                {t('landing.ctaSubtitle')}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <Link
                   href="/register"
                   className="relative w-full sm:w-auto rounded-xl p-[3px] bg-gradient-to-r from-cyan-500 to-teal-500 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
-                  <span className="block rounded-[10px] bg-white text-slate-900 px-10 py-5 font-bold text-lg transition-all duration-200 ease-out hover:bg-transparent hover:text-white">
-                    Buat Akun Gratis
+                  <span className="block rounded-[10px] bg-white text-slate-900 px-10 py-5 font-bold text-lg transition-all duration-200 ease-out hover:bg-transparent hover:text-white min-w-[240px]">
+                    {t('landing.ctaExporter')}
                   </span>
                 </Link>
                 <Link
                   href="/login"
-                  className="w-full sm:w-auto px-10 py-5 bg-transparent border-2 border-slate-600 hover:border-white text-white rounded-xl font-bold text-lg transition-all hover:bg-white/5"
+                  className="w-full sm:w-auto px-10 py-5 bg-transparent border-2 border-slate-600 hover:border-white text-white rounded-xl font-bold text-lg transition-all hover:bg-white/5 min-w-[200px]"
                 >
-                  Masuk ke Akun
+                  {t('auth.login')}
                 </Link>
               </div>
             </div>

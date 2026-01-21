@@ -27,9 +27,11 @@ interface InvestorWalletContextType {
     isMetaMaskInstalled: boolean;
     error: string | null;
     chainId: number | null;
+    idrxBalance: string;
     connectWallet: () => Promise<boolean>;
     disconnectWallet: () => void;
     switchToCorrectChain: () => Promise<boolean>;
+    refreshBalance: () => Promise<void>;
 }
 
 const InvestorWalletContext = createContext<InvestorWalletContextType | undefined>(undefined);
@@ -45,12 +47,52 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
     const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [chainId, setChainId] = useState<number | null>(null);
+    const [idrxBalance, setIdrxBalance] = useState<string>('0');
 
     const isConnected = investor !== null && walletAddress !== null;
+
+    // IDRX contract address from env
+    const IDRX_ADDRESS = process.env.NEXT_PUBLIC_IDRX_ADDRESS || '';
+
+    // Fetch IDRX balance
+    const fetchBalance = useCallback(async (address: string) => {
+        if (!address || !IDRX_ADDRESS || isMock) {
+            if (isMock) setIdrxBalance('1000000000'); // 1000 IDRX for demo
+            return;
+        }
+
+        try {
+            if (!window.ethereum) return;
+
+            // ERC20 balanceOf(address) function selector
+            const data = `0x70a08231000000000000000000000000${address.slice(2)}`;
+
+            const result = await window.ethereum.request({
+                method: 'eth_call',
+                params: [{ to: IDRX_ADDRESS, data }, 'latest'],
+            }) as string;
+
+            // Parse the result (it's in wei/smallest unit)
+            const balanceWei = BigInt(result);
+            // IDRX typically has 6 or 18 decimals - assuming 6 for stablecoin
+            const balance = Number(balanceWei) / 1e6;
+            setIdrxBalance(balance.toLocaleString('id-ID'));
+        } catch (err) {
+            console.error('Failed to fetch IDRX balance:', err);
+            setIdrxBalance('0');
+        }
+    }, [IDRX_ADDRESS, isMock]);
+
+    const refreshBalance = useCallback(async () => {
+        if (walletAddress) {
+            await fetchBalance(walletAddress);
+        }
+    }, [walletAddress, fetchBalance]);
 
     // Load saved investor state on mount
     useEffect(() => {
         if (isMock) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsMetaMaskInstalled(true);
             const saved = typeof window !== 'undefined' ? localStorage.getItem(INVESTOR_WALLET_KEY) : null;
             if (saved) {
@@ -97,6 +139,14 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
                 .catch(console.error);
         }
     }, [isMock]);
+
+    // Fetch balance when wallet connects
+    useEffect(() => {
+        if (walletAddress) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            fetchBalance(walletAddress);
+        }
+    }, [walletAddress, fetchBalance]);
 
     // Listen for account changes
     useEffect(() => {
@@ -264,9 +314,11 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
         isMetaMaskInstalled,
         error,
         chainId,
+        idrxBalance,
         connectWallet,
         disconnectWallet,
         switchToCorrectChain,
+        refreshBalance,
     };
 
     return <InvestorWalletContext.Provider value={value}>{children}</InvestorWalletContext.Provider>;

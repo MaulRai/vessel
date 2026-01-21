@@ -25,6 +25,7 @@ export default function InvestorConnectPage() {
     // Redirect if already connected
     useEffect(() => {
         if (isConnected && !isWrongChain) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsRedirecting(true);
             router.push('/pendana/dashboard');
         }

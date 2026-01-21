@@ -188,13 +188,13 @@ const generateId = () =>
     : Math.random().toString(36).slice(2, 10);
 
 function ProfilBisnisContent() {
-  const { user } = useAuth();
+  useAuth();
   const [activeTab, setActiveTab] = useState<TabKey>('perusahaan');
   const [savedToast, setSavedToast] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  
+
   // Backend integration state
   const [mitraStatus, setMitraStatus] = useState<MitraApplicationResponse | null>(null);
   const [documentUploadStatus, setDocumentUploadStatus] = useState<DocumentUploadStatus>({
@@ -202,7 +202,7 @@ function ProfilBisnisContent() {
     akta_pendirian: false,
     ktp_direktur: false,
   });
-  const [uploadingDocs, setUploadingDocs] = useState<Record<string, boolean>>({});
+  const [, setUploadingDocs] = useState<Record<string, boolean>>({});
 
   const [companyBasics, setCompanyBasics] = useState<CompanyBasics>({
     name: '',
@@ -346,7 +346,7 @@ function ProfilBisnisContent() {
         if (res.success && res.data) {
           setMitraStatus(res.data);
           setDocumentUploadStatus(res.data.documents_status);
-          
+
           // If already approved or pending, mark as submitted
           if (res.data.application?.status === 'pending' || res.data.application?.status === 'approved') {
             setSubmitted(true);
@@ -361,7 +361,7 @@ function ProfilBisnisContent() {
         console.error('Failed to check mitra status:', err);
       }
     };
-    
+
     checkMitraStatus();
   }, []);
 
@@ -377,7 +377,7 @@ function ProfilBisnisContent() {
         setSubmitError(res.error?.message || `Gagal mengupload ${documentType}`);
         return false;
       }
-    } catch (err) {
+    } catch {
       setSubmitError(`Gagal mengupload ${documentType}`);
       return false;
     } finally {
@@ -505,10 +505,10 @@ function ProfilBisnisContent() {
 
     const commissionerProvided = Boolean(
       relationsData.commissionerName.trim() ||
-        relationsData.commissionerPhone.trim() ||
-        relationsData.commissionerKtp.trim() ||
-        relationsData.commissionerKtpFile ||
-        relationsData.commissionerApproval,
+      relationsData.commissionerPhone.trim() ||
+      relationsData.commissionerKtp.trim() ||
+      relationsData.commissionerKtpFile ||
+      relationsData.commissionerApproval,
     );
 
     if (commissionerProvided) {
@@ -683,7 +683,7 @@ function ProfilBisnisContent() {
 
   const handleSubmit = async () => {
     const newErrors: Record<string, string> = {};
-    
+
     // Validasi data perusahaan yang diperlukan backend
     if (!companyBasics.name.trim()) {
       newErrors.companyName = 'Nama perusahaan wajib diisi.';
@@ -700,7 +700,7 @@ function ProfilBisnisContent() {
     if (!membershipAgreement.membership || !membershipAgreement.savings || !membershipAgreement.adArt) {
       newErrors.membership = 'Mohon setujui seluruh akad keanggotaan sebelum melanjutkan.';
     }
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       if (newErrors.companyName || newErrors.entityType) {
@@ -712,11 +712,11 @@ function ProfilBisnisContent() {
       }
       return;
     }
-    
+
     setErrors({});
     setIsSubmitting(true);
     setSubmitError(null);
-    
+
     try {
       // Step 1: Submit Mitra Application (company data)
       // Map entityType to company_type format expected by backend
@@ -728,7 +728,7 @@ function ProfilBisnisContent() {
         'Lainnya': 'UD',
         'UD': 'UD',
       };
-      
+
       // Map financialPerformance.sales to annual_revenue format
       const getAnnualRevenue = (sales: string): '<1M' | '1M-5M' | '5M-25M' | '25M-100M' | '>100M' => {
         const numericValue = parseInt(sales.replace(/\./g, ''), 10);
@@ -739,7 +739,7 @@ function ProfilBisnisContent() {
         if (numericValue < 100000000000) return '25M-100M'; // 25-100 Miliar
         return '>100M'; // > 100 Miliar
       };
-      
+
       const mitraApplicationData = {
         company_name: companyBasics.name.trim(),
         company_type: companyTypeMap[companyBasics.entityType] || 'PT',
@@ -752,22 +752,22 @@ function ProfilBisnisContent() {
         key_products: companyLocation.sector || 'Export Products',
         export_markets: 'International',
       };
-      
+
       const applyRes = await userAPI.applyMitra(mitraApplicationData);
-      
+
       if (!applyRes.success) {
         setSubmitError(applyRes.error?.message || 'Gagal mengirim aplikasi mitra.');
         setIsSubmitting(false);
         return;
       }
-      
+
       // Step 2: Upload required documents (only the three that backend supports)
       const documentsToUpload: { file: File | null; type: BackendDocumentType; name: string }[] = [
         { file: licensing.nibFile?.file || null, type: 'nib', name: 'NIB' },
         { file: corporateLegal.deedFile?.file || null, type: 'akta_pendirian', name: 'Akta Pendirian' },
         { file: responsibleDocs.ktpFile?.file || null, type: 'ktp_direktur', name: 'KTP Direktur' },
       ];
-      
+
       for (const doc of documentsToUpload) {
         if (doc.file && !documentUploadStatus[doc.type]) {
           const uploadSuccess = await uploadDocumentToBackend(doc.file, doc.type);
@@ -778,10 +778,10 @@ function ProfilBisnisContent() {
           }
         }
       }
-      
+
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      
+
     } catch (err) {
       console.error('Submit error:', err);
       setSubmitError('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
@@ -813,11 +813,10 @@ function ProfilBisnisContent() {
         <button
           key={tab.key}
           onClick={() => setActiveTab(tab.key)}
-          className={`w-full text-left px-4 py-3 rounded-xl transition-all border ${
-            activeTab === tab.key
+          className={`w-full text-left px-4 py-3 rounded-xl transition-all border ${activeTab === tab.key
               ? 'bg-cyan-600/20 border-cyan-500 text-cyan-200'
               : 'bg-slate-900/30 border-slate-700 text-slate-300 hover:border-slate-600'
-          }`}
+            }`}
         >
           <div className="text-sm font-semibold">{tab.label}</div>
           <p className="text-xs text-slate-400">Lengkapi data {tab.label.toLowerCase()}</p>
@@ -1417,11 +1416,11 @@ function ProfilBisnisContent() {
               <div>
                 <p className="text-sm text-emerald-300 font-semibold">Permohonan verifikasi terkirim</p>
                 <p className="text-xs text-emerald-200 mt-1">
-                  {mitraStatus?.application?.status === 'pending' 
+                  {mitraStatus?.application?.status === 'pending'
                     ? 'Aplikasi Anda sedang ditinjau oleh tim kami.'
                     : mitraStatus?.application?.status === 'approved'
-                    ? 'Selamat! Aplikasi Anda telah disetujui.'
-                    : 'Tim kami segera meninjau data dan menghubungi Anda melalui email.'}
+                      ? 'Selamat! Aplikasi Anda telah disetujui.'
+                      : 'Tim kami segera meninjau data dan menghubungi Anda melalui email.'}
                 </p>
               </div>
             </div>

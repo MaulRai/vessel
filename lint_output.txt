@@ -1,0 +1,255 @@
+
+> vessel@0.1.0 lint
+> eslint
+
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/admin/balance/page.tsx
+  17:12  warning  'searchResults' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  17:27  warning  'setSearchResults' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  70:18  warning  'error' is defined but never used                      @typescript-eslint/no-unused-vars
+  80:11  warning  'formatCurrency' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/admin/login/page.tsx
+  5:8  warning  'Image' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/admin/verifikasi-pengajuan-dana/[id]/page.tsx
+  183:23   error  React Hook "useMemo" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+  369:151  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                            react/no-unescaped-entities
+  369:171  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                            react/no-unescaped-entities
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/dashboard/admin/balance/page.tsx
+   6:34  warning  'GrantBalanceResponse' is defined but never used                                                              @typescript-eslint/no-unused-vars
+  37:6   warning  React Hook useEffect has a missing dependency: 'loadUsers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  74:14  warning  'err' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/dashboard/admin/invoices/[id]/page.tsx
+  12:9  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/dashboard/admin/mitra/[id]/page.tsx
+   59:16  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+   84:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+  108:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/dashboard/admin/pools/create/page.tsx
+   8:20  warning  'PendingInvoice' is defined but never used          @typescript-eslint/no-unused-vars
+  12:9   warning  'router' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  21:10  warning  'createdPoolId' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/dashboard/admin/pools/page.tsx
+  33:6  warning  React Hook useEffect has a missing dependency: 'loadPools'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/eksportir/company/page.tsx
+  29:11  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/eksportir/invoices/create/page.tsx
+  189:9   warning  'router' is assigned a value but never used            @typescript-eslint/no-unused-vars
+  193:10  warning  'createdInvoiceId' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/eksportir/pendanaan/buat/page.tsx
+  868:42  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+  886:42  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/eksportir/pending/page.tsx
+  43:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/eksportir/pending/page.tsx:43:9
+  41 |         }
+  42 |
+> 43 |         setCheckingAuth(false);
+     |         ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  44 |     }, [isAuthenticated, isLoading, user, router]);
+  45 |
+  46 |     const handleLogout = async () => {  react-hooks/set-state-in-effect
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/eksportir/profil-bisnis/page.tsx
+  191:11  warning  'user' is assigned a value but never used           @typescript-eslint/no-unused-vars
+  205:10  warning  'uploadingDocs' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  380:14  warning  'err' is defined but never used                     @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/page.tsx
+  6:33  warning  'useMemo' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/pendana/connect/page.tsx
+  28:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/pendana/connect/page.tsx:28:13
+  26 |     useEffect(() => {
+  27 |         if (isConnected && !isWrongChain) {
+> 28 |             setIsRedirecting(true);
+     |             ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  29 |             router.push('/pendana/dashboard');
+  30 |         }
+  31 |     }, [isConnected, isWrongChain, router]);  react-hooks/set-state-in-effect
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/pendana/marketplace/page.tsx
+  13:11  warning  'walletAddress' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/pendana/portfolio/page.tsx
+  35:16  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/pendana/risk-assessment/page.tsx
+   77:16  warning  'err' is defined but never used                                                                                   @typescript-eslint/no-unused-vars
+   85:6   warning  React Hook useEffect has a missing dependency: 'demoQuestions'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  124:14  warning  'err' is defined but never used                                                                                   @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/register/page.tsx
+  51:10  warning  'otpExpiresAt' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  60:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/register/page.tsx:60:7
+  58 |   useEffect(() => {
+  59 |     if (step === 'details') {
+> 60 |       setUsername('');
+     |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  61 |       setPassword('');
+  62 |       setConfirmPassword('');
+  63 |       setCooperativeAgreement(false);  react-hooks/set-state-in-effect
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/lib/api/admin.ts
+  84:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/lib/api/user.ts
+   74:18  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  119:18  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  136:49  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:29  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  149:80  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  150:29  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  162:78  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  189:18  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  319:18  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  444:18  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  471:62  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  472:29  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  563:18  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  641:18  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  780:18  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  856:18  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/lib/context/InvestorWalletContext.tsx
+   95:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/lib/context/InvestorWalletContext.tsx:95:13
+  93 |     useEffect(() => {
+  94 |         if (isMock) {
+> 95 |             setIsMetaMaskInstalled(true);
+     |             ^^^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  96 |             const saved = typeof window !== 'undefined' ? localStorage.getItem(INVESTOR_WALLET_KEY) : null;
+  97 |             if (saved) {
+  98 |                 try {  react-hooks/set-state-in-effect
+  145:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/lib/context/InvestorWalletContext.tsx:145:13
+  143 |     useEffect(() => {
+  144 |         if (walletAddress) {
+> 145 |             fetchBalance(walletAddress);
+      |             ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  146 |         }
+  147 |     }, [walletAddress, fetchBalance]);
+  148 |                                                                                                        react-hooks/set-state-in-effect
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/lib/context/WalletContext.tsx
+  39:7  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/lib/context/WalletContext.tsx:39:7
+  37 |   useEffect(() => {
+  38 |     if (isMock) {
+> 39 |       setIsMetaMaskInstalled(true);
+     |       ^^^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  40 |       const saved = typeof window !== 'undefined' ? localStorage.getItem('demo_wallet_address') : null;
+  41 |       if (saved) setWalletAddress(saved);
+  42 |       return;  react-hooks/set-state-in-effect
+  48:6  warning  React Hook useEffect has a missing dependency: 'isMock'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/exhaustive-deps
+  52:7  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/lib/context/WalletContext.tsx:52:7
+  50 |   useEffect(() => {
+  51 |     if (!isMock && !isMetaMaskInstalled) {
+> 52 |       setWalletAddress(null);
+     |       ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  53 |     }
+  54 |   }, [isMock, isMetaMaskInstalled]);
+  55 |                                                                                                          react-hooks/set-state-in-effect
+  59:7  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/lib/context/WalletContext.tsx:59:7
+  57 |     if (isMock) return;
+  58 |     if (user?.wallet_address) {
+> 59 |       setWalletAddress(user.wallet_address);
+     |       ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  60 |     } else {
+  61 |       setWalletAddress(null);
+  62 |     }                                                                                            react-hooks/set-state-in-effect
+  83:6  warning  React Hook useEffect has a missing dependency: 'isMock'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/exhaustive-deps
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/lib/i18n/LanguageContext.tsx
+  29:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/lib/i18n/LanguageContext.tsx:29:13
+  27 |         const saved = localStorage.getItem(LANGUAGE_KEY) as Language | null;
+  28 |         if (saved && (saved === 'en' || saved === 'id')) {
+> 29 |             setLanguageState(saved);
+     |             ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  30 |         }
+  31 |     }, []);
+  32 |  react-hooks/set-state-in-effect
+
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/lib/types/auth.ts
+  123:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+✖ 63 problems (20 errors, 43 warnings)
+

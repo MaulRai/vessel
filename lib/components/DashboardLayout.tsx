@@ -4,6 +4,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import { useInvestorWallet } from '../context/InvestorWalletContext';
+import { useLanguage } from '../i18n/LanguageContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { UserRole } from '../types/auth';
 
 interface NavItem {
@@ -12,10 +15,10 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-const investorNavItems: NavItem[] = [
+const getInvestorNavItems = (t: (key: string) => string): NavItem[] => [
   {
     href: '/pendana/dashboard',
-    label: 'Dashboard',
+    label: t('nav.dashboard'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -24,7 +27,7 @@ const investorNavItems: NavItem[] = [
   },
   {
     href: '/pendana/marketplace',
-    label: 'Marketplace',
+    label: t('nav.marketplace'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -33,7 +36,7 @@ const investorNavItems: NavItem[] = [
   },
   {
     href: '/pendana/portfolio',
-    label: 'Portfolio',
+    label: t('nav.portfolio'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -42,28 +45,19 @@ const investorNavItems: NavItem[] = [
   },
   {
     href: '/pendana/risk-assessment',
-    label: 'Risk Assessment',
+    label: t('nav.riskAssessment'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
       </svg>
     ),
   },
-  {
-    href: '/pendana/profile',
-    label: 'Profil',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-    ),
-  },
 ];
 
-const adminNavItems: NavItem[] = [
+const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
   {
     href: '/dashboard/admin',
-    label: 'Dashboard',
+    label: t('nav.dashboard'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -72,7 +66,7 @@ const adminNavItems: NavItem[] = [
   },
   {
     href: '/dashboard/admin/invoices',
-    label: 'Invoice Review',
+    label: t('nav.invoiceReview'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -81,7 +75,7 @@ const adminNavItems: NavItem[] = [
   },
   {
     href: '/dashboard/admin/pools',
-    label: 'Funding Pools',
+    label: t('nav.fundingPools'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -90,7 +84,7 @@ const adminNavItems: NavItem[] = [
   },
   {
     href: '/dashboard/admin/balance',
-    label: 'Grant Balance',
+    label: t('nav.grantBalance'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -99,7 +93,7 @@ const adminNavItems: NavItem[] = [
   },
   {
     href: '/dashboard/admin/users',
-    label: 'Users',
+    label: t('nav.users'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -108,7 +102,7 @@ const adminNavItems: NavItem[] = [
   },
   {
     href: '/dashboard/admin/mitra',
-    label: 'Mitra Review',
+    label: t('nav.mitraReview'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -117,10 +111,10 @@ const adminNavItems: NavItem[] = [
   },
 ];
 
-const mitraNavItems: NavItem[] = [
+const getMitraNavItems = (t: (key: string) => string): NavItem[] => [
   {
     href: '/eksportir/dashboard',
-    label: 'Dashboard',
+    label: t('nav.dashboard'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -129,7 +123,7 @@ const mitraNavItems: NavItem[] = [
   },
   {
     href: '/eksportir/invoices',
-    label: 'Invoice',
+    label: t('nav.invoice'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -138,7 +132,7 @@ const mitraNavItems: NavItem[] = [
   },
   {
     href: '/eksportir/pendanaan',
-    label: 'Pendanaan',
+    label: t('nav.funding'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -147,7 +141,7 @@ const mitraNavItems: NavItem[] = [
   },
   {
     href: '/eksportir/company',
-    label: 'Perusahaan',
+    label: t('nav.company'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -156,7 +150,7 @@ const mitraNavItems: NavItem[] = [
   },
   {
     href: '/eksportir/profile',
-    label: 'Profil',
+    label: t('nav.profile'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -174,9 +168,11 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
+  const { walletAddress, disconnectWallet, idrxBalance } = useInvestorWallet();
 
-  const navItems = role === 'investor' ? investorNavItems : role === 'admin' ? adminNavItems : mitraNavItems;
-  const roleLabel = role === 'investor' ? 'Pendana' : role === 'admin' ? 'Admin' : 'Eksportir';
+  const navItems = role === 'investor' ? getInvestorNavItems(t) : role === 'admin' ? getAdminNavItems(t) : getMitraNavItems(t);
+  const roleLabel = role === 'investor' ? t('role.investor') : role === 'admin' ? t('role.admin') : t('role.exporter');
   const roleColor = role === 'investor' ? 'cyan' : role === 'admin' ? 'purple' : 'teal';
   const dashboardHref = role === 'investor' ? '/pendana/dashboard' : role === 'admin' ? '/dashboard/admin' : '/eksportir/dashboard';
   const isOnDashboard = pathname === dashboardHref;
@@ -184,6 +180,16 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const handleLogout = () => {
     logout();
     router.push('/login');
+  };
+
+  const handleDisconnectWallet = () => {
+    disconnectWallet();
+    router.push('/pendana/connect');
+  };
+
+  // Format wallet address for display
+  const formatWalletAddress = (address: string) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
   return (
@@ -222,8 +228,8 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                   <Link
                     href={item.href}
                     className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all ${isActive
-                        ? `bg-${roleColor}-500/10 text-${roleColor}-400 border border-${roleColor}-500/20`
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                      ? `bg-${roleColor}-500/10 text-${roleColor}-400 border border-${roleColor}-500/20`
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                       }`}
                   >
                     {item.icon}
@@ -235,28 +241,59 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
           </ul>
         </nav>
 
-        {/* User Info & Logout */}
+        {/* User/Wallet Info & Logout */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-800/50">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium text-slate-300">
-                {user?.username?.charAt(0).toUpperCase() || 'U'}
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-200 truncate">{user?.username || 'User'}</p>
-              <p className="text-xs text-slate-500 truncate">{user?.email}</p>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span className="font-medium">Keluar</span>
-          </button>
+          {role === 'investor' ? (
+            // Wallet info for investors
+            <>
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border border-cyan-500/30 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-slate-500">{t('dashboard.walletConnected')}</p>
+                  <p className="text-sm font-mono font-medium text-cyan-400 truncate">
+                    {walletAddress ? formatWalletAddress(walletAddress) : t('dashboard.notConnected')}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleDisconnectWallet}
+                className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all min-w-[200px]"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                <span className="font-medium">{t('dashboard.disconnect')}</span>
+              </button>
+            </>
+          ) : (
+            // User info for mitra/admin
+            <>
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-medium text-slate-300">
+                    {user?.username?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-200 truncate">{user?.username || 'User'}</p>
+                  <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all min-w-[140px]"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span className="font-medium">{t('auth.logout')}</span>
+              </button>
+            </>
+          )}
         </div>
       </aside>
 
@@ -270,7 +307,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                 <Link
                   href={dashboardHref}
                   className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all group"
-                  title="Kembali ke Dashboard"
+                  title={t('dashboard.backToDashboard')}
                 >
                   <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -278,19 +315,34 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                 </Link>
               )}
               <h1 className="text-lg font-semibold text-slate-100">
-                {navItems.find((item) => item.href === pathname)?.label || 'Dashboard'}
+                {navItems.find((item) => item.href === pathname)?.label || t('nav.dashboard')}
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              {/* Balance */}
-              <div className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-sm font-medium text-slate-200">
-                  Rp {(user?.balance_idr || 0).toLocaleString('id-ID')}
-                </span>
-              </div>
+              {/* Balance - only show for non-investors (mitra/admin) */}
+              {role !== 'investor' && (
+                <div className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                  <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-medium text-slate-200">
+                    Rp {(user?.balance_idr || 0).toLocaleString('id-ID')}
+                  </span>
+                </div>
+              )}
+              {/* IDRX Balance indicator for investors */}
+              {role === 'investor' && (
+                <div className="flex items-center space-x-2 px-4 py-2 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
+                  <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-medium text-slate-200">
+                    {idrxBalance} IDRX
+                  </span>
+                </div>
+              )}
+              {/* Language Switcher */}
+              <LanguageSwitcher />
               {/* Notifications */}
               <button className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg transition-all relative">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

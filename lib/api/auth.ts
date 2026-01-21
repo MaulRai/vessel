@@ -9,6 +9,8 @@ import {
   LoginRequest,
   LoginResponse,
   RefreshTokenRequest,
+  GoogleAuthRequest,
+  GoogleAuthResponse,
 } from '../types/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
@@ -40,20 +42,39 @@ class AuthAPI {
 
     try {
       const response = await fetch(url, config);
-      const data = await response.json();
+
+      // Get the response text first
+      const text = await response.text();
+
+      // Try to parse as JSON
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.error('Failed to parse JSON response:', text);
+        return {
+          success: false,
+          error: {
+            code: 'PARSE_ERROR',
+            message: text || 'Failed to parse server response',
+          },
+        };
+      }
 
       if (!response.ok) {
+        // Handle error response
         return {
           success: false,
           error: data.error || {
             code: 'UNKNOWN_ERROR',
-            message: 'Terjadi kesalahan yang tidak diketahui',
+            message: data.message || 'Terjadi kesalahan yang tidak diketahui',
           },
         };
       }
 
       return data;
     } catch (error) {
+      console.error('Network error:', error);
       return {
         success: false,
         error: {
@@ -94,6 +115,13 @@ class AuthAPI {
 
   async refreshToken(data: RefreshTokenRequest): Promise<APIResponse<LoginResponse>> {
     return this.request<LoginResponse>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async googleAuth(data: GoogleAuthRequest): Promise<APIResponse<GoogleAuthResponse>> {
+    return this.request<GoogleAuthResponse>('/auth/google', {
       method: 'POST',
       body: JSON.stringify(data),
     });

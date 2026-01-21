@@ -9,10 +9,42 @@ import {
   RiskQuestion,
   RiskQuestionnaireStatusResponse,
 } from '@/lib/api/user';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+
+// Demo questions to use when API fails - kept as fallback data
+const demoQuestions: RiskQuestion[] = [
+  {
+    id: 1,
+    question: 'Berapa lama pengalaman investasi Anda?',
+    options: [
+      { value: 1, label: 'Kurang dari 1 tahun' },
+      { value: 2, label: '1-3 tahun' },
+      { value: 3, label: 'Lebih dari 3 tahun' },
+    ],
+  },
+  {
+    id: 2,
+    question: 'Bagaimana sikap Anda terhadap risiko investasi?',
+    options: [
+      { value: 1, label: 'Saya lebih memilih keamanan meski return rendah' },
+      { value: 2, label: 'Saya bersedia mengambil risiko untuk return lebih tinggi' },
+    ],
+  },
+  {
+    id: 3,
+    question: 'Apa yang akan Anda lakukan jika nilai investasi turun 20%?',
+    options: [
+      { value: 1, label: 'Menarik dana segera' },
+      { value: 2, label: 'Menahan dan menunggu pemulihan' },
+    ],
+  },
+];
 
 function RiskAssessmentContent() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [questions, setQuestions] = useState<RiskQuestion[]>([]);
+  // ... (keep state variables)
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -34,15 +66,17 @@ function RiskAssessmentContent() {
           }
         }
 
-        // Load questions
+        // Load questions from API
         const questionsRes = await riskQuestionnaireAPI.getQuestions();
-        if (questionsRes.success && questionsRes.data) {
+        if (questionsRes.success && questionsRes.data && questionsRes.data.questions.length > 0) {
           setQuestions(questionsRes.data.questions);
         } else {
-          setError('Gagal memuat pertanyaan');
+          // Use demo questions if API fails
+          setQuestions(demoQuestions);
         }
-      } catch (err) {
-        setError('Terjadi kesalahan');
+      } catch {
+        // Use demo questions on error
+        setQuestions(demoQuestions);
       } finally {
         setLoading(false);
       }
@@ -68,7 +102,7 @@ function RiskAssessmentContent() {
 
   const handleSubmit = async () => {
     if (Object.keys(answers).length !== questions.length) {
-      setError('Harap jawab semua pertanyaan');
+      setError(t('riskAssessment.answerAll') || 'Harap jawab semua pertanyaan');
       return;
     }
 
@@ -85,10 +119,10 @@ function RiskAssessmentContent() {
       if (res.success && res.data) {
         setStatus(res.data);
       } else {
-        setError(res.error?.message || 'Gagal menyimpan jawaban');
+        setError(res.error?.message || t('riskAssessment.saveError') || 'Gagal menyimpan jawaban');
       }
-    } catch (err) {
-      setError('Terjadi kesalahan');
+    } catch {
+      setError(t('common.errorOccurred') || 'Terjadi kesalahan');
     } finally {
       setSubmitting(false);
     }
@@ -117,11 +151,10 @@ function RiskAssessmentContent() {
         <div className="max-w-2xl mx-auto">
           <div className="p-8 bg-slate-800/30 border border-slate-700/50 rounded-xl backdrop-blur-sm text-center">
             <div
-              className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${
-                status.catalyst_unlocked
-                  ? 'bg-green-500/20 text-green-400'
-                  : 'bg-yellow-500/20 text-yellow-400'
-              }`}
+              className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${status.catalyst_unlocked
+                ? 'bg-green-500/20 text-green-400'
+                : 'bg-yellow-500/20 text-yellow-400'
+                }`}
             >
               {status.catalyst_unlocked ? (
                 <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -135,34 +168,32 @@ function RiskAssessmentContent() {
             </div>
 
             <h1 className="text-2xl font-bold text-white mb-2">
-              {status.catalyst_unlocked ? 'Catalyst Tranche Terbuka!' : 'Assessment Selesai'}
+              {status.catalyst_unlocked ? t('riskAssessment.catalystUnlocked') : t('riskAssessment.assessmentCompleted')}
             </h1>
 
             <p className="text-slate-400 mb-6">{status.message}</p>
 
             <div className="p-4 bg-slate-700/30 rounded-lg mb-6">
-              <h3 className="text-sm font-medium text-slate-300 mb-3">Akses Tranche Anda:</h3>
+              <h3 className="text-sm font-medium text-slate-300 mb-3">{t('riskAssessment.yourTrancheAccess')}</h3>
               <div className="flex justify-center gap-4">
                 <div className="px-4 py-2 bg-cyan-500/20 border border-cyan-500/30 rounded-lg">
-                  <span className="text-cyan-400 font-medium">Priority Tranche</span>
-                  <p className="text-xs text-slate-400 mt-1">Return lebih rendah, risiko lebih kecil</p>
+                  <span className="text-cyan-400 font-medium">{t('riskAssessment.priorityTranche') || 'Priority Tranche'}</span>
+                  <p className="text-xs text-slate-400 mt-1">{t('riskAssessment.priorityDescription')}</p>
                 </div>
                 <div
-                  className={`px-4 py-2 rounded-lg ${
-                    status.catalyst_unlocked
-                      ? 'bg-teal-500/20 border border-teal-500/30'
-                      : 'bg-slate-600/20 border border-slate-600/30'
-                  }`}
+                  className={`px-4 py-2 rounded-lg ${status.catalyst_unlocked
+                    ? 'bg-teal-500/20 border border-teal-500/30'
+                    : 'bg-slate-600/20 border border-slate-600/30'
+                    }`}
                 >
                   <span
-                    className={`font-medium ${
-                      status.catalyst_unlocked ? 'text-teal-400' : 'text-slate-500'
-                    }`}
+                    className={`font-medium ${status.catalyst_unlocked ? 'text-teal-400' : 'text-slate-500'
+                      }`}
                   >
-                    Catalyst Tranche
+                    {t('riskAssessment.catalystTranche') || 'Catalyst Tranche'}
                   </span>
                   <p className="text-xs text-slate-400 mt-1">
-                    {status.catalyst_unlocked ? 'Return lebih tinggi, risiko lebih besar' : 'Terkunci'}
+                    {status.catalyst_unlocked ? t('riskAssessment.catalystDescription') : t('riskAssessment.locked')}
                   </p>
                 </div>
               </div>
@@ -173,13 +204,13 @@ function RiskAssessmentContent() {
                 onClick={handleRetake}
                 className="px-4 py-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-medium text-slate-200 transition-all"
               >
-                Ulangi Assessment
+                {t('riskAssessment.retakeAssessment')}
               </button>
               <button
                 onClick={() => router.push('/pendana/marketplace')}
                 className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-lg text-sm font-medium text-white transition-all"
               >
-                Mulai Investasi
+                {t('riskAssessment.startInvesting')}
               </button>
             </div>
           </div>
@@ -198,22 +229,24 @@ function RiskAssessmentContent() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">Risk Assessment</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">{t('riskAssessment.title')}</h1>
           <p className="text-slate-400">
-            Jawab pertanyaan berikut untuk menentukan profil risiko investasi Anda
+            {t('riskAssessment.subtitle')}
           </p>
         </div>
 
         {/* Progress */}
         <div className="mb-8">
           <div className="flex items-center justify-between text-sm text-slate-400 mb-2">
-            <span>Pertanyaan {currentStep + 1} dari {questions.length}</span>
-            <span>{Math.round(((currentStep + 1) / questions.length) * 100)}%</span>
+            <span>
+              {t('riskAssessment.question')} {currentStep + 1} {t('riskAssessment.of')} {questions.length || 1}
+            </span>
+            <span>{questions.length > 0 ? Math.round(((currentStep + 1) / questions.length) * 100) : 0}%</span>
           </div>
           <div className="w-full bg-slate-700 rounded-full h-2">
             <div
               className="bg-gradient-to-r from-cyan-500 to-teal-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}
+              style={{ width: `${questions.length > 0 ? ((currentStep + 1) / questions.length) * 100 : 0}%` }}
             />
           </div>
         </div>
@@ -234,19 +267,17 @@ function RiskAssessmentContent() {
                 <button
                   key={option.value}
                   onClick={() => handleAnswerSelect(currentQuestion.id, option.value)}
-                  className={`w-full p-4 rounded-lg border text-left transition-all ${
-                    answers[currentQuestion.id] === option.value
-                      ? 'bg-cyan-500/20 border-cyan-500/50 text-white'
-                      : 'bg-slate-700/30 border-slate-600/50 text-slate-300 hover:bg-slate-700/50 hover:border-slate-500'
-                  }`}
+                  className={`w-full p-4 rounded-lg border text-left transition-all ${answers[currentQuestion.id] === option.value
+                    ? 'bg-cyan-500/20 border-cyan-500/50 text-white'
+                    : 'bg-slate-700/30 border-slate-600/50 text-slate-300 hover:bg-slate-700/50 hover:border-slate-500'
+                    }`}
                 >
                   <div className="flex items-center space-x-3">
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        answers[currentQuestion.id] === option.value
-                          ? 'border-cyan-400 bg-cyan-400'
-                          : 'border-slate-500'
-                      }`}
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${answers[currentQuestion.id] === option.value
+                        ? 'border-cyan-400 bg-cyan-400'
+                        : 'border-slate-500'
+                        }`}
                     >
                       {answers[currentQuestion.id] === option.value && (
                         <svg className="w-3 h-3 text-slate-900" fill="currentColor" viewBox="0 0 20 20">
@@ -269,38 +300,35 @@ function RiskAssessmentContent() {
               <button
                 onClick={handlePrev}
                 disabled={currentStep === 0}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  currentStep === 0
-                    ? 'text-slate-500 cursor-not-allowed'
-                    : 'text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-700'
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${currentStep === 0
+                  ? 'text-slate-500 cursor-not-allowed'
+                  : 'text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-700'
+                  }`}
               >
-                Sebelumnya
+                {t('common.prev')}
               </button>
 
               {isLastQuestion ? (
                 <button
                   onClick={handleSubmit}
                   disabled={!allAnswered || submitting}
-                  className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-                    allAnswered && !submitting
-                      ? 'bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-white'
-                      : 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                  }`}
+                  className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${allAnswered && !submitting
+                    ? 'bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-white'
+                    : 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                    }`}
                 >
-                  {submitting ? 'Menyimpan...' : 'Kirim Jawaban'}
+                  {submitting ? t('riskAssessment.saving') : t('riskAssessment.sendAnswers')}
                 </button>
               ) : (
                 <button
                   onClick={handleNext}
                   disabled={!answers[currentQuestion.id]}
-                  className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-                    answers[currentQuestion.id]
-                      ? 'bg-cyan-500 hover:bg-cyan-400 text-white'
-                      : 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                  }`}
+                  className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${answers[currentQuestion.id]
+                    ? 'bg-cyan-500 hover:bg-cyan-400 text-white'
+                    : 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                    }`}
                 >
-                  Selanjutnya
+                  {t('common.next')}
                 </button>
               )}
             </div>
@@ -314,11 +342,11 @@ function RiskAssessmentContent() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <p className="text-sm text-slate-300 font-medium">Tentang Tranche</p>
+              <p className="text-sm text-slate-300 font-medium">{t('riskAssessment.aboutTranches')}</p>
               <p className="text-xs text-slate-400 mt-1">
-                <strong>Priority Tranche (Senior)</strong>: Mendapat pembayaran terlebih dahulu dengan return lebih rendah.
+                {t('riskAssessment.priorityInfo')}
                 <br />
-                <strong>Catalyst Tranche (Junior)</strong>: Mendapat return lebih tinggi namun dibayar setelah Priority.
+                {t('riskAssessment.catalystInfo')}
               </p>
             </div>
           </div>

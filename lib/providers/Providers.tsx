@@ -1,15 +1,16 @@
 'use client';
 
 import { AuthProvider } from '../context/AuthContext';
-import { WalletProvider } from '../context/WalletContext';
+
 import { InvestorWalletProvider } from '../context/InvestorWalletContext';
+import { LanguageProvider } from '../i18n/LanguageContext';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <WalletProvider>
+    <LanguageProvider>
+      <AuthProvider>
         <InvestorWalletProvider>{children}</InvestorWalletProvider>
-      </WalletProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
