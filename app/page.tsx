@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { motion, useInView, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTime, useTransform } from 'framer-motion';
 import { MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
+import { useWallet } from '@/lib/context/WalletContext';
+import { useRouter } from 'next/navigation';
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -49,6 +51,8 @@ function CountUp({ target, start }: { target: number; start: boolean }) {
 
 export default function LandingPage() {
   const { isAuthenticated, user } = useAuth();
+  const { connectWallet, isConnecting, walletAddress } = useWallet();
+  const router = useRouter();
   const prefersReduced = useReducedMotion();
   const heroRef = useRef<HTMLDivElement | null>(null);
   const featuresRef = useRef<HTMLDivElement | null>(null);
@@ -85,6 +89,13 @@ export default function LandingPage() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Redirect to Pendana dashboard after successful wallet connection
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      router.push('/pendana/dashboard');
+    }
+  }, [isAuthenticated, user, router]);
 
   const statsInView = useInView(statsRef, { once: true, margin: '-10% 0px' });
   const securityInView = useInView(securityRef, { margin: '-20% 0px' });
@@ -164,20 +175,13 @@ export default function LandingPage() {
                   Dashboard
                 </Link>
               ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="text-slate-300 hover:text-white transition-colors text-sm font-medium"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-cyan-500/25 ring-1 ring-white/10"
-                  >
-                    Get Started
-                  </Link>
-                </>
+                <button
+                  onClick={connectWallet}
+                  disabled={isConnecting}
+                  className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 disabled:from-slate-600 disabled:to-slate-700 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-cyan-500/25 ring-1 ring-white/10 disabled:cursor-not-allowed"
+                >
+                  {isConnecting ? 'Connecting...' : walletAddress ? 'Connect Wallet' : 'Connect Wallet'}
+                </button>
               )}
             </div>
           </div>
@@ -237,15 +241,28 @@ export default function LandingPage() {
                 transition={heroCta.transition}
                 className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8"
               >
-                <Link
-                  href="/register"
-                  className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-bold text-lg transition-all shadow-xl shadow-cyan-500/20 ring-1 ring-white/20 flex items-center justify-center space-x-2"
-                >
-                  <span>Mulai Sekarang</span>
-                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </Link>
+                {isAuthenticated ? (
+                  <Link
+                    href={getDashboardLink()}
+                    className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-bold text-lg transition-all shadow-xl shadow-cyan-500/20 ring-1 ring-white/20 flex items-center justify-center space-x-2"
+                  >
+                    <span>Go to Dashboard</span>
+                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={connectWallet}
+                    disabled={isConnecting}
+                    className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 disabled:from-slate-600 disabled:to-slate-700 rounded-xl font-bold text-lg transition-all shadow-xl shadow-cyan-500/20 ring-1 ring-white/20 flex items-center justify-center space-x-2 disabled:cursor-not-allowed"
+                  >
+                    <span>{isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
+                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </button>
+                )}
                 <a
                   href="#how-it-works"
                   className="w-full sm:w-auto px-8 py-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 rounded-xl font-bold text-lg transition-all backdrop-blur-sm text-center text-slate-300 hover:text-white"
@@ -393,7 +410,7 @@ export default function LandingPage() {
                   'Opsi penarikan yang fleksibel',
                 ],
                 cta: 'Mulai Berinvestasi',
-                href: '/register',
+                href: '#',
               },
               {
                 title: 'Untuk Eksportir',
@@ -408,7 +425,7 @@ export default function LandingPage() {
                   'Tanpa agunan tambahan',
                 ],
                 cta: 'Ajukan Pendanaan',
-                href: '/register',
+                href: '#',
               },
             ].map((card, idx) => {
               const active = activeFeature === idx;
@@ -686,20 +703,26 @@ export default function LandingPage() {
                 Rasakan masa depan pembiayaan hari ini.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                <Link
-                  href="/register"
-                  className="relative w-full sm:w-auto rounded-xl p-[3px] bg-gradient-to-r from-cyan-500 to-teal-500 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                >
-                  <span className="block rounded-[10px] bg-white text-slate-900 px-10 py-5 font-bold text-lg transition-all duration-200 ease-out hover:bg-transparent hover:text-white">
-                    Buat Akun Gratis
-                  </span>
-                </Link>
-                <Link
-                  href="/login"
-                  className="w-full sm:w-auto px-10 py-5 bg-transparent border-2 border-slate-600 hover:border-white text-white rounded-xl font-bold text-lg transition-all hover:bg-white/5"
-                >
-                  Masuk ke Akun
-                </Link>
+                {isAuthenticated ? (
+                  <Link
+                    href={getDashboardLink()}
+                    className="relative w-full sm:w-auto rounded-xl p-[3px] bg-gradient-to-r from-cyan-500 to-teal-500 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                  >
+                    <span className="block rounded-[10px] bg-white text-slate-900 px-10 py-5 font-bold text-lg transition-all duration-200 ease-out hover:bg-transparent hover:text-white">
+                      Go to Dashboard
+                    </span>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={connectWallet}
+                    disabled={isConnecting}
+                    className="relative w-full sm:w-auto rounded-xl p-[3px] bg-gradient-to-r from-cyan-500 to-teal-500 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed"
+                  >
+                    <span className="block rounded-[10px] bg-white text-slate-900 px-10 py-5 font-bold text-lg transition-all duration-200 ease-out hover:bg-transparent hover:text-white">
+                      {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
           </div>

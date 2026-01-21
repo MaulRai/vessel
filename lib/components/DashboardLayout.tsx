@@ -173,7 +173,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, switchRole } = useAuth();
 
   const navItems = role === 'investor' ? investorNavItems : role === 'admin' ? adminNavItems : mitraNavItems;
   const roleLabel = role === 'investor' ? 'Pendana' : role === 'admin' ? 'Admin' : 'Eksportir';
@@ -183,7 +183,18 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
 
   const handleLogout = () => {
     logout();
-    router.push('/login');
+    router.push('/');
+  };
+
+  const handleSwitchRole = () => {
+    // Don't allow switching if admin
+    if (role === 'admin') return;
+    
+    const newRole: UserRole = role === 'investor' ? 'mitra' : 'investor';
+    const newPath = newRole === 'investor' ? '/pendana/dashboard' : '/eksportir/dashboard';
+    
+    switchRole(newRole);
+    router.push(newPath);
   };
 
   return (
@@ -282,6 +293,21 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Role Switcher (not for admin) */}
+              {role !== 'admin' && (
+                <button
+                  onClick={handleSwitchRole}
+                  className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-800 rounded-lg border border-slate-700/50 hover:border-slate-600 transition-all group"
+                  title={`Switch to ${role === 'investor' ? 'Eksportir' : 'Pendana'} Dashboard`}
+                >
+                  <svg className="w-4 h-4 text-slate-400 group-hover:text-cyan-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                  </svg>
+                  <span className="text-sm font-medium text-slate-300 group-hover:text-slate-100">
+                    {role === 'investor' ? 'Eksportir' : 'Pendana'}
+                  </span>
+                </button>
+              )}
               {/* Balance */}
               <div className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
                 <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -291,6 +317,17 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                   Rp {(user?.balance_idr || 0).toLocaleString('id-ID')}
                 </span>
               </div>
+              {/* Wallet Address */}
+              {user?.wallet_address && (
+                <div className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50" title={user.wallet_address}>
+                  <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  <span className="text-sm font-medium text-slate-200 font-mono">
+                    {user.wallet_address.slice(0, 6)}...{user.wallet_address.slice(-4)}
+                  </span>
+                </div>
+              )}
               {/* Notifications */}
               <button className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg transition-all relative">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

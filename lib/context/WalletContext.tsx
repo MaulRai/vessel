@@ -27,7 +27,7 @@ interface WalletContextType {
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, loginWithWallet } = useAuth();
   const isMock = process.env.NEXT_PUBLIC_WALLET_MOCK === '1';
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -38,14 +38,20 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     if (isMock) {
       setIsMetaMaskInstalled(true);
       const saved = typeof window !== 'undefined' ? localStorage.getItem('demo_wallet_address') : null;
-      if (saved) setWalletAddress(saved);
+      if (saved) {
+        setWalletAddress(saved);
+        // Auto-login if wallet was previously connected
+        if (!user) {
+          loginWithWallet(saved, 'investor');
+        }
+      }
       return;
     }
 
     if (typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
       setIsMetaMaskInstalled(true);
     }
-  }, []);
+  }, [isMock]);
 
   useEffect(() => {
     if (!isMock && !isMetaMaskInstalled) {
@@ -71,7 +77,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       if (accountList.length === 0) {
         setWalletAddress(null);
       } else if (accountList[0] !== walletAddress) {
-        setWalletAddress(accountList[0]);
+        const newAddress = accountList[0];
+        setWalletAddress(newAddress);
+        // Update auth with new wallet address
+        loginWithWallet(newAddress, user?.role || 'investor');
       }
     };
 
@@ -80,7 +89,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     return () => {
       window.ethereum?.removeListener('accountsChanged', handleAccountsChanged);
     };
-  }, [walletAddress]);
+  }, [walletAddress, loginWithWallet, user?.role]);
 
   const connectWallet = useCallback(async (): Promise<boolean> => {
     setIsConnecting(true);
@@ -92,6 +101,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       if (typeof window !== 'undefined') {
         localStorage.setItem('demo_wallet_address', mockAddress);
       }
+      // Login with wallet in mock mode
+      loginWithWallet(mockAddress, 'investor');
       setIsConnecting(false);
       return true;
     }
@@ -114,18 +125,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       }
 
       const address = accounts[0];
-
-      const res = await walletAPI.updateWallet(address);
-
-      if (res.success) {
-        setWalletAddress(address);
-        setIsConnecting(false);
-        return true;
-      } else {
-        setError(res.error?.message || 'Gagal menyimpan wallet address');
-        setIsConnecting(false);
-        return false;
-      }
+      
+      // Login with wallet address, default to investor role
+      loginWithWallet(address, 'investor');
+      setWalletAddress(address);
+      setIsConnecting(false);
+      return true;
     } catch (err: unknown) {
       const error = err as { code?: number; message?: string };
       if (error.code === 4001) {
@@ -136,7 +141,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       setIsConnecting(false);
       return false;
     }
-  }, [isMock]);
+  }, [isMock, loginWithWallet]);
 
   const disconnectWallet = useCallback(() => {
     setWalletAddress(null);
