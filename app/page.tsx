@@ -5,8 +5,8 @@ import Image from 'next/image';
 import { motion, useInView, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTime, useTransform } from 'framer-motion';
 import { MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/lib/context/AuthContext';
-import { useWallet } from '@/lib/context/WalletContext';
 import { useRouter } from 'next/navigation';
+import { ConnectWallet, Wallet } from '@coinbase/onchainkit/wallet';
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -51,7 +51,6 @@ function CountUp({ target, start }: { target: number; start: boolean }) {
 
 export default function LandingPage() {
   const { isAuthenticated, user } = useAuth();
-  const { connectWallet, isConnecting, walletAddress } = useWallet();
   const router = useRouter();
   const prefersReduced = useReducedMotion();
   const heroRef = useRef<HTMLDivElement | null>(null);
@@ -175,13 +174,9 @@ export default function LandingPage() {
                   Dashboard
                 </Link>
               ) : (
-                <button
-                  onClick={connectWallet}
-                  disabled={isConnecting}
-                  className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 disabled:from-slate-600 disabled:to-slate-700 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-cyan-500/25 ring-1 ring-white/10 disabled:cursor-not-allowed"
-                >
-                  {isConnecting ? 'Connecting...' : walletAddress ? 'Connect Wallet' : 'Connect Wallet'}
-                </button>
+                <Wallet>
+                  <ConnectWallet className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-cyan-500/25 ring-1 ring-white/10" />
+                </Wallet>
               )}
             </div>
           </div>
@@ -252,16 +247,9 @@ export default function LandingPage() {
                     </svg>
                   </Link>
                 ) : (
-                  <button
-                    onClick={connectWallet}
-                    disabled={isConnecting}
-                    className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 disabled:from-slate-600 disabled:to-slate-700 rounded-xl font-bold text-lg transition-all shadow-xl shadow-cyan-500/20 ring-1 ring-white/20 flex items-center justify-center space-x-2 disabled:cursor-not-allowed"
-                  >
-                    <span>{isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
-                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </button>
+                  <Wallet>
+                    <ConnectWallet className="w-full sm:w-auto" />
+                  </Wallet>
                 )}
                 <a
                   href="#how-it-works"
@@ -713,15 +701,9 @@ export default function LandingPage() {
                     </span>
                   </Link>
                 ) : (
-                  <button
-                    onClick={connectWallet}
-                    disabled={isConnecting}
-                    className="relative w-full sm:w-auto rounded-xl p-[3px] bg-gradient-to-r from-cyan-500 to-teal-500 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed"
-                  >
-                    <span className="block rounded-[10px] bg-white text-slate-900 px-10 py-5 font-bold text-lg transition-all duration-200 ease-out hover:bg-transparent hover:text-white">
-                      {isConnecting ? 'Connecting...' : 'Connect Wallet'}
-                    </span>
-                  </button>
+                  <Wallet>
+                    <ConnectWallet className="w-full sm:w-auto" />
+                  </Wallet>
                 )}
               </div>
             </div>

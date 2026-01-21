@@ -4,16 +4,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { walletAPI } from '../api/user';
 import { useAuth } from './AuthContext';
 
-declare global {
-  interface Window {
-    ethereum?: {
-      isMetaMask?: boolean;
-      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-      on: (event: string, callback: (...args: unknown[]) => void) => void;
-      removeListener: (event: string, callback: (...args: unknown[]) => void) => void;
-    };
-  }
-}
+// Type declaration removed - using wagmi/viem's built-in types
 
 interface WalletContextType {
   walletAddress: string | null;

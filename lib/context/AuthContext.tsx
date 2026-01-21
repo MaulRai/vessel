@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { UserRole } from '../types/auth';
+import { useAccount } from 'wagmi';
 
 interface User {
   wallet_address: string;
@@ -29,11 +30,22 @@ const USER_KEY = 'vessel_user';
 const CURRENT_ROLE_KEY = 'vessel_current_role';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { address, isConnected } = useAccount();
   const [state, setState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
     isLoading: true,
   });
+
+  // Auto-login when wallet connects
+  useEffect(() => {
+    if (isConnected && address && !state.isAuthenticated) {
+      loginWithWallet(address, 'investor');
+    } else if (!isConnected && state.isAuthenticated) {
+      // Auto-logout when wallet disconnects
+      logout();
+    }
+  }, [isConnected, address]);
 
   // Load auth state from localStorage on mount
   useEffect(() => {
