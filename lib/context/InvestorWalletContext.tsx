@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 // Align with existing ambient declaration; keep it broad to avoid TS conflicts
 declare global {
     interface Window {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ethereum?: any;
     }
 }
