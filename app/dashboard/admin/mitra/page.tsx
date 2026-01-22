@@ -45,8 +45,8 @@ export default function AdminMitraPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await adminAPI.listPendingMitraApplications(page, perPage);
-        
+        const res = await adminAPI.listAllMitraApplications(page, perPage);
+
         // Handle successful response
         if (res.success) {
           const applications = res.data?.applications || [];
@@ -109,8 +109,8 @@ export default function AdminMitraPage() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <p className="text-red-400 mb-4">{error}</p>
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               className="px-4 py-2 bg-cyan-600 text-white rounded-lg"
             >
               Coba Lagi

@@ -131,6 +131,19 @@ class AdminAPI {
         });
     }
 
+    async listAllMitraApplications(
+        page: number = 1,
+        perPage: number = 10
+    ): Promise<APIResponse<MitraApplicationsListResponse>> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            per_page: perPage.toString(),
+        });
+        return this.request<MitraApplicationsListResponse>(`/admin/mitra/all?${params.toString()}`, {
+            method: 'GET',
+        });
+    }
+
     async getMitraApplicationDetail(id: string): Promise<APIResponse<MitraApplicationDetail>> {
         return this.request<MitraApplicationDetail>(`/admin/mitra/${id}`, {
             method: 'GET',
