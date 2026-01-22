@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useAccount, useDisconnect, useChainId, useSwitchChain, useChains } from 'wagmi';
-import { Identity, Address, Avatar, Name } from '@coinbase/onchainkit/identity';
+import { Identity, Address, Avatar, Name } from '@coinbase/onchainkit';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { UserRole } from '../types/auth';
