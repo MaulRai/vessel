@@ -18,7 +18,19 @@ interface AuthState {
   isLoading: boolean;
 }
 
+interface LoginCredentials {
+  email_or_username: string;
+  password: string;
+}
+
+interface LoginResponse {
+  success: boolean;
+  data?: { user: User };
+  error?: { message: string };
+}
+
 interface AuthContextType extends AuthState {
+  login: (credentials: LoginCredentials) => Promise<LoginResponse>;
   loginWithWallet: (walletAddress: string, initialRole?: UserRole) => Promise<void>;
   switchRole: (newRole: UserRole) => void;
   logout: () => void;
@@ -78,6 +90,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadAuthState();
   }, []);
 
+  // Traditional login for admin (email/password)
+  const login = useCallback(async (credentials: LoginCredentials): Promise<LoginResponse> => {
+    // Placeholder: Mock admin authentication
+    // TODO: Replace with actual API call to backend
+    
+    if (credentials.email_or_username === 'admin' && credentials.password === 'admin123') {
+      const adminUser: User = {
+        wallet_address: '0xADMIN000000000000000000000000000000000', // Placeholder address
+        role: 'admin',
+        username: 'Admin User',
+        email: 'admin@vessel.finance',
+      };
+
+      localStorage.setItem(USER_KEY, JSON.stringify(adminUser));
+      localStorage.setItem(CURRENT_ROLE_KEY, 'admin');
+
+      setState({
+        user: adminUser,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      return {
+        success: true,
+        data: { user: adminUser },
+      };
+    }
+
+    return {
+      success: false,
+      error: { message: 'Email/username atau password salah' },
+    };
+  }, []);
+
   const loginWithWallet = useCallback(async (walletAddress: string, initialRole: UserRole = 'investor') => {
     // In a real app, this would call an API to register/login the wallet
     const user: User = {
@@ -125,6 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value: AuthContextType = {
     ...state,
+    login,
     loginWithWallet,
     switchRole,
     logout,
