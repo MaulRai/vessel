@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import { useInvestorWallet } from '../context/InvestorWalletContext';
+import { useAccount } from 'wagmi';
 import { UserRole } from '../types/auth';
 
 interface AuthGuardProps {
@@ -20,7 +20,7 @@ export function AuthGuard({
   redirectTo = '/login',
 }: AuthGuardProps) {
   const { isAuthenticated, isLoading, user } = useAuth();
-  const { isConnected, investor } = useInvestorWallet();
+  const { isConnected } = useAccount();
   const router = useRouter();
 
   // Determine if user has valid access
@@ -28,7 +28,7 @@ export function AuthGuard({
   const isMitraRoute = allowedRoles?.includes('mitra') && allowedRoles.length === 1;
 
   // For investor-only routes, check wallet connection
-  const hasInvestorAccess = isInvestorRoute && isConnected && investor;
+  const hasInvestorAccess = isInvestorRoute && isConnected;
 
   // For mitra routes or mixed routes, check traditional auth
   const hasTraditionalAccess = isAuthenticated && user;
@@ -90,7 +90,7 @@ export function AuthGuard({
         }
       }
     }
-  }, [isAuthenticated, isLoading, user, isConnected, investor, allowedRoles, requireAuth, redirectTo, router, isInvestorRoute, isMitraRoute, hasAccess]);
+  }, [isAuthenticated, isLoading, user, isConnected, allowedRoles, requireAuth, redirectTo, router, isInvestorRoute, isMitraRoute, hasAccess]);
 
   // Loading state
   if (isLoading) {
