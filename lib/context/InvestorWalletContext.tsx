@@ -2,14 +2,10 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
+// Align with existing ambient declaration; keep it broad to avoid TS conflicts
 declare global {
     interface Window {
-        ethereum?: {
-            isMetaMask?: boolean;
-            request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-            on: (event: string, callback: (...args: unknown[]) => void) => void;
-            removeListener: (event: string, callback: (...args: unknown[]) => void) => void;
-        };
+        ethereum?: any;
     }
 }
 
@@ -112,7 +108,7 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
 
             // Check if already connected
             window.ethereum.request({ method: 'eth_accounts' })
-                .then((accounts) => {
+                .then((accounts: unknown) => {
                     const accountList = accounts as string[];
                     if (accountList.length > 0) {
                         const saved = localStorage.getItem(INVESTOR_WALLET_KEY);
@@ -133,7 +129,7 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
 
             // Get current chain ID
             window.ethereum.request({ method: 'eth_chainId' })
-                .then((id) => {
+                .then((id: unknown) => {
                     setChainId(parseInt(id as string, 16));
                 })
                 .catch(console.error);
