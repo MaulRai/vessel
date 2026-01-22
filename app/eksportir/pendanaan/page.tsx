@@ -171,7 +171,7 @@ function PendanaanEksportirContent() {
 										</div>
 										<button
 											onClick={() => setIsModalOpen(true)}
-											className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-900/30 transition hover:from-cyan-500 hover:to-teal-500"
+											className="inline-flex items-center justify-center rounded-lg bg-linear-to-r from-cyan-600 to-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-900/30 transition hover:from-cyan-500 hover:to-teal-500"
 										>
 											Bayar Pendanaan
 										</button>
@@ -309,7 +309,7 @@ function PendanaanEksportirContent() {
 									</button>
 									<button
 										onClick={() => setModalStep("va")}
-										className="rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-900/30 transition hover:from-cyan-500 hover:to-teal-500"
+										className="rounded-lg bg-linear-to-r from-cyan-600 to-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-900/30 transition hover:from-cyan-500 hover:to-teal-500"
 									>
 										Lanjutkan
 									</button>
@@ -380,7 +380,7 @@ function PendanaanEksportirContent() {
 									</button>
 									<button
 										onClick={closeModal}
-										className="rounded-lg bg-gradient-to-r from-emerald-600 to-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-900/30 transition hover:from-emerald-500 hover:to-cyan-500"
+										className="rounded-lg bg-linear-to-r from-emerald-600 to-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-900/30 transition hover:from-emerald-500 hover:to-cyan-500"
 									>
 										Saya Sudah Transfer
 									</button>

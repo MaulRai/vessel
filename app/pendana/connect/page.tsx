@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ConnectWallet, Wallet } from '@coinbase/onchainkit/wallet';
-import { useAccount, useChainId } from 'wagmi';
+import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 import { ONCHAINKIT_CONFIG } from '@/lib/config/onchainkit';
 
 export default function InvestorConnectPage() {
     const router = useRouter();
     const { isConnected } = useAccount();
     const chainId = useChainId();
+    const { switchChain, isPending: isSwitching, error: switchError } = useSwitchChain();
     const expectedChainId = ONCHAINKIT_CONFIG.chain.id;
     const isWrongChain = isConnected && chainId !== expectedChainId;
 
@@ -22,7 +23,7 @@ export default function InvestorConnectPage() {
     }, [isConnected, isWrongChain, router]);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">
+        <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">
             {/* Background Effects */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-linear-to-br from-cyan-500/10 via-transparent to-transparent rounded-full blur-3xl animate-pulse" />
@@ -50,8 +51,16 @@ export default function InvestorConnectPage() {
                     </div>
 
                     {isWrongChain && (
-                        <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/50 rounded-xl text-sm text-amber-100 text-center">
-                            Anda terhubung ke jaringan yang salah. Pilih jaringan {ONCHAINKIT_CONFIG.chain.name} di wallet Anda lalu coba lagi.
+                        <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/50 rounded-xl text-sm text-amber-100 text-center space-y-3">
+                            <div>Anda terhubung ke jaringan lain. Pilih jaringan {ONCHAINKIT_CONFIG.chain.name} untuk bertransaksi.</div>
+                            <button
+                                onClick={() => switchChain({ chainId: expectedChainId })}
+                                disabled={isSwitching}
+                                className="w-full px-4 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-100 rounded-lg text-sm font-medium transition-all disabled:opacity-60"
+                            >
+                                {isSwitching ? 'Mengganti jaringan...' : `Ganti ke ${ONCHAINKIT_CONFIG.chain.name}`}
+                            </button>
+                            {switchError && <p className="text-xs text-amber-200/80">{switchError.message}</p>}
                         </div>
                     )}
 

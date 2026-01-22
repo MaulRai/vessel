@@ -205,7 +205,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-medium py-2.5 px-4 rounded-lg transition-all text-sm shadow-lg shadow-cyan-900/50"
+          className="w-full bg-linear-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-medium py-2.5 px-4 rounded-lg transition-all text-sm shadow-lg shadow-cyan-900/50"
         >
           {isLoading ? t('common.processing') : t('auth.login')}
         </button>
@@ -264,8 +264,8 @@ function LoginFormFallback() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">
-      <div className="w-full max-w-5xl h-[calc(100vh-2rem)] max-h-[700px] bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
+    <div className="min-h-screen h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">
+      <div className="w-full max-w-5xl h-[calc(100vh-2rem)] max-h-175 bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
         <div className="grid md:grid-cols-2 h-full">
           {/* Left Column - Form */}
           <div className="p-6 md:p-8 lg:p-10 flex flex-col justify-center overflow-y-auto">
@@ -275,7 +275,7 @@ export default function LoginPage() {
           </div>
 
           {/* Right Column - Image */}
-          <div className="hidden md:block relative bg-gradient-to-br from-slate-800 via-cyan-900 to-teal-900">
+          <div className="hidden md:block relative bg-linear-to-br from-slate-800 via-cyan-900 to-teal-900">
             <div className="absolute inset-0">
               <Image
                 src="/assets/auth/auth-image-4.png"

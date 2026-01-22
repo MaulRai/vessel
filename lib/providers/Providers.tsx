@@ -11,11 +11,24 @@ import { AuthProvider } from '../context/AuthContext';
 import { LanguageProvider } from '../i18n/LanguageContext';
 
 const wagmiConfig = createConfig({
-  chains: [base, baseSepolia],
+  chains: [base, baseSepolia], // Base-first but do not block other chains
   connectors: [
-    injected(),
-    coinbaseWallet({ appName: ONCHAINKIT_CONFIG.appName, appLogoUrl: ONCHAINKIT_CONFIG.appIcon }),
-    walletConnect({ projectId: WALLET_CONNECT_PROJECT_ID }),
+    injected({ shimDisconnect: true }),
+    coinbaseWallet({
+      appName: ONCHAINKIT_CONFIG.appName,
+      appLogoUrl: ONCHAINKIT_CONFIG.appIcon,
+      preference: 'all',
+    }),
+    walletConnect({
+      projectId: WALLET_CONNECT_PROJECT_ID,
+      showQrModal: true,
+      metadata: {
+        name: ONCHAINKIT_CONFIG.appName,
+        description: 'Vessel Finance dApp',
+        url: ONCHAINKIT_CONFIG.appIcon?.replace('/vessel-logo.png', '') || 'https://vessel.local',
+        icons: [ONCHAINKIT_CONFIG.appIcon || ''],
+      },
+    }),
   ],
   transports: {
     [base.id]: http(),
