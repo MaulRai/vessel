@@ -4,7 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import { useInvestorWallet } from '../context/InvestorWalletContext';
+import { useAccount, useDisconnect } from 'wagmi';
+import { Identity, Address, Avatar, Name } from '@coinbase/onchainkit/identity';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { UserRole } from '../types/auth';
@@ -169,7 +170,8 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { t } = useLanguage();
-  const { walletAddress, disconnectWallet, idrxBalance } = useInvestorWallet();
+  const { address } = useAccount();
+  const { disconnect } = useDisconnect();
 
   const navItems = role === 'investor' ? getInvestorNavItems(t) : role === 'admin' ? getAdminNavItems(t) : getMitraNavItems(t);
   const roleLabel = role === 'investor' ? t('role.investor') : role === 'admin' ? t('role.admin') : t('role.exporter');
@@ -183,13 +185,8 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   };
 
   const handleDisconnectWallet = () => {
-    disconnectWallet();
+    disconnect();
     router.push('/pendana/connect');
-  };
-
-  // Format wallet address for display
-  const formatWalletAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
   return (
@@ -247,17 +244,24 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
             // Wallet info for investors
             <>
               <div className="flex items-center space-x-3 mb-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border border-cyan-500/30 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-slate-500">{t('dashboard.walletConnected')}</p>
-                  <p className="text-sm font-mono font-medium text-cyan-400 truncate">
-                    {walletAddress ? formatWalletAddress(walletAddress) : t('dashboard.notConnected')}
-                  </p>
-                </div>
+                {address ? (
+                  <Identity address={address}>
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="w-10 h-10" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-slate-500">{t('dashboard.walletConnected')}</p>
+                        <p className="text-sm font-mono font-medium text-cyan-400 truncate">
+                          <Address className="text-cyan-300" />
+                        </p>
+                      </div>
+                    </div>
+                  </Identity>
+                ) : (
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-slate-500">{t('dashboard.walletConnected')}</p>
+                    <p className="text-sm font-mono font-medium text-cyan-400 truncate">{t('dashboard.notConnected')}</p>
+                  </div>
+                )}
               </div>
               <button
                 onClick={handleDisconnectWallet}
@@ -327,17 +331,6 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                   </svg>
                   <span className="text-sm font-medium text-slate-200">
                     Rp {(user?.balance_idr || 0).toLocaleString('id-ID')}
-                  </span>
-                </div>
-              )}
-              {/* IDRX Balance indicator for investors */}
-              {role === 'investor' && (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
-                  <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-sm font-medium text-slate-200">
-                    {idrxBalance} IDRX
                   </span>
                 </div>
               )}

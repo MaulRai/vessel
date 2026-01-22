@@ -5,12 +5,10 @@ import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { MarketplacePool, MarketplaceFilters } from '@/lib/api/user';
-import { useInvestorWallet } from '@/lib/context/InvestorWalletContext';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 function PoolInvestmentContent() {
   const router = useRouter();
-  useInvestorWallet();
   const { t } = useLanguage();
   // ... (keep demoPools as is for now, treating them as mock API data)
   const demoPools: MarketplacePool[] = [
