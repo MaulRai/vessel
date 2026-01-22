@@ -4,11 +4,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import { useAccount, useDisconnect } from 'wagmi';
+import { useAccount, useDisconnect, useChainId, useSwitchChain, useChains } from 'wagmi';
 import { Identity, Address, Avatar, Name } from '@coinbase/onchainkit/identity';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { UserRole } from '../types/auth';
+import { base, baseSepolia } from 'wagmi/chains';
 
 interface NavItem {
   href: string;
@@ -172,6 +173,12 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const { t } = useLanguage();
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
+  const chainId = useChainId();
+  const chains = useChains();
+  const { switchChain, isPending: isSwitching } = useSwitchChain();
+  const currentChain = chains.find((item) => item.id === chainId);
+
+  const isOnBase = chainId === base.id || chainId === baseSepolia.id;
 
   const navItems = role === 'investor' ? getInvestorNavItems(t) : role === 'admin' ? getAdminNavItems(t) : getMitraNavItems(t);
   const roleLabel = role === 'investor' ? t('role.investor') : role === 'admin' ? t('role.admin') : t('role.exporter');
@@ -253,6 +260,9 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                         <p className="text-sm font-mono font-medium text-cyan-400 truncate">
                           <Address className="text-cyan-300" />
                         </p>
+                        {!isOnBase && (
+                          <p className="text-[11px] text-amber-300 mt-0.5">{currentChain?.name || 'Jaringan lain'} • Switch ke Base untuk transaksi</p>
+                        )}
                       </div>
                     </div>
                   </Identity>
@@ -265,7 +275,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
               </div>
               <button
                 onClick={handleDisconnectWallet}
-                className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all min-w-[200px]"
+                className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all min-w-50"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -277,7 +287,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
             // User info for mitra/admin
             <>
               <div className="flex items-center space-x-3 mb-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-linear-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center">
                   <span className="text-sm font-medium text-slate-300">
                     {user?.username?.charAt(0).toUpperCase() || 'U'}
                   </span>
@@ -289,7 +299,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
               </div>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all min-w-[140px]"
+                className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all min-w-35"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -323,6 +333,20 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Chain notice for investors when off Base */}
+              {role === 'investor' && address && !isOnBase && (
+                <div className="flex items-center space-x-3 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-100 text-xs">
+                  <span>Jaringan saat ini: {currentChain?.name ?? 'Unknown'}. Ganti ke Base untuk transaksi.</span>
+                  <button
+                    onClick={() => switchChain({ chainId: baseSepolia.id })}
+                    disabled={isSwitching}
+                    className="px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 rounded-md border border-amber-500/40 text-amber-50 text-[11px] font-semibold disabled:opacity-60"
+                  >
+                    {isSwitching ? 'Mengganti…' : 'Switch ke Base Sepolia'}
+                  </button>
+                </div>
+              )}
+
               {/* Balance - only show for non-investors (mitra/admin) */}
               {role !== 'investor' && (
                 <div className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">

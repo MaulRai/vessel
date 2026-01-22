@@ -365,7 +365,7 @@ function PoolInvestmentContent() {
                       </div>
                       <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
                         <div
-                          className="bg-gradient-to-r from-cyan-500 to-teal-500 h-2 rounded-full transition-all"
+                          className="bg-linear-to-r from-cyan-500 to-teal-500 h-2 rounded-full transition-all"
                           style={{ width: `${Math.min(pool.funding_progress || 0, 100)}%` }}
                         />
                       </div>
@@ -418,7 +418,7 @@ function PoolInvestmentContent() {
                         }}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${isFullyFunded
                           ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-white shadow-lg shadow-cyan-500/25'
+                          : 'bg-linear-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-white shadow-lg shadow-cyan-500/25'
                           }`}
                         disabled={isFullyFunded}
                       >
