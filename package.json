@@ -14,8 +14,8 @@
     "framer-motion": "^11.18.2",
     "next": "^15.3.0",
     "pino": "^10.2.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "react-hook-form": "^7.71.0",
     "viem": "^2.44.4",
     "wagmi": "^2.19.5"
