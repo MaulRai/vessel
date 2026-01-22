@@ -333,6 +333,14 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
+              {role === 'investor' && address && (
+                <div className="hidden md:flex items-center space-x-2 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50 max-w-xs">
+                  <span className="text-sm font-mono text-cyan-200 truncate">
+                    <Address address={address} className="truncate" />
+                  </span>
+                </div>
+              )}
+
               {/* Chain notice for investors when off Base */}
               {role === 'investor' && address && !isOnBase && (
                 <div className="flex items-center space-x-3 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-100 text-xs">
