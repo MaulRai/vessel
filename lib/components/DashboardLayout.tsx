@@ -1,5 +1,7 @@
 'use client';
 
+import React from "react"
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -199,45 +201,55 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-slate-900/50 border-r border-slate-800/50 backdrop-blur-xl z-40">
+      <aside className="fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900/95 via-slate-900/90 to-slate-950/95 border-r border-slate-700/50 backdrop-blur-2xl z-40 shadow-2xl shadow-black/20">
+        {/* Animated gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-teal-500/5 pointer-events-none" />
+        
         {/* Logo */}
-        <div className="h-16 flex items-center px-6 border-b border-slate-800/50">
-          <Link href="/" className="flex items-center space-x-2">
+        <div className="relative h-20 flex items-center px-6 border-b border-slate-700/50 bg-slate-900/50">
+          <Link href="/" className="flex items-center space-x-2 group">
             <Image
               src="/vessel-logo.png"
               alt="VESSEL Logo"
               width={120}
               height={32}
-              className="h-10 w-auto object-contain"
+              className="h-11 w-auto object-contain transition-transform group-hover:scale-105"
               priority
             />
           </Link>
         </div>
 
         {/* Role Badge */}
-        <div className="px-6 py-4">
-          <div className={`inline-flex items-center space-x-2 px-3 py-1.5 bg-${roleColor}-500/10 border border-${roleColor}-500/20 rounded-full`}>
-            <span className={`w-2 h-2 bg-${roleColor}-400 rounded-full`} />
-            <span className={`text-xs font-medium text-${roleColor}-400`}>{roleLabel}</span>
+        <div className="relative px-6 py-5">
+          <div className={`inline-flex items-center space-x-2.5 px-4 py-2 bg-gradient-to-r ${roleColor === 'cyan' ? 'from-cyan-500/15 to-cyan-600/10' : roleColor === 'purple' ? 'from-purple-500/15 to-purple-600/10' : 'from-teal-500/15 to-teal-600/10'} border ${roleColor === 'cyan' ? 'border-cyan-400/30' : roleColor === 'purple' ? 'border-purple-400/30' : 'border-teal-400/30'} rounded-xl backdrop-blur-sm shadow-lg ${roleColor === 'cyan' ? 'shadow-cyan-500/10' : roleColor === 'purple' ? 'shadow-purple-500/10' : 'shadow-teal-500/10'}`}>
+            <span className={`w-2.5 h-2.5 ${roleColor === 'cyan' ? 'bg-cyan-400' : roleColor === 'purple' ? 'bg-purple-400' : 'bg-teal-400'} rounded-full animate-pulse shadow-lg ${roleColor === 'cyan' ? 'shadow-cyan-400/50' : roleColor === 'purple' ? 'shadow-purple-400/50' : 'shadow-teal-400/50'}`} />
+            <span className={`text-xs font-semibold tracking-wide uppercase ${roleColor === 'cyan' ? 'text-cyan-300' : roleColor === 'purple' ? 'text-purple-300' : 'text-teal-300'}`}>{roleLabel}</span>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="px-3 py-4">
-          <ul className="space-y-1">
+        <nav className="relative px-4 py-2">
+          <ul className="space-y-1.5">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all ${isActive
-                      ? `bg-${roleColor}-500/10 text-${roleColor}-400 border border-${roleColor}-500/20`
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                      }`}
+                    className={`group relative flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                      isActive
+                        ? `bg-gradient-to-r ${roleColor === 'cyan' ? 'from-cyan-500/20 to-cyan-600/10' : roleColor === 'purple' ? 'from-purple-500/20 to-purple-600/10' : 'from-teal-500/20 to-teal-600/10'} ${roleColor === 'cyan' ? 'text-cyan-300' : roleColor === 'purple' ? 'text-purple-300' : 'text-teal-300'} border ${roleColor === 'cyan' ? 'border-cyan-400/30' : roleColor === 'purple' ? 'border-purple-400/30' : 'border-teal-400/30'} shadow-lg ${roleColor === 'cyan' ? 'shadow-cyan-500/10' : roleColor === 'purple' ? 'shadow-purple-500/10' : 'shadow-teal-500/10'}`
+                        : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 border border-transparent hover:border-slate-700/50'
+                    }`}
                   >
-                    {item.icon}
-                    <span className="font-medium">{item.label}</span>
+                    {/* Active indicator */}
+                    {isActive && (
+                      <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 ${roleColor === 'cyan' ? 'bg-cyan-400' : roleColor === 'purple' ? 'bg-purple-400' : 'bg-teal-400'} rounded-r-full shadow-lg ${roleColor === 'cyan' ? 'shadow-cyan-400/50' : roleColor === 'purple' ? 'shadow-purple-400/50' : 'shadow-teal-400/50'}`} />
+                    )}
+                    <span className={`transition-transform ${isActive ? 'scale-110' : 'group-hover:scale-105'}`}>
+                      {item.icon}
+                    </span>
+                    <span className="font-medium text-sm tracking-wide">{item.label}</span>
                   </Link>
                 </li>
               );
@@ -246,65 +258,32 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
         </nav>
 
         {/* User/Wallet Info & Logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-800/50">
+        <div className="absolute bottom-0 left-0 right-0 p-5 border-t border-slate-700/50 bg-gradient-to-t from-slate-950/80 to-transparent backdrop-blur-sm">
           {role === 'investor' ? (
             // Wallet info for investors
             <>
-              <div className="flex items-center space-x-3 mb-3">
-                {address ? (
-                  <Identity address={address}>
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="w-10 h-10" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-500">{t('dashboard.walletConnected')}</p>
-                        <p className="text-sm font-mono font-medium text-cyan-400 truncate">
-                          <Address className="text-cyan-300" />
-                        </p>
-                        {!isOnBase && (
-                          <p className="text-[11px] text-amber-300 mt-0.5">{currentChain?.name || 'Jaringan lain'} • Switch ke Base untuk transaksi</p>
-                        )}
-                      </div>
-                    </div>
-                  </Identity>
-                ) : (
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-slate-500">{t('dashboard.walletConnected')}</p>
-                    <p className="text-sm font-mono font-medium text-cyan-400 truncate">{t('dashboard.notConnected')}</p>
-                  </div>
-                )}
-              </div>
+              
               <button
                 onClick={handleDisconnectWallet}
-                className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all min-w-50"
+                className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-slate-300 hover:text-red-300 bg-slate-800/40 hover:bg-red-500/10 border border-slate-700/50 hover:border-red-500/30 rounded-xl transition-all duration-300 font-medium text-sm group"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
-                <span className="font-medium">{t('dashboard.disconnect')}</span>
+                <span>{t('dashboard.disconnect')}</span>
               </button>
             </>
           ) : (
             // User info for mitra/admin
             <>
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="w-10 h-10 bg-linear-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-slate-300">
-                    {user?.username?.charAt(0).toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-200 truncate">{user?.username || 'User'}</p>
-                  <p className="text-xs text-slate-500 truncate">{user?.email}</p>
-                </div>
-              </div>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all min-w-35"
+                className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-slate-300 hover:text-red-300 bg-slate-800/40 hover:bg-red-500/10 border border-slate-700/50 hover:border-red-500/30 rounded-xl transition-all duration-300 font-medium text-sm group"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span className="font-medium">{t('auth.logout')}</span>
+                <span>{t('auth.logout')}</span>
               </button>
             </>
           )}
@@ -312,30 +291,36 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="pl-64">
+      <main className="pl-72">
         {/* Top Bar */}
-        <header className="h-16 bg-slate-900/30 border-b border-slate-800/50 backdrop-blur-xl sticky top-0 z-30">
-          <div className="h-full px-6 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <header className="h-20 bg-gradient-to-r from-slate-900/50 via-slate-900/40 to-slate-900/50 border-b border-slate-700/50 backdrop-blur-2xl sticky top-0 z-30 shadow-xl shadow-black/10">
+          <div className="h-full px-8 flex items-center justify-between">
+            <div className="flex items-center gap-5">
               {!isOnDashboard && (
                 <Link
                   href={dashboardHref}
-                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all group"
+                  className="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent hover:border-slate-700/50 rounded-xl transition-all duration-300 group"
                   title={t('dashboard.backToDashboard')}
                 >
-                  <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 group-hover:-translate-x-1.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
                 </Link>
               )}
-              <h1 className="text-lg font-semibold text-slate-100">
-                {navItems.find((item) => item.href === pathname)?.label || t('nav.dashboard')}
-              </h1>
+              <div>
+                <h1 className="text-xl font-bold text-slate-50 tracking-tight">
+                  {navItems.find((item) => item.href === pathname)?.label || t('nav.dashboard')}
+                </h1>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-3">
               {role === 'investor' && address && (
-                <div className="hidden md:flex items-center space-x-2 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50 max-w-xs">
-                  <span className="text-sm font-mono text-cyan-200 truncate">
+                <div className="hidden lg:flex items-center gap-2 px-4 py-2.5 bg-slate-800/60 rounded-xl border border-slate-700/50 backdrop-blur-sm shadow-lg max-w-xs">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
+                  <span className="text-sm font-mono font-semibold text-cyan-300 truncate">
                     <Address address={address} className="truncate" />
                   </span>
                 </div>
@@ -343,37 +328,49 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
 
               {/* Chain notice for investors when off Base */}
               {role === 'investor' && address && !isOnBase && (
-                <div className="flex items-center space-x-3 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-100 text-xs">
-                  <span>Jaringan saat ini: {currentChain?.name ?? 'Unknown'}. Ganti ke Base untuk transaksi.</span>
+                <div className="flex items-center gap-3 px-4 py-2.5 bg-gradient-to-r from-amber-500/15 to-orange-500/10 border border-amber-400/40 rounded-xl text-amber-100 text-xs backdrop-blur-sm shadow-lg shadow-amber-500/10">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-amber-300" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-medium">{currentChain?.name ?? 'Unknown'}</span>
+                  </div>
                   <button
                     onClick={() => switchChain({ chainId: baseSepolia.id })}
                     disabled={isSwitching}
-                    className="px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 rounded-md border border-amber-500/40 text-amber-50 text-[11px] font-semibold disabled:opacity-60"
+                    className="px-3 py-1.5 bg-amber-400/20 hover:bg-amber-400/30 rounded-lg border border-amber-400/40 text-amber-50 text-[11px] font-bold disabled:opacity-50 transition-all duration-200"
                   >
-                    {isSwitching ? 'Mengganti…' : 'Switch ke Base Sepolia'}
+                    {isSwitching ? 'Switching...' : 'Switch to Base'}
                   </button>
                 </div>
               )}
 
               {/* Balance - only show for non-investors (mitra/admin) */}
               {role !== 'investor' && (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                  <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-sm font-medium text-slate-200">
-                    Rp {(user?.balance_idr || 0).toLocaleString('id-ID')}
-                  </span>
+                <div className="flex items-center gap-2.5 px-4 py-2.5 bg-gradient-to-r from-cyan-500/15 to-teal-500/10 rounded-xl border border-cyan-400/30 backdrop-blur-sm shadow-lg shadow-cyan-500/10">
+                  <div className="w-9 h-9 bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-cyan-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-cyan-300 font-medium uppercase tracking-wider">Balance</p>
+                    <p className="text-sm font-bold text-cyan-100">
+                      Rp {(user?.balance_idr || 0).toLocaleString('id-ID')}
+                    </p>
+                  </div>
                 </div>
               )}
+              
               {/* Language Switcher */}
               <LanguageSwitcher />
+              
               {/* Notifications */}
-              <button className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg transition-all relative">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <button className="relative p-2.5 text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 border border-transparent hover:border-slate-700/50 rounded-xl transition-all duration-300 group">
+                <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-cyan-400 rounded-full" />
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-cyan-400 rounded-full border-2 border-slate-900 shadow-lg shadow-cyan-400/50 animate-pulse" />
               </button>
             </div>
           </div>

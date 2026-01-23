@@ -138,46 +138,86 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.03)_1px,transparent_1px)] bg-size-[100px_100px]" />
       </div>
 
-      <nav className="fixed w-full z-50 border-b border-slate-800/50 backdrop-blur-xl bg-slate-950/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <nav className="fixed w-full z-50 border-b border-slate-700/50 backdrop-blur-2xl bg-gradient-to-b from-slate-950/95 via-slate-950/90 to-slate-950/80 shadow-2xl shadow-black/20">
+        {/* Animated gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-teal-500/5 pointer-events-none" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            {/* Logo */}
             <div className="flex items-center space-x-2">
-              <Image
-                src="/vessel-logo.png"
-                alt="VESSEL Logo"
-                width={120}
-                height={32}
-                className="h-12 w-auto object-contain"
-                priority
-              />
+              <Link href="/" className="group flex items-center space-x-2">
+                <Image
+                  src="/vessel-logo.png"
+                  alt="VESSEL Logo"
+                  width={120}
+                  height={32}
+                  className="h-12 w-auto object-contain transition-transform group-hover:scale-105"
+                  priority
+                />
+              </Link>
             </div>
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">{t('landing.features')}</a>
-              <a href="#how-it-works" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">{t('landing.howItWorks')}</a>
-              <a href="#security" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium tracking-wide">{t('landing.security')}</a>
+            
+            {/* Desktop Navigation Links */}
+            <div className="hidden md:flex items-center space-x-2">
+              <a 
+                href="#features" 
+                className="relative px-4 py-2 text-slate-300 hover:text-cyan-300 transition-all duration-300 text-sm font-semibold tracking-wide group rounded-lg hover:bg-slate-800/50"
+              >
+                <span className="relative z-10">{t('landing.features')}</span>
+                <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/0 to-teal-500/0 group-hover:from-cyan-500/10 group-hover:to-teal-500/10 transition-all duration-300" />
+              </a>
+              <a 
+                href="#how-it-works" 
+                className="relative px-4 py-2 text-slate-300 hover:text-cyan-300 transition-all duration-300 text-sm font-semibold tracking-wide group rounded-lg hover:bg-slate-800/50"
+              >
+                <span className="relative z-10">{t('landing.howItWorks')}</span>
+                <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/0 to-teal-500/0 group-hover:from-cyan-500/10 group-hover:to-teal-500/10 transition-all duration-300" />
+              </a>
+              <a 
+                href="#security" 
+                className="relative px-4 py-2 text-slate-300 hover:text-cyan-300 transition-all duration-300 text-sm font-semibold tracking-wide group rounded-lg hover:bg-slate-800/50"
+              >
+                <span className="relative z-10">{t('landing.security')}</span>
+                <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/0 to-teal-500/0 group-hover:from-cyan-500/10 group-hover:to-teal-500/10 transition-all duration-300" />
+              </a>
             </div>
-            <div className="flex items-center space-x-4">
+            
+            {/* Right side actions */}
+            <div className="flex items-center gap-3">
               <LanguageSwitcher />
               {isAuthenticated ? (
                 <Link
                   href={getDashboardLink()}
-                  className="px-6 py-2.5 bg-linear-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-cyan-500/25 ring-1 ring-white/10"
+                  className="group relative px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-bold text-sm transition-all duration-300 shadow-xl shadow-cyan-500/30 ring-1 ring-white/20 overflow-hidden"
                 >
-                  Dashboard
+                  <span className="relative z-10 flex items-center gap-2">
+                    Dashboard
+                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                 </Link>
               ) : (
                 <>
                   <Link
                     href="/login"
-                    className="text-slate-300 hover:text-white transition-colors text-sm font-medium"
+                    className="hidden sm:block px-5 py-2.5 text-slate-200 hover:text-white hover:bg-slate-800/60 border border-transparent hover:border-slate-700/50 rounded-xl transition-all duration-300 text-sm font-semibold"
                   >
                     {t('auth.login')}
                   </Link>
                   <Link
                     href="/register"
-                    className="px-6 py-2.5 min-w-35 text-center bg-linear-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-cyan-500/25 ring-1 ring-white/10"
+                    className="group relative px-6 py-2.5 min-w-35 text-center bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-bold text-sm transition-all duration-300 shadow-xl shadow-cyan-500/30 ring-1 ring-white/20 overflow-hidden"
                   >
-                    {t('landing.getStarted')}
+                    <span className="relative z-10 flex items-center gap-2">
+                      {t('landing.getStarted')}
+                      <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </span>
+                    <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                   </Link>
                 </>
               )}
@@ -433,7 +473,7 @@ export default function LandingPage() {
                       animate={active ? { rotate: 0, y: 0, scale: 1.03 } : { rotate: 0, y: 4, scale: 1 }}
                       transition={{ duration: 0.45, ease }}
                     >
-                      <Image src={card.img} alt={t(card.titleKey)} width={64} height={64} className="w-12 h-12 object-contain" />
+                      <Image src={card.img || "/placeholder.svg"} alt={t(card.titleKey)} width={64} height={64} className="w-12 h-12 object-contain" />
                     </motion.div>
                     <h3 className="text-3xl font-bold mb-2 text-white">{t(card.titleKey)}</h3>
                     <p className="text-slate-400 text-md mb-4 leading-relaxed">
@@ -641,7 +681,7 @@ export default function LandingPage() {
                       >
                         <div className="flex items-center space-x-2">
                           <Image
-                            src={item.icon}
+                            src={item.icon || "/placeholder.svg"}
                             alt="VESSEL Logo"
                             width={120}
                             height={120}
