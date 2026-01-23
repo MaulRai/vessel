@@ -29,7 +29,7 @@ export default function PendingApprovalPage() {
         }
 
         if (user?.role === 'admin') {
-            router.push('/dashboard/admin');
+            router.push('/admin/dashboard');
             return;
         }
 

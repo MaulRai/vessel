@@ -140,7 +140,7 @@ function InvoiceReviewListContent() {
                           </td>
                           <td className="px-6 py-4">
                             <Link
-                              href={`/dashboard/admin/invoices/${invoice.id}`}
+                              href={`/admin/dashboard/invoices/${invoice.id}`}
                               className="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-lg text-sm font-medium text-purple-400 transition-all"
                             >
                               Review

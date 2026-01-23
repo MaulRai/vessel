@@ -60,7 +60,7 @@ const getInvestorNavItems = (t: (key: string) => string): NavItem[] => [
 
 const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
   {
-    href: '/dashboard/admin',
+    href: '/admin/dashboard',
     label: t('nav.dashboard'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,7 +69,7 @@ const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
     ),
   },
   {
-    href: '/dashboard/admin/invoices',
+    href: '/admin/dashboard/invoices',
     label: t('nav.invoiceReview'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -78,7 +78,7 @@ const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
     ),
   },
   {
-    href: '/dashboard/admin/pools',
+    href: '/admin/dashboard/pools',
     label: t('nav.fundingPools'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -87,7 +87,7 @@ const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
     ),
   },
   {
-    href: '/dashboard/admin/balance',
+    href: '/admin/dashboard/balance',
     label: t('nav.grantBalance'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,7 +96,7 @@ const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
     ),
   },
   {
-    href: '/dashboard/admin/users',
+    href: '/admin/dashboard/users',
     label: t('nav.users'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -105,7 +105,7 @@ const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
     ),
   },
   {
-    href: '/dashboard/admin/mitra',
+    href: '/admin/dashboard/mitra',
     label: t('nav.mitraReview'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -185,7 +185,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const navItems = role === 'investor' ? getInvestorNavItems(t) : role === 'admin' ? getAdminNavItems(t) : getMitraNavItems(t);
   const roleLabel = role === 'investor' ? t('role.investor') : role === 'admin' ? t('role.admin') : t('role.exporter');
   const roleColor = role === 'investor' ? 'cyan' : role === 'admin' ? 'purple' : 'teal';
-  const dashboardHref = role === 'investor' ? '/pendana/dashboard' : role === 'admin' ? '/dashboard/admin' : '/eksportir/dashboard';
+  const dashboardHref = role === 'investor' ? '/pendana/dashboard' : role === 'admin' ? '/admin/dashboard' : '/eksportir/dashboard';
   const isOnDashboard = pathname === dashboardHref;
 
   const handleLogout = () => {
@@ -262,7 +262,42 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
           {role === 'investor' ? (
             // Wallet info for investors
             <>
-              
+              <div className="mb-3 p-3 rounded-xl bg-slate-800/60 border border-slate-700/50">
+                {address ? (
+                  <Identity address={address}>
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <Avatar className="w-11 h-11 ring-2 ring-cyan-500/30" />
+                        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-slate-900 shadow-lg shadow-emerald-400/50" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-slate-400 font-medium mb-0.5">{t('dashboard.walletConnected')}</p>
+                        <p className="text-sm font-mono font-semibold text-cyan-300 truncate">
+                          <Address className="text-cyan-300" />
+                        </p>
+                        {!isOnBase && (
+                          <p className="text-[10px] text-amber-300 mt-1 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+                            {currentChain?.name || 'Jaringan lain'}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </Identity>
+                ) : (
+                  <div className="flex items-center space-x-3">
+                    <div className="w-11 h-11 rounded-full bg-slate-700/50 border border-slate-600/50 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-slate-400 font-medium">{t('dashboard.walletConnected')}</p>
+                      <p className="text-sm font-medium text-slate-500">{t('dashboard.notConnected')}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
               <button
                 onClick={handleDisconnectWallet}
                 className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-slate-300 hover:text-red-300 bg-slate-800/40 hover:bg-red-500/10 border border-slate-700/50 hover:border-red-500/30 rounded-xl transition-all duration-300 font-medium text-sm group"
@@ -276,6 +311,22 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
           ) : (
             // User info for mitra/admin
             <>
+              <div className="mb-3 p-3 rounded-xl bg-slate-800/60 border border-slate-700/50">
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <div className="w-11 h-11 bg-gradient-to-br from-slate-600 to-slate-700 rounded-full flex items-center justify-center ring-2 ring-slate-600/50 shadow-lg">
+                      <span className="text-base font-bold text-slate-100">
+                        {user?.username?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-slate-900 shadow-lg shadow-emerald-400/50" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-100 truncate">{user?.username || 'User'}</p>
+                    <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+                  </div>
+                </div>
+              </div>
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-slate-300 hover:text-red-300 bg-slate-800/40 hover:bg-red-500/10 border border-slate-700/50 hover:border-red-500/30 rounded-xl transition-all duration-300 font-medium text-sm group"

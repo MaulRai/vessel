@@ -40,7 +40,7 @@ function LoginForm() {
     if (response.success && response.data) {
       const user = response.data.user;
       if (user.role === 'admin') {
-        router.push('/dashboard/admin');
+        router.push('/admin/dashboard');
       } else if (user.role === 'mitra') {
         if (user.profile_completed) {
           router.push('/eksportir/dashboard');

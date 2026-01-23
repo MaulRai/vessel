@@ -17,25 +17,25 @@
   369:151  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                            react/no-unescaped-entities
   369:171  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                            react/no-unescaped-entities
 
-/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/dashboard/admin/balance/page.tsx
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/admin/dashboard/balance/page.tsx
    6:34  warning  'GrantBalanceResponse' is defined but never used                                                              @typescript-eslint/no-unused-vars
   37:6   warning  React Hook useEffect has a missing dependency: 'loadUsers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
   74:14  warning  'err' is defined but never used                                                                               @typescript-eslint/no-unused-vars
 
-/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/dashboard/admin/invoices/[id]/page.tsx
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/admin/dashboard/invoices/[id]/page.tsx
   12:9  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
-/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/dashboard/admin/mitra/[id]/page.tsx
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/admin/dashboard/mitra/[id]/page.tsx
    59:16  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
    84:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
   108:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
 
-/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/dashboard/admin/pools/create/page.tsx
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/admin/dashboard/pools/create/page.tsx
    8:20  warning  'PendingInvoice' is defined but never used          @typescript-eslint/no-unused-vars
   12:9   warning  'router' is assigned a value but never used         @typescript-eslint/no-unused-vars
   21:10  warning  'createdPoolId' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
-/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/dashboard/admin/pools/page.tsx
+/home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/admin/dashboard/pools/page.tsx
   33:6  warning  React Hook useEffect has a missing dependency: 'loadPools'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
 
 /home/mir4na/ameame/hackathon/base-indonesia-2025/vessel-fe/app/eksportir/company/page.tsx

@@ -49,7 +49,7 @@ function AdminDashboardContent() {
 
   const quickActions = [
     {
-      href: '/dashboard/admin/invoices',
+      href: '/admin/dashboard/invoices',
       label: 'Invoice Review',
       description: 'Review permohonan invoice',
       icon: (
@@ -60,7 +60,7 @@ function AdminDashboardContent() {
       color: 'purple',
     },
     {
-      href: '/dashboard/admin/pools',
+      href: '/admin/dashboard/pools',
       label: 'Funding Pools',
       description: 'Kelola pool pendanaan',
       icon: (
@@ -71,7 +71,7 @@ function AdminDashboardContent() {
       color: 'cyan',
     },
     {
-      href: '/dashboard/admin/mitra',
+      href: '/admin/dashboard/mitra',
       label: 'Mitra Review',
       description: 'Review aplikasi mitra',
       icon: (
@@ -177,7 +177,7 @@ function AdminDashboardContent() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-white">User Terbaru</h2>
             <Link
-              href="/dashboard/admin/balance"
+              href="/admin/dashboard/balance"
               className="text-purple-400 hover:text-purple-300 text-sm font-medium"
             >
               Lihat Semua

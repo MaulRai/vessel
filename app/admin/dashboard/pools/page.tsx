@@ -91,7 +91,7 @@ function PoolListContent() {
             <p className="text-slate-400 mt-1">Kelola pool pendanaan untuk investor</p>
           </div>
           <Link
-            href="/dashboard/admin/pools/create"
+            href="/admin/dashboard/pools/create"
             className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-lg font-medium text-sm transition-all shadow-lg shadow-purple-500/25 flex items-center space-x-2"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,7 +113,7 @@ function PoolListContent() {
               </svg>
               <p className="text-slate-400 mb-4">Belum ada funding pool</p>
               <Link
-                href="/dashboard/admin/pools/create"
+                href="/admin/dashboard/pools/create"
                 className="inline-flex items-center space-x-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-lg text-sm font-medium text-purple-400 transition-all"
               >
                 <span>Buat Pool Pertama</span>
@@ -179,7 +179,7 @@ function PoolListContent() {
                                 </button>
                               )}
                               <Link
-                                href={`/dashboard/admin/pools/${pool.id}`}
+                                href={`/admin/dashboard/pools/${pool.id}`}
                                 className="px-3 py-1 bg-slate-700/50 hover:bg-slate-700 rounded text-xs font-medium text-slate-300 transition-all"
                               >
                                 Detail

@@ -169,14 +169,14 @@ function InvoiceReviewDetailContent() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               {actionCompleted === 'approved' && (
                 <Link
-                  href={`/dashboard/admin/pools/create?invoice_id=${invoiceId}`}
+                  href={`/admin/dashboard/pools/create?invoice_id=${invoiceId}`}
                   className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-medium rounded-lg transition-all shadow-lg"
                 >
                   Buat Funding Pool
                 </Link>
               )}
               <Link
-                href="/dashboard/admin/invoices"
+                href="/admin/dashboard/invoices"
                 className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium rounded-lg transition-all"
               >
                 Kembali ke Daftar
@@ -193,7 +193,7 @@ function InvoiceReviewDetailContent() {
       <DashboardLayout role="admin">
         <div className="text-center py-16">
           <p className="text-slate-400">Data invoice tidak ditemukan</p>
-          <Link href="/dashboard/admin/invoices" className="text-purple-400 hover:text-purple-300 mt-4 inline-block">
+          <Link href="/admin/dashboard/invoices" className="text-purple-400 hover:text-purple-300 mt-4 inline-block">
             Kembali ke daftar
           </Link>
         </div>
@@ -209,7 +209,7 @@ function InvoiceReviewDetailContent() {
         <div className="flex items-center justify-between">
           <div>
             <Link
-              href="/dashboard/admin/invoices"
+              href="/admin/dashboard/invoices"
               className="inline-flex items-center text-purple-400 hover:text-purple-300 text-sm font-medium mb-4 transition-colors"
             >
               <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">

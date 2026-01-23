@@ -60,7 +60,7 @@ export function AuthGuard({
         if (user.role === 'investor') {
           router.push('/pendana/dashboard');
         } else if (user.role === 'admin') {
-          router.push('/dashboard/admin');
+          router.push('/admin/dashboard');
         } else {
           router.push('/');
         }
@@ -84,7 +84,7 @@ export function AuthGuard({
         } else if (user.role === 'mitra') {
           router.push('/eksportir/dashboard');
         } else if (user.role === 'admin') {
-          router.push('/dashboard/admin');
+          router.push('/admin/dashboard');
         } else {
           router.push('/');
         }

@@ -26,7 +26,7 @@ export default function AdminLoginPage() {
         setIsLoading(false);
 
         if (response.success && response.data?.user.role === 'admin') {
-            router.push('/dashboard/admin');
+            router.push('/admin/dashboard');
         } else if (response.success) {
             setError('Akun ini bukan akun admin.');
         } else {

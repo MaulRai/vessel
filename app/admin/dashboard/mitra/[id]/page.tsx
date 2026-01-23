@@ -157,7 +157,7 @@ export default function MitraApplicationDetailPage() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <p className="text-red-400 mb-4">{error || 'Aplikasi tidak ditemukan'}</p>
-            <Link href="/dashboard/admin/mitra" className="text-cyan-400 font-semibold hover:text-cyan-300">
+            <Link href="/admin/dashboard/mitra" className="text-cyan-400 font-semibold hover:text-cyan-300">
               Kembali ke Dashboard
             </Link>
           </div>
@@ -171,7 +171,7 @@ export default function MitraApplicationDetailPage() {
       <div className="space-y-6">
         {/* Breadcrumb */}
         <nav className="text-sm text-slate-400">
-          <Link href="/dashboard/admin/mitra" className="text-cyan-400 hover:text-cyan-300">
+          <Link href="/admin/dashboard/mitra" className="text-cyan-400 hover:text-cyan-300">
             Verifikasi Mitra
           </Link>{' '}
           / <span className="text-slate-500">{application.company_name}</span>
