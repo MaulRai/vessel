@@ -217,5 +217,73 @@
         "footerPrivacy": "Privacy Policy",
         "footerTerms": "Terms of Service",
         "footerRights": "All rights reserved."
+    },
+    "completeProfile": {
+        "pending": {
+            "title": "Application Under Review",
+            "company": "Company",
+            "description": "Your application has been submitted successfully and is currently being reviewed by our team. This process typically takes",
+            "duration": "1-3 business days",
+            "descriptionEnd": ".",
+            "status": "Status",
+            "statusPending": "Pending Review",
+            "statusSubmitted": "Submitted",
+            "statusReview": "Under Review",
+            "statusApproved": "Approved",
+            "notification": "You will receive an email notification once your application has been reviewed."
+        },
+        "step1": {
+            "title": "Company Information",
+            "subtitle": "Tell us about your business"
+        },
+        "step2": {
+            "title": "Upload Documents",
+            "subtitle": "Upload required legal documents"
+        },
+        "changeLanguage": "Change Language",
+        "page": "Page",
+        "of": "of",
+        "continue": "Continue",
+        "back": "Back",
+        "submit": "Submit Application",
+        "submitting": "Submitting...",
+        "validation": {
+            "companyName": "Company Name is required",
+            "npwp": "NPWP is required",
+            "address": "Address is required",
+            "description": "Description is required"
+        },
+        "form": {
+            "companyName": "Company Name *",
+            "companyNamePlaceholder": "PT Maju Jaya",
+            "type": "Type",
+            "typePT": "PT",
+            "typeCV": "CV",
+            "typeUD": "UD",
+            "year": "Year",
+            "npwp": "NPWP *",
+            "npwpPlaceholder": "00.000.000.0-000.000",
+            "annualRevenue": "Annual Revenue",
+            "revenue1": "< 1 Billion IDR",
+            "revenue2": "1 - 5 Billion IDR",
+            "revenue3": "5 - 25 Billion IDR",
+            "revenue4": "25 - 100 Billion IDR",
+            "revenue5": "> 100 Billion IDR",
+            "address": "Business Address *",
+            "addressPlaceholder": "Jl. Sudirman No. 1, Jakarta",
+            "description": "Business Description *",
+            "descriptionPlaceholder": "Describe your business activities and export experience",
+            "website": "Website",
+            "keyProducts": "Key Products",
+            "keyProductsPlaceholder": "Coffee, Furniture",
+            "exportMarkets": "Export Markets",
+            "exportMarketsPlaceholder": "USA, Europe, Asia"
+        },
+        "documents": {
+            "nib": "NIB",
+            "akta_pendirian": "Akta Pendirian",
+            "ktp_direktur": "KTP Direktur",
+            "fileTypes": "PDF, JPG, PNG (max 10MB)"
+        }
     }
 }

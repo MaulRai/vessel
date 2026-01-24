@@ -217,5 +217,73 @@
         "footerPrivacy": "Kebijakan Privasi",
         "footerTerms": "Syarat Layanan",
         "footerRights": "Hak cipta dilindungi."
+    },
+    "completeProfile": {
+        "pending": {
+            "title": "Aplikasi Sedang Ditinjau",
+            "company": "Perusahaan",
+            "description": "Aplikasi Anda telah berhasil diajukan dan saat ini sedang ditinjau oleh tim kami. Proses ini biasanya memakan waktu",
+            "duration": "1-3 hari kerja",
+            "descriptionEnd": ".",
+            "status": "Status",
+            "statusPending": "Menunggu Peninjauan",
+            "statusSubmitted": "Diajukan",
+            "statusReview": "Sedang Ditinjau",
+            "statusApproved": "Disetujui",
+            "notification": "Anda akan menerima notifikasi email setelah aplikasi Anda ditinjau."
+        },
+        "step1": {
+            "title": "Informasi Perusahaan",
+            "subtitle": "Ceritakan tentang bisnis Anda"
+        },
+        "step2": {
+            "title": "Unggah Dokumen",
+            "subtitle": "Unggah dokumen legal yang diperlukan"
+        },
+        "changeLanguage": "Ganti Bahasa",
+        "page": "Halaman",
+        "of": "dari",
+        "continue": "Lanjutkan",
+        "back": "Kembali",
+        "submit": "Kirim Aplikasi",
+        "submitting": "Mengirim...",
+        "validation": {
+            "companyName": "Nama Perusahaan harus diisi",
+            "npwp": "NPWP harus diisi",
+            "address": "Alamat harus diisi",
+            "description": "Deskripsi harus diisi"
+        },
+        "form": {
+            "companyName": "Nama Perusahaan *",
+            "companyNamePlaceholder": "PT Maju Jaya",
+            "type": "Tipe",
+            "typePT": "PT",
+            "typeCV": "CV",
+            "typeUD": "UD",
+            "year": "Tahun",
+            "npwp": "NPWP *",
+            "npwpPlaceholder": "00.000.000.0-000.000",
+            "annualRevenue": "Pendapatan Tahunan",
+            "revenue1": "< 1 Miliar IDR",
+            "revenue2": "1 - 5 Miliar IDR",
+            "revenue3": "5 - 25 Miliar IDR",
+            "revenue4": "25 - 100 Miliar IDR",
+            "revenue5": "> 100 Miliar IDR",
+            "address": "Alamat Bisnis *",
+            "addressPlaceholder": "Jl. Sudirman No. 1, Jakarta",
+            "description": "Deskripsi Bisnis *",
+            "descriptionPlaceholder": "Jelaskan aktivitas bisnis dan pengalaman ekspor Anda",
+            "website": "Website",
+            "keyProducts": "Produk Utama",
+            "keyProductsPlaceholder": "Kopi, Furniture",
+            "exportMarkets": "Pasar Ekspor",
+            "exportMarketsPlaceholder": "Amerika, Eropa, Asia"
+        },
+        "documents": {
+            "nib": "NIB",
+            "akta_pendirian": "Akta Pendirian",
+            "ktp_direktur": "KTP Direktur",
+            "fileTypes": "PDF, JPG, PNG (maks 10MB)"
+        }
     }
 }
