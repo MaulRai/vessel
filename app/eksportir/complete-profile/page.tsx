@@ -43,59 +43,122 @@ function PendingApprovalScreen({ application }: { application?: MitraApplication
     const { t } = useLanguage();
     return (
         <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
-            <div className="max-w-lg w-full text-center">
-                {/* Animated Icon */}
-                <div className="relative mx-auto w-24 h-24 mb-8">
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full opacity-20 animate-ping" />
-                    <div className="relative w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-teal-600/20 rounded-full flex items-center justify-center border border-cyan-500/30 backdrop-blur-sm">
-                        <svg className="w-12 h-12 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+            <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                {/* Left Column - Header & Image */}
+                <div className="space-y-8">
+                    {/* Logo */}
+                    <div className="flex items-center space-x-2">
+                        <Link href="/" className="group flex items-center space-x-2">
+                            <Image
+                                src="/vessel-logo.png"
+                                alt="VESSEL Logo"
+                                width={120}
+                                height={32}
+                                className="h-12 w-auto object-contain transition-transform group-hover:scale-105"
+                                priority
+                            />
+                        </Link>
+                    </div>
+
+                    {/* Header */}
+                    <div>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent mb-4">
+                            {t('completeProfile.pending.title')}
+                        </h1>
+                        <p className="text-slate-400 text-lg mb-6">
+                            {t('completeProfile.pending.description')}
+                            <span className="text-cyan-400 font-medium"> {t('completeProfile.pending.duration')} </span>
+                            {t('completeProfile.pending.descriptionEnd')}
+                        </p>
+                    </div>
+
+                    {/* Large Image */}
+                    <div className="relative w-full aspect-square max-w-lg">
+                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 blur-3xl" />
+                        <div className="relative w-full h-full">
+                            <Image
+                                src="/assets/auth/under-review.png"
+                                alt="Under review illustration"
+                                fill
+                                className="object-cover"
+                                priority
+                            />
+                        </div>
                     </div>
                 </div>
 
-                {/* Title */}
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent mb-4">
-                    {t('completeProfile.pending.title')}
-                </h1>
+                {/* Right Column - Status Card */}
+                <div className="bg-gradient-to-br from-slate-900/80 to-slate-800/50 border border-slate-700/50 rounded-2xl p-8 backdrop-blur-sm shadow-2xl shadow-black/20">
+                    {/* Animated Icon */}
+                    <div className="relative mx-auto w-24 h-24 mb-8">
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full opacity-20 animate-ping" />
+                        <div className="relative w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-teal-600/20 rounded-full flex items-center justify-center border border-cyan-500/30 backdrop-blur-sm">
+                            <svg className="w-12 h-12 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
 
-                {/* Company Name */}
-                {application?.application?.company_name && (
-                    <div className="inline-block px-4 py-2 bg-slate-800/50 rounded-full border border-slate-700 mb-6">
-                        <span className="text-slate-400 text-sm">{t('completeProfile.pending.company')}: </span>
-                        <span className="text-white font-medium">{application.application.company_name}</span>
-                    </div>
-                )}
+                    {/* Company Name */}
+                    {application?.application?.company_name && (
+                        <div className="inline-block px-4 py-2 bg-slate-800/50 rounded-full border border-slate-700 mb-8">
+                            <span className="text-slate-400 text-sm">{t('completeProfile.pending.company')}: </span>
+                            <span className="text-white font-medium">{application.application.company_name}</span>
+                        </div>
+                    )}
 
-                {/* Description */}
-                <p className="text-slate-400 mb-8 leading-relaxed">
-                    {t('completeProfile.pending.description')}
-                    <span className="text-cyan-400 font-medium"> {t('completeProfile.pending.duration')} </span>
-                    {t('completeProfile.pending.descriptionEnd')}
-                </p>
+                    {/* Status Card */}
+                    <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-6 mb-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <span className="text-slate-400 text-sm">{t('completeProfile.pending.status')}</span>
+                            <span className="px-3 py-1 bg-amber-500/10 text-amber-400 text-xs font-medium rounded-full border border-amber-500/20">
+                                {t('completeProfile.pending.statusPending')}
+                            </span>
+                        </div>
+                        
+                        {/* Progress Steps */}
+                        <div className="relative">
+                            {/* Progress Line */}
+                            <div className="absolute top-5 left-0 right-0 h-0.5 bg-slate-700">
+                                <div className="h-full w-1/2 bg-gradient-to-r from-cyan-500 to-teal-500 transition-all duration-500" />
+                            </div>
+                            
+                            {/* Steps */}
+                            <div className="relative flex justify-between">
+                                {/* Step 1 - Submitted (Complete) */}
+                                <div className="flex flex-col items-center">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center mb-2 shadow-lg shadow-cyan-500/30">
+                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <span className="text-xs text-cyan-400 font-medium text-center">{t('completeProfile.pending.statusSubmitted')}</span>
+                                </div>
+                                
+                                {/* Step 2 - Under Review (Current) */}
+                                <div className="flex flex-col items-center">
+                                    <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border-2 border-cyan-500 flex items-center justify-center mb-2 animate-pulse">
+                                        <div className="w-3 h-3 rounded-full bg-cyan-400" />
+                                    </div>
+                                    <span className="text-xs text-cyan-400 font-medium text-center">{t('completeProfile.pending.statusReview')}</span>
+                                </div>
+                                
+                                {/* Step 3 - Approved (Pending) */}
+                                <div className="flex flex-col items-center">
+                                    <div className="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center mb-2">
+                                        <div className="w-3 h-3 rounded-full bg-slate-600" />
+                                    </div>
+                                    <span className="text-xs text-slate-500 text-center">{t('completeProfile.pending.statusApproved')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                {/* Status Card */}
-                <div className="bg-gradient-to-br from-slate-900/80 to-slate-800/50 border border-slate-700/50 rounded-2xl p-6 backdrop-blur-sm mb-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-slate-400 text-sm">{t('completeProfile.pending.status')}</span>
-                        <span className="px-3 py-1 bg-amber-500/10 text-amber-400 text-xs font-medium rounded-full border border-amber-500/20">
-                            {t('completeProfile.pending.statusPending')}
-                        </span>
-                    </div>
-                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                        <div className="h-full w-1/3 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full animate-pulse" />
-                    </div>
-                    <div className="flex justify-between mt-2 text-xs text-slate-500">
-                        <span>{t('completeProfile.pending.statusSubmitted')}</span>
-                        <span>{t('completeProfile.pending.statusReview')}</span>
-                        <span>{t('completeProfile.pending.statusApproved')}</span>
-                    </div>
+                    {/* Info */}
+                    <p className="text-slate-500 text-sm text-center">
+                        {t('completeProfile.pending.notification')}
+                    </p>
                 </div>
-
-                {/* Info */}
-                <p className="text-slate-500 text-sm">
-                    {t('completeProfile.pending.notification')}
-                </p>
             </div>
         </div>
     );
