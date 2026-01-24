@@ -73,7 +73,7 @@ function PendingApprovalScreen({ application }: { application?: MitraApplication
                     </div>
 
                     {/* Large Image */}
-                    <div className="relative w-full aspect-square max-w-lg">
+                    <div className="relative w-full aspect-square max-w-lg hidden lg:block">
                         <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 blur-3xl" />
                         <div className="relative w-full h-full">
                             <Image
@@ -337,7 +337,7 @@ export default function CompleteProfilePage() {
                         </div>
 
                         {/* Large Image */}
-                        <div className="relative w-full aspect-square max-w-lg">
+                        <div className="relative w-full aspect-square max-w-lg hidden lg:block">
                             <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 blur-3xl" />
                             <div className="relative w-full h-full">
                                 <Image
