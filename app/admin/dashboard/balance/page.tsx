@@ -1,5 +1,7 @@
 'use client';
 
+import React from "react";
+
 import { useEffect, useState } from 'react';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
@@ -90,75 +92,110 @@ function AdminBalanceContent() {
 
   return (
     <DashboardLayout role="admin">
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-white">Grant Balance</h1>
-          <p className="text-slate-400 mt-1">Berikan saldo ke user yang terdaftar</p>
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600/10 via-fuchsia-600/10 to-transparent border border-violet-500/20 p-8">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]" />
+          <div className="relative flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/25">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-white">Grant Balance</h1>
+              <p className="text-violet-200/70 mt-1">Manage user balances and transactions</p>
+            </div>
+          </div>
         </div>
 
         {/* Message */}
         {message && (
           <div
-            className={`p-4 rounded-lg ${
+            className={`relative overflow-hidden rounded-2xl p-4 border ${
               message.type === 'success'
-                ? 'bg-green-500/10 border border-green-500/20 text-green-400'
-                : 'bg-red-500/10 border border-red-500/20 text-red-400'
+                ? 'bg-emerald-500/10 border-emerald-500/20'
+                : 'bg-red-500/10 border-red-500/20'
             }`}
           >
-            {message.text}
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-xl ${message.type === 'success' ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+                {message.type === 'success' ? (
+                  <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                )}
+              </div>
+              <p className={`text-sm font-medium ${message.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
+                {message.text}
+              </p>
+            </div>
           </div>
         )}
 
         {/* Grant Form - if user selected */}
         {selectedUser && (
-          <div className="p-6 bg-purple-500/10 border border-purple-500/20 rounded-xl">
-            <h2 className="text-lg font-semibold text-white mb-4">Grant Balance ke User</h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-slate-400 mb-1">User</p>
-                <p className="text-white font-medium">{selectedUser.email}</p>
-                <p className="text-sm text-slate-400">{selectedUser.full_name || selectedUser.username || '-'}</p>
-                <div className="mt-2">{getRoleBadge(selectedUser.role)}</div>
+          <div className="relative overflow-hidden rounded-2xl bg-[rgb(15,15,15)] border border-violet-500/30 p-6">
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5" />
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-xl bg-violet-500/20">
+                  <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-bold text-white">Grant Balance to User</h2>
               </div>
-              <div>
-                <p className="text-sm text-slate-400 mb-1">Saldo Saat Ini</p>
-                <p className="text-xl font-bold text-white">
-                  Rp {selectedUser.balance_idr.toLocaleString('id-ID')}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-slate-400 mb-1">User</p>
+                  <p className="text-white font-medium">{selectedUser.email}</p>
+                  <p className="text-sm text-slate-400">{selectedUser.full_name || selectedUser.username || '-'}</p>
+                  <div className="mt-2">{getRoleBadge(selectedUser.role)}</div>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-400 mb-1">Saldo Saat Ini</p>
+                  <p className="text-xl font-bold text-white">
+                    Rp {selectedUser.balance_idr.toLocaleString('id-ID')}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="block text-sm text-slate-400 mb-2">Jumlah yang Diberikan (IDR)</label>
+                <div className="flex gap-3">
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="Contoh: 1000000"
+                    className="flex-1 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                  />
+                  <button
+                    onClick={handleGrantBalance}
+                    disabled={submitting || !amount}
+                    className={`px-6 py-2 rounded-lg font-medium transition-all ${
+                      submitting || !amount
+                        ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white'
+                    }`}
+                  >
+                    {submitting ? 'Memproses...' : 'Grant Balance'}
+                  </button>
+                  <button
+                    onClick={() => setSelectedUser(null)}
+                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-all"
+                  >
+                    Batal
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500 mt-2">
+                  Masukkan nilai negatif untuk mengurangi saldo. Contoh: -500000
                 </p>
               </div>
-            </div>
-            <div className="mt-4">
-              <label className="block text-sm text-slate-400 mb-2">Jumlah yang Diberikan (IDR)</label>
-              <div className="flex gap-3">
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Contoh: 1000000"
-                  className="flex-1 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                />
-                <button
-                  onClick={handleGrantBalance}
-                  disabled={submitting || !amount}
-                  className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                    submitting || !amount
-                      ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white'
-                  }`}
-                >
-                  {submitting ? 'Memproses...' : 'Grant Balance'}
-                </button>
-                <button
-                  onClick={() => setSelectedUser(null)}
-                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-all"
-                >
-                  Batal
-                </button>
-              </div>
-              <p className="text-xs text-slate-500 mt-2">
-                Masukkan nilai negatif untuk mengurangi saldo. Contoh: -500000
-              </p>
             </div>
           </div>
         )}
