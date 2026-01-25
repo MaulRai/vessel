@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ConnectWallet, Wallet } from '@coinbase/onchainkit/wallet';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ONCHAINKIT_CONFIG } from '@/lib/config/onchainkit';
 
 export default function InvestorConnectPage() {
@@ -13,6 +14,7 @@ export default function InvestorConnectPage() {
     const { isConnected } = useAccount();
     const chainId = useChainId();
     const { switchChain, isPending: isSwitching, error: switchError } = useSwitchChain();
+    const { t, language, setLanguage } = useLanguage();
     const expectedChainId = ONCHAINKIT_CONFIG.chain.id;
     const isWrongChain = isConnected && chainId !== expectedChainId;
 
@@ -30,32 +32,51 @@ export default function InvestorConnectPage() {
                     <div className="p-6 md:p-8 lg:p-10 flex flex-col justify-center overflow-y-auto scrollbar-hide">
                         <div className="max-w-sm mx-auto w-full">
                             {/* Logo */}
-                            <div className="mb-6 flex items-center space-x-2">
-                                <Link href="/">
-                                    <Image
-                                        src="/vessel-logo.png"
-                                        alt="VESSEL Logo"
-                                        width={120}
-                                        height={32}
-                                        className="h-10 w-auto object-contain"
-                                        priority
-                                    />
-                                </Link>
+                            <div className="mb-6 flex items-center justify-between gap-3">
+                                <div className="flex items-center space-x-2">
+                                    <Link href="/">
+                                        <Image
+                                            src="/vessel-logo.png"
+                                            alt="VESSEL Logo"
+                                            width={120}
+                                            height={32}
+                                            className="h-10 w-auto object-contain"
+                                            priority
+                                        />
+                                    </Link>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+                                    className="inline-flex items-center rounded-full border border-cyan-500/50 bg-slate-900/50 p-1 text-[11px] font-semibold uppercase tracking-wide text-cyan-100 shadow-sm hover:border-cyan-400 transition-colors"
+                                    aria-label={language === 'en' ? t('common.switchToIndonesian') : t('common.switchToEnglish')}
+                                >
+                                    <span
+                                        className={`px-2 py-1 rounded-full ${language === 'en' ? 'bg-cyan-400 text-slate-900 shadow' : 'text-cyan-100'}`}
+                                    >
+                                        {t('common.languageShort.en')}
+                                    </span>
+                                    <span
+                                        className={`px-2 py-1 rounded-full ${language === 'id' ? 'bg-cyan-400 text-slate-900 shadow' : 'text-cyan-100'}`}
+                                    >
+                                        {t('common.languageShort.id')}
+                                    </span>
+                                </button>
                             </div>
 
                             <div className="mb-6">
-                                <h2 className="text-2xl font-bold text-white mb-2">Connect Your Wallet</h2>
+                                <h2 className="text-2xl font-bold text-white mb-2">{t('investorConnect.title')}</h2>
                                 <p className="text-slate-400 text-sm">
-                                    Start earning up to 15% APY by investing in verified export invoices
+                                    {t('investorConnect.subtitle')}
                                 </p>
                             </div>
 
                             {/* Benefits */}
                             <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-2">
                                 {[
-                                    { img: '/assets/auth/under-review.png', title: 'Instant Access' },
-                                    { img: '/assets/auth/lock.png', title: 'Your Keys, Your Control' },
-                                    { img: '/assets/auth/onchain.png', title: '100% On-Chain' }
+                                    { img: '/assets/auth/under-review.png', title: t('investorConnect.benefits.instantAccess') },
+                                    { img: '/assets/auth/lock.png', title: t('investorConnect.benefits.keysControl') },
+                                    { img: '/assets/auth/onchain.png', title: t('investorConnect.benefits.onChain') }
                                 ].map((benefit) => (
                                     <div
                                         key={benefit.title}
@@ -83,8 +104,8 @@ export default function InvestorConnectPage() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                         </svg>
                                         <div>
-                                            <p className="font-medium text-xs mb-1">Wrong Network Detected</p>
-                                            <p className="text-xs text-amber-200/80">Please switch to {ONCHAINKIT_CONFIG.chain.name}</p>
+                                            <p className="font-medium text-xs mb-1">{t('investorConnect.wrongNetworkTitle')}</p>
+                                            <p className="text-xs text-amber-200/80">{t('investorConnect.wrongNetworkBody')} {ONCHAINKIT_CONFIG.chain.name}</p>
                                         </div>
                                     </div>
                                     <button
@@ -92,7 +113,7 @@ export default function InvestorConnectPage() {
                                         disabled={isSwitching}
                                         className="w-full px-3 py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-100 rounded-lg text-xs font-medium transition-all disabled:opacity-60"
                                     >
-                                        {isSwitching ? 'Switching...' : `Switch to ${ONCHAINKIT_CONFIG.chain.name}`}
+                                        {isSwitching ? t('investorConnect.switching') : `${t('investorConnect.switchTo')} ${ONCHAINKIT_CONFIG.chain.name}`}
                                     </button>
                                     {switchError && <p className="text-xs text-amber-200/80">{switchError.message}</p>}
                                 </div>
@@ -109,7 +130,7 @@ export default function InvestorConnectPage() {
                             {/* Don't have a wallet? */}
                             <div className="mt-4 p-3 bg-slate-900/50 border border-slate-700/50 rounded-lg">
                                 <p className="text-slate-400 text-xs text-center mb-2">
-                                    Don't have a wallet yet?
+                                    {t('investorConnect.noWalletTitle')}
                                 </p>
                                 <div className="flex flex-wrap gap-2 justify-center">
                                     <a
@@ -118,7 +139,7 @@ export default function InvestorConnectPage() {
                                         rel="noopener noreferrer"
                                         className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
                                     >
-                                        Get MetaMask
+                                        {t('investorConnect.getMetaMask')}
                                     </a>
                                     <a
                                         href="https://www.coinbase.com/wallet"
@@ -126,7 +147,7 @@ export default function InvestorConnectPage() {
                                         rel="noopener noreferrer"
                                         className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
                                     >
-                                        Get Coinbase
+                                        {t('investorConnect.getCoinbase')}
                                     </a>
                                 </div>
                             </div>
@@ -136,7 +157,7 @@ export default function InvestorConnectPage() {
                                     <div className="w-full border-t border-slate-700" />
                                 </div>
                                 <div className="relative flex justify-center text-sm">
-                                    <span className="px-2 bg-slate-800/50 text-slate-400 text-xs">Are you an exporter?</span>
+                                    <span className="px-2 bg-slate-800/50 text-slate-400 text-xs">{t('investorConnect.exporterCta')}</span>
                                 </div>
                             </div>
 
@@ -144,7 +165,7 @@ export default function InvestorConnectPage() {
                                 href="/register"
                                 className="block w-full text-center px-4 py-2.5 bg-slate-900/50 hover:bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-lg text-slate-300 hover:text-white transition-all text-sm"
                             >
-                                Register as Exporter/Mitra
+                                {t('investorConnect.registerExporter')}
                             </Link>
 
                             {/* Trust Indicators */}
@@ -154,13 +175,13 @@ export default function InvestorConnectPage() {
                                         <svg className="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                                         </svg>
-                                        <span>Non-Custodial</span>
+                                        <span>{t('investorConnect.nonCustodial')}</span>
                                     </div>
                                     <div className="flex items-center space-x-1">
                                         <svg className="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                         </svg>
-                                        <span>On-Chain</span>
+                                        <span>{t('investorConnect.onChain')}</span>
                                     </div>
                                 </div>
                             </div>

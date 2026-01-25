@@ -39,7 +39,33 @@
         "error": "Error",
         "success": "Berhasil",
         "walletConnected": "Wallet Terhubung",
-        "walletNotConnected": "Wallet Belum Terhubung"
+        "walletNotConnected": "Wallet Belum Terhubung",
+        "switchToEnglish": "Ganti ke Bahasa Inggris",
+        "switchToIndonesian": "Ganti ke Bahasa Indonesia",
+        "languageShort": {
+            "en": "EN",
+            "id": "ID"
+        }
+    },
+    "investorConnect": {
+        "title": "Hubungkan Wallet Anda",
+        "subtitle": "Mulai hasilkan hingga 15% APY dengan berinvestasi pada invoice ekspor terverifikasi",
+        "benefits": {
+            "instantAccess": "Akses Instan",
+            "keysControl": "Kunci di Tangan Anda",
+            "onChain": "100% On-Chain"
+        },
+        "wrongNetworkTitle": "Jaringan Tidak Sesuai",
+        "wrongNetworkBody": "Silakan pindah ke",
+        "switchTo": "Pindah ke",
+        "switching": "Mengganti...",
+        "noWalletTitle": "Belum punya wallet?",
+        "getMetaMask": "Unduh MetaMask 🦊",
+        "getCoinbase": "Unduh Coinbase 🟦",
+        "exporterCta": "Anda seorang eksportir?",
+        "registerExporter": "Daftar sebagai Eksportir/Mitra",
+        "nonCustodial": "Non-Kustodial",
+        "onChain": "On-Chain"
     },
     "roles": {
         "investor": "Pendana",
@@ -100,12 +126,12 @@
     "auth": {
         "login": "Masuk",
         "logout": "Keluar",
-        "loginTitle": "Masuk ke Akun Mitra",
-        "loginSubtitle": "Halaman ini khusus untuk eksportir/mitra. Investor dapat langsung",
+        "loginTitle": "Masuk ke Akun Mitra Eksportir",
+        "loginSubtitle": "Halaman ini khusus untuk eksportir/mitra.",
         "connectWallet": "koneksikan dompet",
         "connectWalletNow": "Hubungkan Wallet Sekarang",
         "areYouInvestor": "Anda Seorang Investor?",
-        "investorConnectMessage": "Lewati registrasi dan hubungkan wallet Anda untuk akses instan ke peluang investasi.",
+        "investorConnectMessage": "Lewati registrasi dan hubungkan wallet Anda.",
         "loginGoogle": "Masuk dengan Google",
         "loginDemoExporter": "Login dengan akun demo Eksportir",
         "emailOrUsernameLabel": "Email atau Username",

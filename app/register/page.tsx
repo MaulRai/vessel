@@ -47,7 +47,7 @@ export default function RegisterPage() {
 
   const router = useRouter();
   const { sendOTP, verifyOTP, register } = useAuth();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
 
 
   // Google Sign-In handler
@@ -114,6 +114,10 @@ export default function RegisterPage() {
       document.body.removeChild(script);
     };
   }, [handleGoogleCallback]);
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'id' : 'en');
+  };
 
   const handleGoogleSignUp = () => {
     if (window.google) {
@@ -263,27 +267,15 @@ export default function RegisterPage() {
   const renderEmailStep = () => (
     <form onSubmit={handleSendOTP} className="space-y-4">
       {/* Investor Detection Banner */}
-      <div className="mb-4 p-4 bg-gradient-to-r from-cyan-500/10 to-teal-500/10 border border-cyan-500/30 rounded-xl backdrop-blur-sm">
-        <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 w-10 h-10 bg-cyan-500/20 rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-sm font-semibold text-white mb-1">{t('auth.areYouInvestor')}</h3>
-            <p className="text-xs text-slate-300 mb-2">{t('auth.investorConnectMessage')}</p>
-            <Link
-              href="/pendana/connect"
-              className="inline-flex items-center gap-2 text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
-            >
-              {t('auth.connectWalletNow')}
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
-          </div>
-        </div>
+      <div className="mb-3 text-xs text-slate-300">
+        {t('auth.areYouInvestor')}{' '}
+        <Link
+          href="/pendana/connect"
+          className="font-semibold text-cyan-400 hover:text-cyan-300 underline underline-offset-4"
+        >
+          {t('auth.connectWalletNow')}
+        </Link>
+        . {t('auth.investorConnectMessage')}
       </div>
 
       <h2 className="text-xl font-semibold text-slate-100 mb-2">
@@ -526,15 +518,34 @@ export default function RegisterPage() {
           <div className="p-6 md:p-8 lg:p-10 flex flex-col justify-center overflow-y-auto scrollbar-hide">
             <div className="max-w-sm mx-auto w-full">
               {/* Logo/Brand */}
-              <div className="mb-6 flex items-center space-x-2">
-                <Image
-                  src="/vessel-logo.png"
-                  alt="VESSEL Logo"
-                  width={120}
-                  height={32}
-                  className="h-10 w-auto object-contain"
-                  priority
-                />
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <div className="flex items-center space-x-2">
+                  <Image
+                    src="/vessel-logo.png"
+                    alt="VESSEL Logo"
+                    width={120}
+                    height={32}
+                    className="h-10 w-auto object-contain"
+                    priority
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={toggleLanguage}
+                  className="inline-flex items-center rounded-full border border-cyan-500/50 bg-slate-900/50 p-1 text-[11px] font-semibold uppercase tracking-wide text-cyan-100 shadow-sm hover:border-cyan-400 transition-colors"
+                  aria-label={language === 'en' ? t('common.switchToIndonesian') : t('common.switchToEnglish')}
+                >
+                  <span
+                    className={`px-2 py-1 rounded-full ${language === 'en' ? 'bg-cyan-400 text-slate-900 shadow' : 'text-cyan-100'}`}
+                  >
+                    {t('common.languageShort.en')}
+                  </span>
+                  <span
+                    className={`px-2 py-1 rounded-full ${language === 'id' ? 'bg-cyan-400 text-slate-900 shadow' : 'text-cyan-100'}`}
+                  >
+                    {t('common.languageShort.id')}
+                  </span>
+                </button>
               </div>
 
               {/* Step Indicator */}

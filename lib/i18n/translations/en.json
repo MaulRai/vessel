@@ -39,7 +39,33 @@
         "error": "Error",
         "success": "Success",
         "walletConnected": "Wallet Connected",
-        "walletNotConnected": "Wallet Not Connected"
+        "walletNotConnected": "Wallet Not Connected",
+        "switchToEnglish": "Switch to English",
+        "switchToIndonesian": "Switch to Bahasa Indonesia",
+        "languageShort": {
+            "en": "EN",
+            "id": "ID"
+        }
+    },
+    "investorConnect": {
+        "title": "Connect Your Wallet",
+        "subtitle": "Start earning up to 15% APY by investing in verified export invoices",
+        "benefits": {
+            "instantAccess": "Instant Access",
+            "keysControl": "Your Keys, Your Control",
+            "onChain": "100% On-Chain"
+        },
+        "wrongNetworkTitle": "Wrong Network Detected",
+        "wrongNetworkBody": "Please switch to",
+        "switchTo": "Switch to",
+        "switching": "Switching...",
+        "noWalletTitle": "Don't have a wallet yet?",
+        "getMetaMask": "Get MetaMask 🦊",
+        "getCoinbase": "Get Coinbase 🟦",
+        "exporterCta": "Are you an exporter?",
+        "registerExporter": "Register as Exporter/Mitra",
+        "nonCustodial": "Non-Custodial",
+        "onChain": "On-Chain"
     },
     "roles": {
         "investor": "Investor",
@@ -101,7 +127,7 @@
         "login": "Login",
         "logout": "Logout",
         "loginTitle": "Login to Partner Account",
-        "loginSubtitle": "This page is for exporters/partners. Investors can directly",
+        "loginSubtitle": "This page is for exporters/partners.",
         "connectWallet": "connect wallet",
         "connectWalletNow": "Connect Wallet Now",
         "areYouInvestor": "Are you an Investor?",
