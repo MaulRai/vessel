@@ -7,7 +7,6 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useAccount, useDisconnect, useChainId, useSwitchChain, useChains } from 'wagmi';
-import { Identity, Address, Avatar } from '@coinbase/onchainkit/identity';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { UserRole } from '../types/auth';
@@ -179,11 +178,12 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const chains = useChains();
   const { switchChain, isPending: isSwitching } = useSwitchChain();
   const currentChain = chains.find((item) => item.id === chainId);
+  const shortAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '';
 
   const isOnBase = chainId === base.id || chainId === baseSepolia.id;
 
   const navItems = role === 'investor' ? getInvestorNavItems(t) : role === 'admin' ? getAdminNavItems(t) : getMitraNavItems(t);
-  const roleLabel = role === 'investor' ? t('role.investor') : role === 'admin' ? t('role.admin') : t('role.exporter');
+  const roleLabel = role === 'investor' ? t('roles.investor') : role === 'admin' ? t('roles.admin') : t('roles.exporter');
   const roleColor = role === 'investor' ? 'cyan' : role === 'admin' ? 'purple' : 'teal';
   const dashboardHref = role === 'investor' ? '/pendana/dashboard' : role === 'admin' ? '/admin/dashboard' : '/eksportir/dashboard';
   const isOnDashboard = pathname === dashboardHref;
@@ -264,26 +264,24 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
             <>
               <div className="mb-3 p-3 rounded-xl bg-slate-800/60 border border-slate-700/50">
                 {address ? (
-                  <Identity address={address}>
-                    <div className="flex items-center space-x-3">
-                      <div className="relative">
-                        <Avatar className="w-11 h-11 ring-2 ring-cyan-500/30" />
-                        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-slate-900 shadow-lg shadow-emerald-400/50" />
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-500/30 to-teal-500/30 ring-2 ring-cyan-500/30 flex items-center justify-center text-sm font-semibold text-slate-900">
+                        {address.slice(2, 4).toUpperCase()}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-400 font-medium mb-0.5">{t('dashboard.walletConnected')}</p>
-                        <p className="text-sm font-mono font-semibold text-cyan-300 truncate">
-                          <Address className="text-cyan-300" />
-                        </p>
-                        {!isOnBase && (
-                          <p className="text-[10px] text-amber-300 mt-1 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
-                            {currentChain?.name || 'Jaringan lain'}
-                          </p>
-                        )}
-                      </div>
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-slate-900 shadow-lg shadow-emerald-400/50" />
                     </div>
-                  </Identity>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-slate-400 font-medium mb-0.5">{t('common.walletConnected')}</p>
+                      <p className="text-sm font-mono font-semibold text-cyan-300 truncate">{shortAddress}</p>
+                      {!isOnBase && (
+                        <p className="text-[10px] text-amber-300 mt-1 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+                          {currentChain?.name || 'Jaringan lain'}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 ) : (
                   <div className="flex items-center space-x-3">
                     <div className="w-11 h-11 rounded-full bg-slate-700/50 border border-slate-600/50 flex items-center justify-center">
@@ -292,8 +290,8 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                       </svg>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-slate-400 font-medium">{t('dashboard.walletConnected')}</p>
-                      <p className="text-sm font-medium text-slate-500">{t('dashboard.notConnected')}</p>
+                      <p className="text-xs text-slate-400 font-medium">{t('common.walletConnected')}</p>
+                      <p className="text-sm font-medium text-slate-500">{t('common.walletNotConnected')}</p>
                     </div>
                   </div>
                 )}
@@ -305,7 +303,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                 <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
-                <span>{t('dashboard.disconnect')}</span>
+                <span>{t('nav.disconnectWallet')}</span>
               </button>
             </>
           ) : (
@@ -371,9 +369,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
               {role === 'investor' && address && (
                 <div className="hidden lg:flex items-center gap-2 px-4 py-2.5 bg-slate-800/60 rounded-xl border border-slate-700/50 backdrop-blur-sm shadow-lg max-w-xs">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
-                  <span className="text-sm font-mono font-semibold text-cyan-300 truncate">
-                    <Address address={address} className="truncate" />
-                  </span>
+                  <span className="text-sm font-mono font-semibold text-cyan-300 truncate">{shortAddress}</span>
                 </div>
               )}
 
