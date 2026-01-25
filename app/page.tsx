@@ -62,6 +62,8 @@ export default function LandingPage() {
   const [securityActive, setSecurityActive] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [showGetStartedDropdown, setShowGetStartedDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const { scrollYProgress: heroProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const time = useTime();
@@ -87,6 +89,16 @@ export default function LandingPage() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: Event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowGetStartedDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const statsInView = useInView(statsRef, { once: true, margin: '-10% 0px' });
@@ -207,18 +219,59 @@ export default function LandingPage() {
                   >
                     {t('auth.login')}
                   </Link>
-                  <Link
-                    href="/register"
-                    className="group relative px-6 py-2.5 min-w-35 text-center bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-bold text-sm transition-all duration-300 shadow-xl shadow-cyan-500/30 ring-1 ring-white/20 overflow-hidden"
-                  >
-                    <span className="relative z-10 flex items-center gap-2">
-                      {t('landing.getStarted')}
-                      <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </span>
-                    <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                  </Link>
+                  <div className="relative" ref={dropdownRef}>
+                    <button
+                      onClick={() => setShowGetStartedDropdown(!showGetStartedDropdown)}
+                      className="group relative px-4 sm:px-6 py-2.5 text-center bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-xl font-bold text-sm transition-all duration-300 shadow-xl shadow-cyan-500/30 ring-1 ring-white/20 overflow-hidden"
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        <span className="hidden sm:inline">{t('landing.getStarted')}</span>
+                        <span className="sm:hidden">{t('landing.getStartedMobile')}</span>
+                        <svg className={`w-4 h-4 transition-transform ${showGetStartedDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </span>
+                      <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                    </button>
+                    {showGetStartedDropdown && (
+                      <div className="absolute right-0 mt-3 w-96 bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden z-50">
+                        <div className="p-2 space-y-2">
+                          <Link
+                            href="/pendana/connect"
+                            onClick={() => setShowGetStartedDropdown(false)}
+                            className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-800/50 transition-all group border border-transparent hover:border-blue-500/30"
+                          >
+                            <div className="flex-shrink-0 w-16 h-16 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20">
+                              <Image src="/assets/general/investor.png" alt="Investor" width={48} height={48} className="w-12 h-12 object-contain" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="text-white font-bold mb-1 group-hover:text-blue-400 transition-colors">{t('landing.startAsPendana')}</h4>
+                              <p className="text-slate-400 text-xs leading-relaxed">{t('landing.pendanaDesc')}</p>
+                            </div>
+                            <svg className="w-5 h-5 text-slate-600 group-hover:text-blue-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Link>
+                          <Link
+                            href="/register"
+                            onClick={() => setShowGetStartedDropdown(false)}
+                            className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-800/50 transition-all group border border-transparent hover:border-teal-500/30"
+                          >
+                            <div className="flex-shrink-0 w-16 h-16 bg-teal-500/10 rounded-xl flex items-center justify-center border border-teal-500/20">
+                              <Image src="/assets/general/exporter.png" alt="Exporter" width={48} height={48} className="w-12 h-12 object-contain" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="text-white font-bold mb-1 group-hover:text-teal-400 transition-colors">{t('landing.startAsExporter')}</h4>
+                              <p className="text-slate-400 text-xs leading-relaxed">{t('landing.exporterDesc')}</p>
+                            </div>
+                            <svg className="w-5 h-5 text-slate-600 group-hover:text-teal-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
             </div>
