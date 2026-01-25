@@ -509,7 +509,7 @@ export default function RegisterPage() {
                   alt="VESSEL Logo"
                   width={120}
                   height={32}
-                  className="h-12 w-auto object-contain"
+                  className="h-10 w-auto object-contain"
                   priority
                 />
               </div>
