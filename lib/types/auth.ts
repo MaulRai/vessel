@@ -89,11 +89,19 @@ export interface GoogleAuthResponse {
 }
 
 // Response Types
+export interface APIPagination {
+  page: number;
+  per_page: number;
+  total: number;
+  total_pages: number;
+}
+
 export interface APIResponse<T> {
   success: boolean;
   message?: string;
   data?: T;
   error?: APIError;
+  pagination?: APIPagination;
 }
 
 export interface APIError {

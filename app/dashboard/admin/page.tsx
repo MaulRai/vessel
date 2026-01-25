@@ -208,7 +208,7 @@ function AdminDashboardContent() {
                         <p className="text-slate-400 text-xs">{u.full_name || u.username || '-'}</p>
                       </td>
                       <td className="py-3">{getRoleBadge(u.role)}</td>
-                      <td className="py-3 text-slate-300">Rp {u.balance_idr.toLocaleString('id-ID')}</td>
+                      <td className="py-3 text-slate-300">Rp {(u.balance_idr ?? 0).toLocaleString('id-ID')}</td>
                       <td className="py-3">
                         <span
                           className={`px-2 py-0.5 rounded text-xs ${u.is_verified

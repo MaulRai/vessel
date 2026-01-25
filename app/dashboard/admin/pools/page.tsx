@@ -77,6 +77,26 @@ function PoolListContent() {
     }
   };
 
+  const handleClosePool = async (poolId: string) => {
+    if (!confirm('Apakah Anda yakin ingin menghentikan pool funding ini? Investor tidak akan bisa funding lagi.')) return;
+
+    setActionLoading(poolId);
+    try {
+      const res = await adminAPI.closePool(poolId);
+      if (res.success) {
+        alert('Pool berhasil dihentikan');
+        loadPools();
+      } else {
+        alert(res.error?.message || 'Gagal menghentikan pool');
+      }
+    } catch (err) {
+      console.error('Failed to close pool', err);
+      alert('Terjadi kesalahan');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const getProgress = (pool: FundingPool) => {
     if (pool.target_amount === 0) return 0;
     return (pool.funded_amount / pool.target_amount) * 100;
@@ -169,6 +189,15 @@ function PoolListContent() {
                           <td className="px-6 py-4 text-slate-400 text-sm">{formatDate(pool.deadline)}</td>
                           <td className="px-6 py-4">
                             <div className="flex items-center space-x-2">
+                              {pool.status === 'open' && (
+                                <button
+                                  onClick={() => handleClosePool(pool.id)}
+                                  disabled={actionLoading === pool.id}
+                                  className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded text-xs font-medium text-red-400 transition-all disabled:opacity-50"
+                                >
+                                  {actionLoading === pool.id ? 'Processing...' : 'Stop'}
+                                </button>
+                              )}
                               {pool.status === 'filled' && (
                                 <button
                                   onClick={() => handleDisburse(pool.id)}

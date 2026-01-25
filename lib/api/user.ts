@@ -591,6 +591,7 @@ export interface CreateInvoiceRequest {
     repeat_buyer_proof?: string;
     data_confirmation: boolean;
     description?: string;
+    wallet_address: string;
 }
 
 export interface Invoice {

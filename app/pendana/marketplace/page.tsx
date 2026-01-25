@@ -1,12 +1,52 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { MarketplacePool, MarketplaceFilters } from '@/lib/api/user';
+import { fundingAPI, FundingPool } from '@/lib/api/funding';
 import { useInvestorWallet } from '@/lib/context/InvestorWalletContext';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+
+// Helper to map backend pool to UI model
+const mapPoolToUI = (pool: FundingPool): MarketplacePool => {
+  const fundingProgress = pool.target_amount > 0 ? (pool.funded_amount / pool.target_amount) * 100 : 0;
+  const priorityProgress = pool.priority_target > 0 ? (pool.priority_funded / pool.priority_target) * 100 : 0;
+  const catalystProgress = pool.catalyst_target > 0 ? (pool.catalyst_funded / pool.catalyst_target) * 100 : 0;
+  const yieldRange = `${pool.priority_interest_rate}% - ${pool.catalyst_interest_rate}%`;
+
+  return {
+    pool_id: pool.id,
+    invoice_id: pool.invoice_number,
+    project_title: pool.project_title || `Project ${pool.invoice_number}`,
+    grade: pool.grade || 'B',
+    min_yield: pool.priority_interest_rate,
+    max_yield: pool.catalyst_interest_rate,
+    tenor_days: pool.tenor_days,
+    tenor_display: `${pool.tenor_days} Hari`,
+    funding_progress: Math.min(fundingProgress, 100),
+    target_amount: pool.target_amount,
+    funded_amount: pool.funded_amount,
+    remaining_amount: pool.target_amount - pool.funded_amount,
+    priority_interest_rate: pool.priority_interest_rate,
+    catalyst_interest_rate: pool.catalyst_interest_rate,
+    priority_progress: Math.min(priorityProgress, 100),
+    catalyst_progress: Math.min(catalystProgress, 100),
+    priority_target: pool.priority_target,
+    priority_funded: pool.priority_funded,
+    catalyst_target: pool.catalyst_target,
+    catalyst_funded: pool.catalyst_funded,
+    buyer_country_flag: '🌍',
+    buyer_country: pool.buyer_country,
+    buyer_country_risk: 'Medium',
+    buyer_company_name: pool.buyer_company_name,
+    yield_range: yieldRange,
+    is_insured: true,
+    remaining_time: '7 hari tersisa',
+    is_fully_funded: pool.status === 'filled' || pool.status === 'closed',
+  };
+};
 
 function PoolInvestmentContent() {
   const router = useRouter();
@@ -106,7 +146,27 @@ function PoolInvestmentContent() {
     },
   ];
 
-  const [pools] = useState<MarketplacePool[]>(demoPools);
+  /* replaced demoPools */
+  const [pools, setPools] = useState<MarketplacePool[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPools() {
+      try {
+        const res = await fundingAPI.listPools(1, 10);
+        if (res.success && res.data) {
+          const mapped = res.data.pools.map(mapPoolToUI);
+          setPools(mapped);
+        }
+      } catch (err) {
+        console.error('Failed to fetch pools', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPools();
+  }, []);
+
   const [error] = useState<string | null>(null);
   const [filters, setFilters] = useState<MarketplaceFilters>({
     sort_by: 'newest',
@@ -117,7 +177,7 @@ function PoolInvestmentContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'open' | 'done'>('open');
 
-  const loading = false;
+
 
   const handleFilterChange = (key: keyof MarketplaceFilters, value: string | number | boolean | undefined) => {
     setFilters((prev) => ({

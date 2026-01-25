@@ -199,9 +199,9 @@ function CreateInvoiceContent() {
     buyerCountry: '',
     buyerEmail: '',
     invoiceNumber: '',
-    currency: 'USD',
+    currency: 'IDRX',
     originalAmount: '',
-    lockedExchangeRate: '16000',
+    lockedExchangeRate: '1',
     idrAmount: '',
     dueDate: '',
     fundingDuration: '14',
@@ -234,11 +234,11 @@ function CreateInvoiceContent() {
   );
 
   useEffect(() => {
-    const amount = parseFloat(step1Data.originalAmount) || 0;
-    const rate = parseFloat(step1Data.lockedExchangeRate) || 0;
-    const idr = Math.floor(amount * rate);
-    setStep1Data(prev => ({ ...prev, idrAmount: idr.toString() }));
-  }, [step1Data.originalAmount, step1Data.lockedExchangeRate]);
+    // IDRX is 1:1 with IDR in terms of value representation (Token Unit)
+    // or simply, IDRX amount IS the amount.
+    // originalAmount is in IDRX.
+    setStep1Data(prev => ({ ...prev, idrAmount: prev.originalAmount }));
+  }, [step1Data.originalAmount]);
 
   const handleCheckRepeatBuyer = async () => {
     if (!step1Data.buyerCompanyName.trim()) return;
@@ -297,6 +297,8 @@ function CreateInvoiceContent() {
     if (!step1Data.fundingDuration) newErrors.fundingDuration = 'Durasi pendanaan harus diisi';
     else if (Number.isNaN(durationValue) || durationValue < 3 || durationValue > 14) newErrors.fundingDuration = 'Durasi harus antara 3 hingga 14 hari';
 
+    if (!walletAddress) newErrors.walletAddress = 'Wallet harus terhubung untuk menerima dana IDRX';
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -337,6 +339,24 @@ function CreateInvoiceContent() {
     }
   };
 
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+
+  const connectWallet = async () => {
+    if (typeof window.ethereum === 'undefined') {
+      alert('MetaMask not found!');
+      return;
+    }
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }) as string[];
+      if (accounts && accounts.length > 0) {
+        setWalletAddress(accounts[0]);
+      }
+    } catch (err) {
+      console.error('Failed to connect wallet', err);
+      alert('Failed to connect wallet');
+    }
+  };
+
   const handleSubmit = async () => {
     if (!validateStep1() || !validateStep2()) {
       alert('Mohon lengkapi semua data yang diperlukan');
@@ -345,6 +365,11 @@ function CreateInvoiceContent() {
 
     if (!acknowledgement || !dataConfirmation) {
       alert('Mohon setujui semua pernyataan untuk melanjutkan');
+      return;
+    }
+
+    if (!walletAddress) {
+      alert('Wallet must be connected');
       return;
     }
 
@@ -367,7 +392,8 @@ function CreateInvoiceContent() {
         priority_interest_rate: parseFloat(step1Data.priorityInterestRate),
         catalyst_interest_rate: parseFloat(step1Data.catalystInterestRate),
         is_repeat_buyer: step3Data.isRepeatBuyer,
-        data_confirmation: dataConfirmation
+        data_confirmation: dataConfirmation,
+        wallet_address: walletAddress
       };
 
       const res = await invoiceAPI.createFundingRequest(requestData);
@@ -376,14 +402,25 @@ function CreateInvoiceContent() {
         const invoiceId = res.data.id;
         setCreatedInvoiceId(invoiceId);
 
+        // Upload documents and check for failures
+        const uploadErrors: string[] = [];
+
         if (step2Data.commercialInvoice) {
-          await invoiceAPI.uploadDocument(invoiceId, step2Data.commercialInvoice.file, 'commercial_invoice');
+          const uploadRes = await invoiceAPI.uploadDocument(invoiceId, step2Data.commercialInvoice.file, 'commercial_invoice');
+          if (!uploadRes.success) uploadErrors.push('Commercial Invoice: ' + (uploadRes.error?.message || 'Upload gagal'));
         }
         if (step2Data.billOfLading) {
-          await invoiceAPI.uploadDocument(invoiceId, step2Data.billOfLading.file, 'bill_of_lading');
+          const uploadRes = await invoiceAPI.uploadDocument(invoiceId, step2Data.billOfLading.file, 'bill_of_lading');
+          if (!uploadRes.success) uploadErrors.push('Bill of Lading: ' + (uploadRes.error?.message || 'Upload gagal'));
         }
         if (step2Data.purchaseOrder) {
-          await invoiceAPI.uploadDocument(invoiceId, step2Data.purchaseOrder.file, 'purchase_order');
+          const uploadRes = await invoiceAPI.uploadDocument(invoiceId, step2Data.purchaseOrder.file, 'purchase_order');
+          if (!uploadRes.success) uploadErrors.push('Purchase Order: ' + (uploadRes.error?.message || 'Upload gagal'));
+        }
+
+        if (uploadErrors.length > 0) {
+          alert('Gagal mengupload dokumen:\n' + uploadErrors.join('\n'));
+          return;
         }
 
         // Submit invoice for admin review (changes status from 'draft' to 'pending_review')
@@ -391,6 +428,7 @@ function CreateInvoiceContent() {
         if (!submitRes.success) {
           console.error('Failed to submit invoice for review:', submitRes.error);
           alert('Invoice berhasil dibuat tetapi gagal disubmit untuk review: ' + (submitRes.error?.message || 'Unknown error'));
+          return;
         }
 
         setIsSubmitted(true);
@@ -466,7 +504,37 @@ function CreateInvoiceContent() {
         </div>
 
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700/50 p-6 md:p-8">
-          <Stepper currentStep={currentStep} onStepClick={handleStepClick} />
+
+          {!walletAddress ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2">Hubungkan Wallet</h2>
+              <p className="text-slate-400 mb-6 max-w-md mx-auto">
+                Anda perlu menghubungkan wallet untuk membuat invoice dan menerima funding dalam bentuk IDRX.
+              </p>
+              <button
+                onClick={connectWallet}
+                className="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-white font-bold rounded-lg transition-all shadow-lg"
+              >
+                Connect Wallet
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-6 bg-teal-950/20 px-4 py-3 rounded-lg border border-teal-800/30">
+                <div className="flex items-center">
+                  <div className="h-2 w-2 rounded-full bg-emerald-400 mr-2"></div>
+                  <span className="text-sm text-slate-300">Wallet Terhubung</span>
+                </div>
+                <code className="text-sm font-mono text-teal-400">{walletAddress}</code>
+              </div>
+              <Stepper currentStep={currentStep} onStepClick={handleStepClick} />
+            </>
+          )}
 
           <div className="mt-8">
             {currentStep === 1 && (
@@ -474,6 +542,36 @@ function CreateInvoiceContent() {
                 <div>
                   <h2 className="text-xl font-semibold text-slate-100 mb-4">Data Pendanaan</h2>
                   <p className="text-sm text-slate-400 mb-6">Isi informasi tagihan yang akan didanai</p>
+                </div>
+
+                {/* Wallet Connection Section */}
+                <div className={`p-4 rounded-xl border ${walletAddress ? 'bg-teal-950/20 border-teal-800/30' : 'bg-slate-900/50 border-slate-700/60'}`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-200">Koneksi Wallet Pencairan (IDRX)</p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        {walletAddress ? 'Wallet terhubung. Dana akan dicairkan ke alamat ini.' : 'Hubungkan wallet untuk menerima pencairan dana IDRX.'}
+                      </p>
+                    </div>
+                    {walletAddress ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-teal-400 bg-teal-950/40 px-2 py-1 rounded border border-teal-800/30">
+                          {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                        </span>
+                        <button onClick={() => setWalletAddress(null)} className="text-xs text-red-400 hover:text-red-300">
+                          Putus
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={connectWallet}
+                        className="px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-white text-xs font-bold rounded-lg transition-all"
+                      >
+                        Hubungkan Wallet
+                      </button>
+                    )}
+                  </div>
+                  {errors.walletAddress && <p className="mt-2 text-xs text-red-400">{errors.walletAddress}</p>}
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
@@ -552,29 +650,25 @@ function CreateInvoiceContent() {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Mata Uang <span className="text-red-400">*</span>
+                      Mata Uang
                     </label>
-                    <select
-                      value={step1Data.currency}
-                      onChange={(e) => setStep1Data({ ...step1Data, currency: e.target.value })}
-                      className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-teal-500 transition-all text-slate-100"
-                    >
-                      <option value="USD">USD - US Dollar</option>
-                      <option value="EUR">EUR - Euro</option>
-                      <option value="SGD">SGD - Singapore Dollar</option>
-                      <option value="JPY">JPY - Japanese Yen</option>
-                    </select>
+                    <input
+                      type="text"
+                      value="IDRX (Vessel Network Token)"
+                      readOnly
+                      className="w-full px-4 py-3 bg-slate-900/30 border border-slate-700 rounded-lg text-slate-400 cursor-not-allowed"
+                    />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Nominal Invoice <span className="text-red-400">*</span>
+                      Nominal Invoice (IDRX) <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">{step1Data.currency}</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">IDRX</span>
                       <input
                         type="number"
                         value={step1Data.originalAmount}
@@ -584,16 +678,6 @@ function CreateInvoiceContent() {
                       />
                     </div>
                     {errors.originalAmount && <p className="mt-1 text-xs text-red-400">{errors.originalAmount}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Kurs (IDR)</label>
-                    <input
-                      type="text"
-                      value={`Rp ${new Intl.NumberFormat('id-ID').format(parseFloat(step1Data.lockedExchangeRate) || 0)}`}
-                      readOnly
-                      className="w-full px-4 py-3 bg-slate-900/30 border border-slate-700 rounded-lg text-slate-400 cursor-not-allowed"
-                    />
                   </div>
                 </div>
 
@@ -686,14 +770,14 @@ function CreateInvoiceContent() {
                 <div className="bg-teal-950/30 border border-teal-800/30 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-sm font-medium text-slate-300">Total dalam IDR:</span>
+                      <span className="text-sm font-medium text-slate-300">Total Funding:</span>
                       <p className="text-xs text-slate-400 mt-1">Limit pendanaan: {step3Data.fundingLimit}%</p>
                     </div>
                     <div className="text-right">
                       <span className="text-lg font-bold text-teal-400">
-                        Rp {new Intl.NumberFormat('id-ID').format(parseFloat(step1Data.idrAmount) || 0)}
+                        {new Intl.NumberFormat('id-ID').format(parseFloat(step1Data.originalAmount) || 0)} IDRX
                       </span>
-                      <p className="text-xs text-slate-400">Est. Dana: Rp {calculateEstimatedFunds()}</p>
+                      <p className="text-xs text-slate-400">Est. Dana Cair: {calculateEstimatedFunds()} IDRX</p>
                     </div>
                   </div>
                 </div>
