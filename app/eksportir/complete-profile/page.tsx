@@ -465,8 +465,18 @@ export default function CompleteProfilePage() {
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
+                                <div className="mt-8 space-y-4">
+                                    {/* Progress Indicator */}
+                                    <div className="flex items-center justify-center gap-3">
+                                        <span className="text-sm text-slate-400">{t('completeProfile.page')} {currentStep} {t('completeProfile.of')} 2</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-slate-600" />
+                                            <div className="w-2 h-2 rounded-full bg-cyan-400" />
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Action Buttons */}
+                                    <div className="flex items-center justify-between gap-4">
                                         <button
                                             type="button"
                                             onClick={handleBackStep}
@@ -477,33 +487,26 @@ export default function CompleteProfilePage() {
                                             </svg>
                                             {t('completeProfile.back')}
                                         </button>
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-sm text-slate-400">{t('completeProfile.page')} {currentStep} {t('completeProfile.of')} 2</span>
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-slate-600" />
-                                                <div className="w-2 h-2 rounded-full bg-cyan-400" />
-                                            </div>
-                                        </div>
+                                        <button
+                                            onClick={handleFinalSubmit}
+                                            disabled={loading}
+                                            className="group px-8 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-400 hover:to-teal-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-teal-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                    {t('completeProfile.submitting')}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {t('completeProfile.submit')}
+                                                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </>
+                                            )}
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={handleFinalSubmit}
-                                        disabled={loading}
-                                        className="group px-8 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-400 hover:to-teal-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-teal-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                    >
-                                        {loading ? (
-                                            <>
-                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                {t('completeProfile.submitting')}
-                                            </>
-                                        ) : (
-                                            <>
-                                                {t('completeProfile.submit')}
-                                                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            </>
-                                        )}
-                                    </button>
                                 </div>
                             </div>
                         )}
