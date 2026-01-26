@@ -110,7 +110,7 @@ export default function PencairanDanaPage() {
 
 						<button
 							type="submit"
-							className="w-full rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-900/30 transition hover:from-cyan-500 hover:to-teal-500"
+							className="w-full rounded-lg bg-linear-to-r from-cyan-600 to-teal-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-900/30 transition hover:from-cyan-500 hover:to-teal-500"
 						>
 							Tarik Dana
 						</button>

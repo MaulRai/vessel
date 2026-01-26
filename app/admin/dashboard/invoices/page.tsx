@@ -55,30 +55,49 @@ function InvoiceReviewListContent() {
 
   return (
     <DashboardLayout role="admin">
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Invoice Review</h1>
-            <p className="text-slate-400 mt-1">Review dan approve permohonan pendanaan dari mitra</p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-              <span className="text-purple-400 font-medium">{total} Pending</span>
+      <div className="space-y-8">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600/10 via-fuchsia-600/10 to-transparent border border-violet-500/20 p-8">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]" />
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/25">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">Invoice Review</h1>
+                <p className="text-violet-200/70 mt-1">Review and approve funding requests from partners</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 bg-amber-400 rounded-full animate-pulse" />
+                  <span className="text-amber-400 font-semibold">{total} Pending</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
+        <div className="rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] overflow-hidden">
           {loading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-400"></div>
+            <div className="flex items-center justify-center py-20">
+              <div className="relative">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-violet-500"></div>
+                <div className="absolute inset-0 rounded-full border-2 border-violet-500/20"></div>
+              </div>
             </div>
           ) : invoices.length === 0 ? (
-            <div className="text-center py-16">
-              <svg className="w-16 h-16 mx-auto text-slate-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="text-slate-400">Tidak ada invoice yang menunggu review</p>
+            <div className="text-center py-20">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-emerald-500/10 mb-4">
+                <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-zinc-400 text-lg">No invoices pending review</p>
+              <p className="text-zinc-500 text-sm mt-2">All invoices have been processed</p>
             </div>
           ) : (
             <>
@@ -140,7 +159,7 @@ function InvoiceReviewListContent() {
                           </td>
                           <td className="px-6 py-4">
                             <Link
-                              href={`/dashboard/admin/invoices/${invoice.id}`}
+                              href={`/admin/dashboard/invoices/${invoice.id}`}
                               className="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-lg text-sm font-medium text-purple-400 transition-all"
                             >
                               Review

@@ -5,8 +5,11 @@ import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { MarketplacePool, MarketplaceFilters } from '@/lib/api/user';
+<<<<<<< HEAD
 import { fundingAPI, FundingPool } from '@/lib/api/funding';
 import { useInvestorWallet } from '@/lib/context/InvestorWalletContext';
+=======
+>>>>>>> 3ff8080d73b7dfbd03d930cdd142e1bfac7b0538
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 // Helper to map backend pool to UI model
@@ -50,7 +53,6 @@ const mapPoolToUI = (pool: FundingPool): MarketplacePool => {
 
 function PoolInvestmentContent() {
   const router = useRouter();
-  useInvestorWallet();
   const { t } = useLanguage();
 
   const [pools, setPools] = useState<MarketplacePool[]>([]);
@@ -331,7 +333,7 @@ function PoolInvestmentContent() {
                       </div>
                       <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
                         <div
-                          className="bg-gradient-to-r from-cyan-500 to-teal-500 h-2 rounded-full transition-all"
+                          className="bg-linear-to-r from-cyan-500 to-teal-500 h-2 rounded-full transition-all"
                           style={{ width: `${Math.min(pool.funding_progress || 0, 100)}%` }}
                         />
                       </div>
@@ -380,7 +382,7 @@ function PoolInvestmentContent() {
                         }}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${isFullyFunded
                           ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-white shadow-lg shadow-cyan-500/25'
+                          : 'bg-linear-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-white shadow-lg shadow-cyan-500/25'
                           }`}
                         disabled={isFullyFunded}
                       >

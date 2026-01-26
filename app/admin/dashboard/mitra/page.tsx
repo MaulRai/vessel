@@ -213,7 +213,7 @@ export default function AdminMitraPage() {
                       </td>
                       <td className="px-6 py-4">
                         <Link
-                          href={`/dashboard/admin/mitra/${app.id}`}
+                          href={`/admin/dashboard/mitra/${app.id}`}
                           className="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 text-white text-sm font-semibold hover:from-cyan-500 hover:to-teal-500"
                         >
                           Lihat Detail

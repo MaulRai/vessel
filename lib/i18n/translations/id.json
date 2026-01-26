@@ -39,7 +39,33 @@
         "error": "Error",
         "success": "Berhasil",
         "walletConnected": "Wallet Terhubung",
-        "walletNotConnected": "Wallet Belum Terhubung"
+        "walletNotConnected": "Wallet Belum Terhubung",
+        "switchToEnglish": "Ganti ke Bahasa Inggris",
+        "switchToIndonesian": "Ganti ke Bahasa Indonesia",
+        "languageShort": {
+            "en": "EN",
+            "id": "ID"
+        }
+    },
+    "investorConnect": {
+        "title": "Hubungkan Wallet Anda",
+        "subtitle": "Mulai hasilkan hingga 15% APY dengan berinvestasi pada invoice ekspor terverifikasi",
+        "benefits": {
+            "instantAccess": "Akses Instan",
+            "keysControl": "Kunci di Tangan Anda",
+            "onChain": "100% On-Chain"
+        },
+        "wrongNetworkTitle": "Jaringan Tidak Sesuai",
+        "wrongNetworkBody": "Silakan pindah ke",
+        "switchTo": "Pindah ke",
+        "switching": "Mengganti...",
+        "noWalletTitle": "Belum punya wallet?",
+        "getMetaMask": "Unduh MetaMask 🦊",
+        "getCoinbase": "Unduh Coinbase 🟦",
+        "exporterCta": "Anda seorang eksportir?",
+        "registerExporter": "Daftar sebagai Eksportir/Mitra",
+        "nonCustodial": "Non-Kustodial",
+        "onChain": "On-Chain"
     },
     "roles": {
         "investor": "Pendana",
@@ -100,9 +126,12 @@
     "auth": {
         "login": "Masuk",
         "logout": "Keluar",
-        "loginTitle": "Masuk ke Akun Mitra",
-        "loginSubtitle": "Halaman ini khusus untuk eksportir/mitra. Investor dapat langsung",
+        "loginTitle": "Masuk ke Akun Mitra Eksportir",
+        "loginSubtitle": "Halaman ini khusus untuk eksportir/mitra.",
         "connectWallet": "koneksikan dompet",
+        "connectWalletNow": "Hubungkan Wallet Sekarang",
+        "areYouInvestor": "Anda Seorang Investor?",
+        "investorConnectMessage": "Lewati registrasi dan hubungkan wallet Anda.",
         "loginGoogle": "Masuk dengan Google",
         "loginDemoExporter": "Login dengan akun demo Eksportir",
         "emailOrUsernameLabel": "Email atau Username",
@@ -150,6 +179,7 @@
         "howItWorks": "Cara Kerja",
         "security": "Keamanan",
         "getStarted": "Mulai Sekarang",
+        "getStartedMobile": "Mulai",
         "poweredBy": "Didukung oleh Lisk Blockchain",
         "heroTitle1": "Pembiayaan Ekspor",
         "heroTitle2": "Terdesentralisasi",
@@ -207,6 +237,10 @@
         "ctaSubtitle": "Bergabung dengan ribuan eksportir dan investor yang telah merasakan manfaat VESSEL.",
         "ctaInvestor": "Mulai Investasi",
         "ctaExporter": "Daftar sebagai Eksportir",
+        "startAsPendana": "Mulai sebagai Pendana",
+        "pendanaDesc": "Hubungkan wallet Anda dan mulai mendapatkan keuntungan dengan berinvestasi di faktur ekspor",
+        "startAsExporter": "Mulai sebagai Eksportir",
+        "exporterDesc": "Daftarkan bisnis Anda dan dapatkan pembiayaan cepat untuk faktur ekspor Anda",
         "footerDesc": "Platform pembiayaan ekspor terdesentralisasi berbasis blockchain.",
         "footerProduct": "Produk",
         "footerCompany": "Perusahaan",
@@ -217,5 +251,73 @@
         "footerPrivacy": "Kebijakan Privasi",
         "footerTerms": "Syarat Layanan",
         "footerRights": "Hak cipta dilindungi."
+    },
+    "completeProfile": {
+        "pending": {
+            "title": "Aplikasi Sedang Ditinjau",
+            "company": "Perusahaan",
+            "description": "Aplikasi Anda telah berhasil diajukan dan saat ini sedang ditinjau oleh tim kami. Proses ini biasanya memakan waktu",
+            "duration": "1-3 hari kerja",
+            "descriptionEnd": ".",
+            "status": "Status",
+            "statusPending": "Menunggu Peninjauan",
+            "statusSubmitted": "Diajukan",
+            "statusReview": "Sedang Ditinjau",
+            "statusApproved": "Disetujui",
+            "notification": "Anda akan menerima notifikasi email setelah aplikasi Anda ditinjau."
+        },
+        "step1": {
+            "title": "Informasi Perusahaan",
+            "subtitle": "Ceritakan tentang bisnis Anda"
+        },
+        "step2": {
+            "title": "Unggah Dokumen",
+            "subtitle": "Unggah dokumen legal yang diperlukan"
+        },
+        "changeLanguage": "Ganti Bahasa",
+        "page": "Hal",
+        "of": "dari",
+        "continue": "Lanjutkan",
+        "back": "Kembali",
+        "submit": "Kirim",
+        "submitting": "Mengirim...",
+        "validation": {
+            "companyName": "Nama Perusahaan harus diisi",
+            "npwp": "NPWP harus diisi",
+            "address": "Alamat harus diisi",
+            "description": "Deskripsi harus diisi"
+        },
+        "form": {
+            "companyName": "Nama Perusahaan *",
+            "companyNamePlaceholder": "PT Maju Jaya",
+            "type": "Tipe",
+            "typePT": "PT",
+            "typeCV": "CV",
+            "typeUD": "UD",
+            "year": "Tahun",
+            "npwp": "NPWP *",
+            "npwpPlaceholder": "00.000.000.0-000.000",
+            "annualRevenue": "Pendapatan Tahunan",
+            "revenue1": "< 1 Miliar IDR",
+            "revenue2": "1 - 5 Miliar IDR",
+            "revenue3": "5 - 25 Miliar IDR",
+            "revenue4": "25 - 100 Miliar IDR",
+            "revenue5": "> 100 Miliar IDR",
+            "address": "Alamat Bisnis *",
+            "addressPlaceholder": "Jl. Sudirman No. 1, Jakarta",
+            "description": "Deskripsi Bisnis *",
+            "descriptionPlaceholder": "Jelaskan aktivitas bisnis dan pengalaman ekspor Anda",
+            "website": "Website",
+            "keyProducts": "Produk Utama",
+            "keyProductsPlaceholder": "Kopi, Furniture",
+            "exportMarkets": "Pasar Ekspor",
+            "exportMarketsPlaceholder": "Amerika, Eropa, Asia"
+        },
+        "documents": {
+            "nib": "NIB",
+            "akta_pendirian": "Akta Pendirian",
+            "ktp_direktur": "KTP Direktur",
+            "fileTypes": "PDF, JPG, PNG (maks 10MB)"
+        }
     }
 }

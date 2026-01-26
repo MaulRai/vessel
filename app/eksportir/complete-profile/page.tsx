@@ -2,9 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useAuth } from '@/lib/context/AuthContext';
 import { userAPI, MitraApplicationResponse } from '@/lib/api/user';
 import { AuthGuard } from '@/lib/components/AuthGuard';
+import { LanguageSwitcher } from '@/lib/components/LanguageSwitcher';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 type DocumentType = 'nib' | 'akta_pendirian' | 'ktp_direktur';
 
@@ -36,60 +40,125 @@ const INITIAL_DATA: FormData = {
 
 // Pending Approval Screen
 function PendingApprovalScreen({ application }: { application?: MitraApplicationResponse }) {
+    const { t } = useLanguage();
     return (
         <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
-            <div className="max-w-lg w-full text-center">
-                {/* Animated Icon */}
-                <div className="relative mx-auto w-24 h-24 mb-8">
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full opacity-20 animate-ping" />
-                    <div className="relative w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full flex items-center justify-center border border-cyan-500/30 backdrop-blur-sm">
-                        <svg className="w-12 h-12 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+            <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                {/* Left Column - Header & Image */}
+                <div className="space-y-8">
+                    {/* Logo */}
+                    <div className="flex items-center space-x-2">
+                        <Link href="/" className="group flex items-center space-x-2">
+                            <Image
+                                src="/vessel-logo.png"
+                                alt="VESSEL Logo"
+                                width={120}
+                                height={32}
+                                className="h-12 w-auto object-contain transition-transform group-hover:scale-105"
+                                priority
+                            />
+                        </Link>
+                    </div>
+
+                    {/* Header */}
+                    <div>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent mb-4">
+                            {t('completeProfile.pending.title')}
+                        </h1>
+                        <p className="text-slate-400 text-lg mb-6">
+                            {t('completeProfile.pending.description')}
+                            <span className="text-cyan-400 font-medium"> {t('completeProfile.pending.duration')} </span>
+                            {t('completeProfile.pending.descriptionEnd')}
+                        </p>
+                    </div>
+
+                    {/* Large Image */}
+                    <div className="relative w-full aspect-square max-w-lg hidden lg:block">
+                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 blur-3xl" />
+                        <div className="relative w-full h-full">
+                            <Image
+                                src="/assets/auth/under-review.png"
+                                alt="Under review illustration"
+                                fill
+                                className="object-cover"
+                                priority
+                            />
+                        </div>
                     </div>
                 </div>
 
-                {/* Title */}
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
-                    Application Under Review
-                </h1>
+                {/* Right Column - Status Card */}
+                <div className="bg-gradient-to-br from-slate-900/80 to-slate-800/50 border border-slate-700/50 rounded-2xl p-8 backdrop-blur-sm shadow-2xl shadow-black/20">
+                    {/* Animated Icon */}
+                    <div className="relative mx-auto w-24 h-24 mb-8">
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full opacity-20 animate-ping" />
+                        <div className="relative w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-teal-600/20 rounded-full flex items-center justify-center border border-cyan-500/30 backdrop-blur-sm">
+                            <svg className="w-12 h-12 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
 
-                {/* Company Name */}
-                {application?.application?.company_name && (
-                    <div className="inline-block px-4 py-2 bg-slate-800/50 rounded-full border border-slate-700 mb-6">
-                        <span className="text-slate-400 text-sm">Company: </span>
-                        <span className="text-white font-medium">{application.application.company_name}</span>
-                    </div>
-                )}
+                    {/* Company Name */}
+                    {application?.application?.company_name && (
+                        <div className="inline-block px-4 py-2 bg-slate-800/50 rounded-full border border-slate-700 mb-8">
+                            <span className="text-slate-400 text-sm">{t('completeProfile.pending.company')}: </span>
+                            <span className="text-white font-medium">{application.application.company_name}</span>
+                        </div>
+                    )}
 
-                {/* Description */}
-                <p className="text-slate-400 mb-8 leading-relaxed">
-                    Your application has been submitted successfully and is currently being reviewed by our team.
-                    This process typically takes <span className="text-cyan-400 font-medium">1-3 business days</span>.
-                </p>
+                    {/* Status Card */}
+                    <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-6 mb-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <span className="text-slate-400 text-sm">{t('completeProfile.pending.status')}</span>
+                            <span className="px-3 py-1 bg-amber-500/10 text-amber-400 text-xs font-medium rounded-full border border-amber-500/20">
+                                {t('completeProfile.pending.statusPending')}
+                            </span>
+                        </div>
+                        
+                        {/* Progress Steps */}
+                        <div className="relative">
+                            {/* Progress Line */}
+                            <div className="absolute top-5 left-0 right-0 h-0.5 bg-slate-700">
+                                <div className="h-full w-1/2 bg-gradient-to-r from-cyan-500 to-teal-500 transition-all duration-500" />
+                            </div>
+                            
+                            {/* Steps */}
+                            <div className="relative flex justify-between">
+                                {/* Step 1 - Submitted (Complete) */}
+                                <div className="flex flex-col items-center">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center mb-2 shadow-lg shadow-cyan-500/30">
+                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <span className="text-xs text-cyan-400 font-medium text-center">{t('completeProfile.pending.statusSubmitted')}</span>
+                                </div>
+                                
+                                {/* Step 2 - Under Review (Current) */}
+                                <div className="flex flex-col items-center">
+                                    <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border-2 border-cyan-500 flex items-center justify-center mb-2 animate-pulse">
+                                        <div className="w-3 h-3 rounded-full bg-cyan-400" />
+                                    </div>
+                                    <span className="text-xs text-cyan-400 font-medium text-center">{t('completeProfile.pending.statusReview')}</span>
+                                </div>
+                                
+                                {/* Step 3 - Approved (Pending) */}
+                                <div className="flex flex-col items-center">
+                                    <div className="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center mb-2">
+                                        <div className="w-3 h-3 rounded-full bg-slate-600" />
+                                    </div>
+                                    <span className="text-xs text-slate-500 text-center">{t('completeProfile.pending.statusApproved')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                {/* Status Card */}
-                <div className="bg-gradient-to-br from-slate-900/80 to-slate-800/50 border border-slate-700/50 rounded-2xl p-6 backdrop-blur-sm mb-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-slate-400 text-sm">Status</span>
-                        <span className="px-3 py-1 bg-amber-500/10 text-amber-400 text-xs font-medium rounded-full border border-amber-500/20">
-                            Pending Review
-                        </span>
-                    </div>
-                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                        <div className="h-full w-1/3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full animate-pulse" />
-                    </div>
-                    <div className="flex justify-between mt-2 text-xs text-slate-500">
-                        <span>Submitted</span>
-                        <span>Under Review</span>
-                        <span>Approved</span>
-                    </div>
+                    {/* Info */}
+                    <p className="text-slate-500 text-sm text-center">
+                        {t('completeProfile.pending.notification')}
+                    </p>
                 </div>
-
-                {/* Info */}
-                <p className="text-slate-500 text-sm">
-                    You will receive an email notification once your application has been reviewed.
-                </p>
             </div>
         </div>
     );
@@ -98,11 +167,12 @@ function PendingApprovalScreen({ application }: { application?: MitraApplication
 export default function CompleteProfilePage() {
     const router = useRouter();
     const { user, refreshProfile } = useAuth();
+    const { t } = useLanguage();
     const [formData, setFormData] = useState<FormData>(INITIAL_DATA);
     const [loading, setLoading] = useState(false);
     const [checkingStatus, setCheckingStatus] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [currentStep, setCurrentStep] = useState(1);
+    const [currentStep, setCurrentStep] = useState<1 | 2>(1);
     const [mitraStatus, setMitraStatus] = useState<MitraApplicationResponse | null>(null);
 
     const [docs, setDocs] = useState<Record<DocumentType, File | null>>({
@@ -151,10 +221,10 @@ export default function CompleteProfilePage() {
     };
 
     const validateStep1 = () => {
-        if (!formData.company_name) return 'Company Name is required';
-        if (!formData.npwp) return 'NPWP is required';
-        if (!formData.address) return 'Address is required';
-        if (!formData.business_description) return 'Description is required';
+        if (!formData.company_name) return t('completeProfile.validation.companyName');
+        if (!formData.npwp) return t('completeProfile.validation.npwp');
+        if (!formData.address) return t('completeProfile.validation.address');
+        if (!formData.business_description) return t('completeProfile.validation.description');
         return null;
     };
 
@@ -234,23 +304,54 @@ export default function CompleteProfilePage() {
     return (
         <AuthGuard allowedRoles={['mitra']}>
             <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
-                <div className="w-full max-w-4xl">
-                    {/* Header */}
-                    <div className="text-center mb-8">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/50 rounded-full border border-slate-700/50 mb-4">
-                            <div className={`w-2 h-2 rounded-full ${currentStep === 1 ? 'bg-cyan-400' : 'bg-slate-600'}`} />
-                            <div className={`w-8 h-0.5 ${currentStep === 2 ? 'bg-cyan-400' : 'bg-slate-700'}`} />
-                            <div className={`w-2 h-2 rounded-full ${currentStep === 2 ? 'bg-cyan-400' : 'bg-slate-600'}`} />
+                <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    {/* Left Column - Header & Image */}
+                    <div className="space-y-8">
+                        {/* Logo */}
+                        <div className="flex items-center space-x-2">
+                            <Link href="/" className="group flex items-center space-x-2">
+                                <Image
+                                    src="/vessel-logo.png"
+                                    alt="VESSEL Logo"
+                                    width={120}
+                                    height={32}
+                                    className="h-12 w-auto object-contain transition-transform group-hover:scale-105"
+                                    priority
+                                />
+                            </Link>
                         </div>
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                            {currentStep === 1 ? 'Company Information' : 'Upload Documents'}
-                        </h1>
-                        <p className="mt-2 text-slate-500 text-sm">
-                            {currentStep === 1 ? 'Tell us about your business' : 'Upload required legal documents'}
-                        </p>
+                        {/* Header */}
+                        <div>
+                            <h1 key={`title-${currentStep}`} className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent mb-4 animate-in fade-in slide-in-from-left-4 duration-500">
+                                {currentStep === 1 ? t('completeProfile.step1.title') : t('completeProfile.step2.title')}
+                            </h1>
+                            <p key={`subtitle-${currentStep}`} className="text-slate-400 text-lg mb-6 animate-in fade-in slide-in-from-left-4 duration-500 delay-75">
+                                {currentStep === 1 ? t('completeProfile.step1.subtitle') : t('completeProfile.step2.subtitle')}
+                            </p>
+
+                            {/* Language Switcher */}
+                            <div className="flex items-center gap-3 mb-8">
+                                <span className="text-sm text-slate-500">{t('completeProfile.changeLanguage')}:</span>
+                                <LanguageSwitcher />
+                            </div>
+                        </div>
+
+                        {/* Large Image */}
+                        <div className="relative w-full aspect-square max-w-lg hidden lg:block">
+                            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 blur-3xl" />
+                            <div className="relative w-full h-full">
+                                <Image
+                                    src="/assets/auth/company.png"
+                                    alt="Company illustration"
+                                    fill
+                                    className="object-cover"
+                                    priority
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Card */}
+                    {/* Right Column - Form Card */}
                     <div className="bg-gradient-to-br from-slate-900/80 to-slate-800/50 border border-slate-700/50 rounded-2xl p-8 backdrop-blur-sm shadow-2xl shadow-black/20">
                         {error && (
                             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-3">
@@ -262,62 +363,69 @@ export default function CompleteProfilePage() {
                         )}
 
                         {currentStep === 1 ? (
-                            <form onSubmit={handleNextStep}>
+                            <form onSubmit={handleNextStep} key="step-1" className="animate-in fade-in slide-in-from-right-8 duration-500">
                                 <div className="grid grid-cols-6 gap-4">
                                     <div className="col-span-6 md:col-span-3">
-                                        <label className={labelClass}>Company Name *</label>
-                                        <input type="text" name="company_name" value={formData.company_name} onChange={handleChange} className={inputClass} placeholder="PT Maju Jaya" />
+                                        <label className={labelClass}>{t('completeProfile.form.companyName')}</label>
+                                        <input type="text" name="company_name" value={formData.company_name} onChange={handleChange} className={inputClass} placeholder={t('completeProfile.form.companyNamePlaceholder')} />
                                     </div>
                                     <div className="col-span-3 md:col-span-2">
-                                        <label className={labelClass}>Type</label>
+                                        <label className={labelClass}>{t('completeProfile.form.type')}</label>
                                         <select name="company_type" value={formData.company_type} onChange={handleChange} className={inputClass}>
-                                            <option value="PT">PT</option>
-                                            <option value="CV">CV</option>
-                                            <option value="UD">UD</option>
+                                            <option value="PT">{t('completeProfile.form.typePT')}</option>
+                                            <option value="CV">{t('completeProfile.form.typeCV')}</option>
+                                            <option value="UD">{t('completeProfile.form.typeUD')}</option>
                                         </select>
                                     </div>
                                     <div className="col-span-3 md:col-span-1">
-                                        <label className={labelClass}>Year</label>
+                                        <label className={labelClass}>{t('completeProfile.form.year')}</label>
                                         <input type="number" name="year_founded" value={formData.year_founded} onChange={handleChange} className={inputClass} />
                                     </div>
                                     <div className="col-span-6 md:col-span-3">
-                                        <label className={labelClass}>NPWP *</label>
-                                        <input type="text" name="npwp" value={formData.npwp} onChange={handleChange} className={inputClass} placeholder="00.000.000.0-000.000" />
+                                        <label className={labelClass}>{t('completeProfile.form.npwp')}</label>
+                                        <input type="text" name="npwp" value={formData.npwp} onChange={handleChange} className={inputClass} placeholder={t('completeProfile.form.npwpPlaceholder')} />
                                     </div>
                                     <div className="col-span-6 md:col-span-3">
-                                        <label className={labelClass}>Annual Revenue</label>
+                                        <label className={labelClass}>{t('completeProfile.form.annualRevenue')}</label>
                                         <select name="annual_revenue" value={formData.annual_revenue} onChange={handleChange} className={inputClass}>
-                                            <option value="<1M">&lt; 1 Billion IDR</option>
-                                            <option value="1M-5M">1 - 5 Billion IDR</option>
-                                            <option value="5M-25M">5 - 25 Billion IDR</option>
-                                            <option value="25M-100M">25 - 100 Billion IDR</option>
-                                            <option value=">100M">&gt; 100 Billion IDR</option>
+                                            <option value="<1M">{t('completeProfile.form.revenue1')}</option>
+                                            <option value="1M-5M">{t('completeProfile.form.revenue2')}</option>
+                                            <option value="5M-25M">{t('completeProfile.form.revenue3')}</option>
+                                            <option value="25M-100M">{t('completeProfile.form.revenue4')}</option>
+                                            <option value=">100M">{t('completeProfile.form.revenue5')}</option>
                                         </select>
                                     </div>
                                     <div className="col-span-6">
-                                        <label className={labelClass}>Business Address *</label>
-                                        <input type="text" name="address" value={formData.address} onChange={handleChange} className={inputClass} placeholder="Jl. Sudirman No. 1, Jakarta" />
+                                        <label className={labelClass}>{t('completeProfile.form.address')}</label>
+                                        <input type="text" name="address" value={formData.address} onChange={handleChange} className={inputClass} placeholder={t('completeProfile.form.addressPlaceholder')} />
                                     </div>
                                     <div className="col-span-6">
-                                        <label className={labelClass}>Business Description *</label>
-                                        <textarea name="business_description" value={formData.business_description} onChange={handleChange} rows={2} className={inputClass} placeholder="Describe your business activities and export experience" />
+                                        <label className={labelClass}>{t('completeProfile.form.description')}</label>
+                                        <textarea name="business_description" value={formData.business_description} onChange={handleChange} rows={2} className={inputClass} placeholder={t('completeProfile.form.descriptionPlaceholder')} />
                                     </div>
                                     <div className="col-span-6 md:col-span-2">
-                                        <label className={labelClass}>Website</label>
-                                        <input type="url" name="website_url" value={formData.website_url} onChange={handleChange} className={inputClass} placeholder="https://" />
+                                        <label className={labelClass}>{t('completeProfile.form.website')}</label>
+                                        <input type="text" name="website_url" value={formData.website_url} onChange={handleChange} className={inputClass} placeholder="example.com" />
                                     </div>
                                     <div className="col-span-3 md:col-span-2">
-                                        <label className={labelClass}>Key Products</label>
-                                        <input type="text" name="key_products" value={formData.key_products} onChange={handleChange} className={inputClass} placeholder="Coffee, Furniture" />
+                                        <label className={labelClass}>{t('completeProfile.form.keyProducts')}</label>
+                                        <input type="text" name="key_products" value={formData.key_products} onChange={handleChange} className={inputClass} placeholder={t('completeProfile.form.keyProductsPlaceholder')} />
                                     </div>
                                     <div className="col-span-3 md:col-span-2">
-                                        <label className={labelClass}>Export Markets</label>
-                                        <input type="text" name="export_markets" value={formData.export_markets} onChange={handleChange} className={inputClass} placeholder="USA, Europe, Asia" />
+                                        <label className={labelClass}>{t('completeProfile.form.exportMarkets')}</label>
+                                        <input type="text" name="export_markets" value={formData.export_markets} onChange={handleChange} className={inputClass} placeholder={t('completeProfile.form.exportMarketsPlaceholder')} />
                                     </div>
                                 </div>
-                                <div className="mt-8 flex justify-end">
-                                    <button type="submit" className="group px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-2">
-                                        Continue
+                                <div className="mt-8 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-sm text-slate-400">{t('completeProfile.page')} {currentStep} {t('completeProfile.of')} 2</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-cyan-400" />
+                                            <div className="w-2 h-2 rounded-full bg-slate-600" />
+                                        </div>
+                                    </div>
+                                    <button type="submit" className="group px-8 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-400 hover:to-teal-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-2">
+                                        {t('completeProfile.continue')}
                                         <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
@@ -325,7 +433,7 @@ export default function CompleteProfilePage() {
                                 </div>
                             </form>
                         ) : (
-                            <div>
+                            <div key="step-2" className="animate-in fade-in slide-in-from-right-8 duration-500">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                                     {(['nib', 'akta_pendirian', 'ktp_direktur'] as DocumentType[]).map((type) => (
                                         <div key={type} className={`relative p-6 rounded-xl border-2 border-dashed transition-all ${docs[type] ? 'border-cyan-500/50 bg-cyan-500/5' : 'border-slate-700/50 bg-slate-900/30 hover:border-slate-600'}`}>
@@ -341,11 +449,11 @@ export default function CompleteProfilePage() {
                                                         </svg>
                                                     )}
                                                 </div>
-                                                <p className="text-sm font-medium text-slate-300 mb-1 capitalize">{type.replace(/_/g, ' ')}</p>
+                                                <p className="text-sm font-medium text-slate-300 mb-1 capitalize">{t(`completeProfile.documents.${type}`)}</p>
                                                 {docs[type] ? (
                                                     <p className="text-xs text-cyan-400 truncate max-w-full">{docs[type]!.name}</p>
                                                 ) : (
-                                                    <p className="text-xs text-slate-500">PDF, JPG, PNG (max 10MB)</p>
+                                                    <p className="text-xs text-slate-500">{t('completeProfile.documents.fileTypes')}</p>
                                                 )}
                                             </div>
                                             <input
@@ -357,36 +465,48 @@ export default function CompleteProfilePage() {
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex justify-between">
-                                    <button
-                                        type="button"
-                                        onClick={handleBackStep}
-                                        className="group px-6 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 font-medium rounded-xl transition-all border border-slate-700/50 flex items-center gap-2"
-                                    >
-                                        <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                        </svg>
-                                        Back
-                                    </button>
-                                    <button
-                                        onClick={handleFinalSubmit}
-                                        disabled={loading}
-                                        className="group px-8 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                    >
-                                        {loading ? (
-                                            <>
-                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                Submitting...
-                                            </>
-                                        ) : (
-                                            <>
-                                                Submit Application
-                                                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            </>
-                                        )}
-                                    </button>
+                                <div className="mt-8 space-y-4">
+                                    {/* Progress Indicator */}
+                                    <div className="flex items-center justify-center gap-3">
+                                        <span className="text-sm text-slate-400">{t('completeProfile.page')} {currentStep} {t('completeProfile.of')} 2</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-slate-600" />
+                                            <div className="w-2 h-2 rounded-full bg-cyan-400" />
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Action Buttons */}
+                                    <div className="flex items-center justify-between gap-4">
+                                        <button
+                                            type="button"
+                                            onClick={handleBackStep}
+                                            className="group px-6 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 font-medium rounded-xl transition-all border border-slate-700/50 flex items-center gap-2"
+                                        >
+                                            <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                            {t('completeProfile.back')}
+                                        </button>
+                                        <button
+                                            onClick={handleFinalSubmit}
+                                            disabled={loading}
+                                            className="group px-8 py-3 bg-gradient-to-r from-cyan-500 to-teal-600 hover:from-cyan-400 hover:to-teal-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-teal-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                    {t('completeProfile.submitting')}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {t('completeProfile.submit')}
+                                                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}
