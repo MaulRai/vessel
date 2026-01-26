@@ -19,8 +19,8 @@ function InvoiceListContent() {
       try {
         const res = await invoiceAPI.getMyInvoices(page, 10, statusFilter || undefined);
         if (res.success && res.data) {
-          setInvoices(res.data.invoices || []);
-          setTotalPages(res.data.total_pages || 1);
+          setInvoices(res.data);
+          setTotalPages(res.pagination?.total_pages || 1);
         }
       } catch (err) {
         console.error('Failed to load invoices', err);

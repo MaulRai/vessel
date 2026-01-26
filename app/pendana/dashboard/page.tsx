@@ -1,67 +1,98 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
-
-type Tier = 'Prioritas' | 'Katalis';
-type Status = 'Lancar' | 'Perhatian' | 'Gagal Bayar';
+import { investmentAPI, InvestorPortfolio, ActiveInvestment } from '@/lib/api/user';
 
 const numberId = new Intl.NumberFormat('id-ID');
 
-const portfolio = {
-  saldoTersedia: 180_000_000,
-  danaDisalurkan: 420_000_000,
-  imbalHasil: 58_500_000,
-  sebaran: {
-    tunai: 0.25,
-    prioritas: 0.5,
-    katalis: 0.25,
-  },
-};
-
-const aktifRows: { nama: string; tier: Tier; modal: number; estimasi: number; status: Status }[] = [
-  { nama: 'Kopi Gayo #12', tier: 'Prioritas', modal: 120_000_000, estimasi: 8_400_000, status: 'Lancar' },
-  { nama: 'Rempah Maluku #07', tier: 'Katalis', modal: 150_000_000, estimasi: 11_250_000, status: 'Perhatian' },
-  { nama: 'Udang Vanname #03', tier: 'Prioritas', modal: 90_000_000, estimasi: 6_300_000, status: 'Lancar' },
-  { nama: 'Kakao Sulawesi #05', tier: 'Katalis', modal: 60_000_000, estimasi: 4_200_000, status: 'Gagal Bayar' },
-];
-
 function InvestorDashboardContent() {
-  const totalPembiayaanBerjalan = useMemo(() => portfolio.saldoTersedia + portfolio.danaDisalurkan, []);
+  const [portfolio, setPortfolio] = useState<InvestorPortfolio | null>(null);
+  const [investments, setInvestments] = useState<ActiveInvestment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [portfolioRes, investmentsRes] = await Promise.all([
+          investmentAPI.getPortfolio(),
+          investmentAPI.getActiveInvestments(1, 10),
+        ]);
+
+        if (portfolioRes.success && portfolioRes.data) {
+          setPortfolio(portfolioRes.data);
+        }
+
+        if (investmentsRes.success && investmentsRes.data) {
+          setInvestments(investmentsRes.data.investments || []);
+        }
+      } catch {
+        // silently handle
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  const totalPembiayaanBerjalan = useMemo(() => {
+    if (!portfolio) return 0;
+    return (portfolio.available_balance || 0) + (portfolio.total_funding || 0);
+  }, [portfolio]);
+
+  const priorityPct = useMemo(() => {
+    if (!portfolio) return 50;
+    const total = (portfolio.priority_allocation || 0) + (portfolio.catalyst_allocation || 0) + (portfolio.available_balance || 0);
+    if (total === 0) return 33;
+    return Math.round((portfolio.priority_allocation / total) * 100);
+  }, [portfolio]);
+
+  const catalystPct = useMemo(() => {
+    if (!portfolio) return 25;
+    const total = (portfolio.priority_allocation || 0) + (portfolio.catalyst_allocation || 0) + (portfolio.available_balance || 0);
+    if (total === 0) return 33;
+    return Math.round((portfolio.catalyst_allocation / total) * 100);
+  }, [portfolio]);
+
+  const cashPct = 100 - priorityPct - catalystPct;
 
   const donutSegments = useMemo(
     () => [
-      { label: 'Saldo Tunai', value: portfolio.sebaran.tunai, color: '#16a34a' },
-      { label: 'Prioritas', value: portfolio.sebaran.prioritas, color: '#2563eb' },
-      { label: 'Katalis', value: portfolio.sebaran.katalis, color: '#ea580c' },
+      { label: 'Saldo Tunai', value: cashPct / 100, color: '#16a34a' },
+      { label: 'Prioritas', value: priorityPct / 100, color: '#2563eb' },
+      { label: 'Katalis', value: catalystPct / 100, color: '#ea580c' },
     ],
-    []
+    [cashPct, priorityPct, catalystPct]
   );
-
-  const cumulativeStops = donutSegments.reduce<{ stop: number; color: string }[]>((acc, seg) => {
-    const last = acc[acc.length - 1]?.stop ?? 0;
-    const next = last + seg.value;
-    return acc.concat({ stop: next, color: seg.color });
-  }, []);
 
   const conicGradient = useMemo(() => {
     const parts: string[] = [];
     let start = 0;
-    cumulativeStops.forEach(({ stop, color }) => {
-      const end = Math.round(stop * 360);
-      parts.push(`${color} ${start}deg ${end}deg`);
-      start = end;
+    donutSegments.forEach(({ value, color }) => {
+      const end = Math.round((start + value) * 360);
+      parts.push(`${color} ${Math.round(start * 360)}deg ${end}deg`);
+      start += value;
     });
     return `conic-gradient(${parts.join(', ')})`;
-  }, [cumulativeStops]);
+  }, [donutSegments]);
+
+  if (loading) {
+    return (
+      <DashboardLayout role="investor">
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout role="investor">
       <div className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
         <div className="mx-auto flex max-w-6xl flex-col gap-8">
           <header className="space-y-2">
-            <p className="text-sm font-semibold tracking-wide text-cyan-300/80">Pendana • Dashboard</p>
+            <p className="text-sm font-semibold tracking-wide text-cyan-300/80">Pendana &bull; Dashboard</p>
             <h1 className="text-3xl font-bold text-slate-50">Ringkasan Aset</h1>
             <p className="max-w-3xl text-sm text-slate-400">
               Pantau Nilai Pembiayaan Berjalan, realisasi imbal hasil, dan distribusi aset lintas prioritas.
@@ -72,12 +103,12 @@ function InvestorDashboardContent() {
             <StatCard
               title="Total Simpanan & Pembiayaan"
               value={`Rp ${numberId.format(totalPembiayaanBerjalan)}`}
-              subtitle={`Saldo Tersedia Rp ${numberId.format(portfolio.saldoTersedia)} • Dana Sedang Disalurkan Rp ${numberId.format(portfolio.danaDisalurkan)}`}
+              subtitle={`Saldo Tersedia Rp ${numberId.format(portfolio?.available_balance || 0)} \u2022 Dana Sedang Disalurkan Rp ${numberId.format(portfolio?.total_funding || 0)}`}
             />
             <StatCard
               title="Total Imbal Hasil Diterima"
-              value={`Rp ${numberId.format(portfolio.imbalHasil)}`}
-              subtitle="Akumulasi profit terealisasi"
+              value={`Rp ${numberId.format(portfolio?.total_realized_gain || 0)}`}
+              subtitle={`Estimasi: Rp ${numberId.format(portfolio?.total_expected_gain || 0)}`}
             />
             <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
               <p className="text-sm font-semibold text-slate-200">Sebaran Aset</p>
@@ -109,45 +140,51 @@ function InvestorDashboardContent() {
               </div>
             </div>
 
-            <div className="mt-5 overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-800">
-                <thead className="bg-slate-900/60">
-                  <tr>
-                    <Th>Nama Proyek</Th>
-                    <Th>Tipe</Th>
-                    <Th>Modal Disalurkan</Th>
-                    <Th>Estimasi Hasil</Th>
-                    <Th>Status</Th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800">
-                  {aktifRows.map((row) => (
-                    <tr key={row.nama} className="hover:bg-slate-900/40">
-                      <Td>
-                        <p className="font-semibold text-slate-100">{row.nama}</p>
-                        <p className="text-xs text-slate-500">Nilai Pembiayaan Berjalan</p>
-                      </Td>
-                      <Td>
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                            row.tier === 'Prioritas'
-                              ? 'bg-blue-500/15 text-blue-200 border border-blue-500/40'
-                              : 'bg-amber-500/15 text-amber-200 border border-amber-500/40'
-                          }`}
-                        >
-                          {row.tier}
-                        </span>
-                      </Td>
-                      <Td className="text-slate-200">Rp {numberId.format(row.modal)}</Td>
-                      <Td className="text-slate-200">Rp {numberId.format(row.estimasi)}</Td>
-                      <Td>
-                        <StatusBadge status={row.status} />
-                      </Td>
+            {investments.length === 0 ? (
+              <div className="mt-5 p-8 text-center text-slate-500">
+                <p>Belum ada pembiayaan aktif.</p>
+              </div>
+            ) : (
+              <div className="mt-5 overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-800">
+                  <thead className="bg-slate-900/60">
+                    <tr>
+                      <Th>Nama Proyek</Th>
+                      <Th>Tipe</Th>
+                      <Th>Modal Disalurkan</Th>
+                      <Th>Estimasi Hasil</Th>
+                      <Th>Status</Th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800">
+                    {investments.map((row) => (
+                      <tr key={row.investment_id} className="hover:bg-slate-900/40">
+                        <Td>
+                          <p className="font-semibold text-slate-100">{row.project_name}</p>
+                          <p className="text-xs text-slate-500">{row.buyer_flag} {row.buyer_name}</p>
+                        </Td>
+                        <Td>
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                              row.tranche === 'priority'
+                                ? 'bg-blue-500/15 text-blue-200 border border-blue-500/40'
+                                : 'bg-amber-500/15 text-amber-200 border border-amber-500/40'
+                            }`}
+                          >
+                            {row.tranche_display}
+                          </span>
+                        </Td>
+                        <Td className="text-slate-200">Rp {numberId.format(row.principal)}</Td>
+                        <Td className="text-slate-200">Rp {numberId.format(row.estimated_return)}</Td>
+                        <Td>
+                          <StatusBadge status={row.status} label={row.status_display} color={row.status_color} />
+                        </Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
         </div>
       </div>
@@ -173,20 +210,18 @@ function StatCard({ title, value, subtitle }: { title: string; value: string; su
   );
 }
 
-function StatusBadge({ status }: { status: Status }) {
-  const tone: Record<Status, { bg: string; text: string; label: string }> = {
-    Lancar: { bg: 'bg-emerald-500/15', text: 'text-emerald-200', label: 'Lancar' },
-    Perhatian: { bg: 'bg-amber-500/15', text: 'text-amber-200', label: 'Perhatian' },
-    'Gagal Bayar': { bg: 'bg-rose-500/20', text: 'text-rose-200', label: 'Gagal Bayar' },
+function StatusBadge({ status, label, color }: { status: string; label: string; color: string }) {
+  const colorMap: Record<string, { bg: string; text: string }> = {
+    green: { bg: 'bg-emerald-500/15', text: 'text-emerald-200' },
+    yellow: { bg: 'bg-amber-500/15', text: 'text-amber-200' },
+    red: { bg: 'bg-rose-500/20', text: 'text-rose-200' },
   };
 
-  const cls = tone[status];
+  const cls = colorMap[color] || { bg: 'bg-slate-500/15', text: 'text-slate-200' };
+
   return (
     <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${cls.bg} ${cls.text}`}>
-      {status === 'Lancar' && <span aria-hidden>🟢</span>}
-      {status === 'Perhatian' && <span aria-hidden>🟡</span>}
-      {status === 'Gagal Bayar' && <span aria-hidden>🔴</span>}
-      {cls.label}
+      {label || status}
     </span>
   );
 }

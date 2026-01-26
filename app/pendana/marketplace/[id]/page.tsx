@@ -116,8 +116,6 @@ function ProjectDetailContent() {
       const signer = await provider.getSigner();
       const idrx = new ethers.Contract(IDRX_ADDRESS, ERC20_ABI, signer);
 
-      // Assume 18 decimals, or fetch
-      // const decimals = await idrx.decimals(); 
       const amountUnits = ethers.parseUnits(amount.toString(), 18);
 
       console.log(`Transferring ${amountUnits} to ${PLATFORM_WALLET_ADDRESS}`);
@@ -127,7 +125,6 @@ function ProjectDetailContent() {
       await tx.wait();
       console.log('Tx confirmed');
 
-      // Call Backend
       const res = await fundingAPI.invest({
         pool_id: pool.id,
         amount: amount,
@@ -192,11 +189,9 @@ function ProjectDetailContent() {
               <span>K: {pool.catalyst_interest_rate}%</span>
             </div>
           </div>
-          {/* Docs placeholder */}
         </div>
 
         <div className="bg-slate-900/50 border border-slate-800/60 rounded-2xl p-4 space-y-4">
-          {/* Tab Selection */}
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setTab('priority')}
@@ -244,7 +239,6 @@ function ProjectDetailContent() {
           </button>
         </div>
 
-        {/* Priority Sheet */}
         {showPrioritySheet && (
           <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/60 backdrop-blur-sm px-4 pb-6">
             <div className="w-full max-w-xl bg-slate-900 rounded-2xl border border-slate-700/60 p-5 shadow-2xl">
@@ -270,7 +264,6 @@ function ProjectDetailContent() {
           </div>
         )}
 
-        {/* Warning Sheet for Catalyst */}
         {showWarning && (
           <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm flex items-center justify-center px-4 py-6">
             <div className="w-full max-w-3xl bg-slate-900 rounded-2xl border border-orange-500/40 shadow-2xl overflow-hidden p-6">
@@ -281,7 +274,6 @@ function ProjectDetailContent() {
                 <div className="h-10"></div>
               </div>
               <div className="space-y-2 mb-4">
-                {/* Checkboxes code simplified for brevity */}
                 <label className="flex gap-2 text-slate-300"><input type="checkbox" onChange={e => setRiskChecks(p => ({ ...p, a: e.target.checked }))} /> Risk Acknowledgment</label>
                 <label className="flex gap-2 text-slate-300"><input type="checkbox" onChange={e => setRiskChecks(p => ({ ...p, b: e.target.checked }))} /> Loss Acceptance</label>
                 <label className="flex gap-2 text-slate-300"><input type="checkbox" onChange={e => setRiskChecks(p => ({ ...p, c: e.target.checked }))} /> Non-Bank Product</label>

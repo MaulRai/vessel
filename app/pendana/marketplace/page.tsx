@@ -52,101 +52,7 @@ function PoolInvestmentContent() {
   const router = useRouter();
   useInvestorWallet();
   const { t } = useLanguage();
-  // ... (keep demoPools as is for now, treating them as mock API data)
-  const demoPools: MarketplacePool[] = [
-    {
-      pool_id: 'demo-1',
-      invoice_id: 'INV-DEMO-001',
-      project_title: 'Kopi Arabika Gayo Batch #12',
-      grade: 'A',
-      min_yield: 10,
-      max_yield: 15,
-      tenor_days: 60,
-      tenor_display: '60 Hari',
-      funding_progress: 75,
-      target_amount: 500_000_000,
-      funded_amount: 375_000_000,
-      remaining_amount: 125_000_000,
-      priority_interest_rate: 10,
-      catalyst_interest_rate: 15,
-      priority_progress: 80,
-      catalyst_progress: 65,
-      priority_target: 300_000_000,
-      priority_funded: 240_000_000,
-      catalyst_target: 200_000_000,
-      catalyst_funded: 130_000_000,
-      buyer_country_flag: '🇩🇪',
-      buyer_country: 'Jerman',
-      buyer_country_risk: 'Low',
-      buyer_company_name: 'Buyer Jerman',
-      yield_range: '10% - 15%',
-      is_insured: true,
-      remaining_time: '12 hari tersisa',
-      is_fully_funded: false,
-    },
-    {
-      pool_id: 'demo-2',
-      invoice_id: 'INV-DEMO-002',
-      project_title: 'Udang Vaname Sulawesi #03',
-      grade: 'B',
-      min_yield: 12,
-      max_yield: 16,
-      tenor_days: 45,
-      tenor_display: '45 Hari',
-      funding_progress: 52,
-      target_amount: 320_000_000,
-      funded_amount: 166_400_000,
-      remaining_amount: 153_600_000,
-      priority_interest_rate: 12,
-      catalyst_interest_rate: 16,
-      priority_progress: 55,
-      catalyst_progress: 48,
-      priority_target: 200_000_000,
-      priority_funded: 110_000_000,
-      catalyst_target: 120_000_000,
-      catalyst_funded: 57_600_000,
-      buyer_country_flag: '🇸🇬',
-      buyer_country: 'Singapura',
-      buyer_country_risk: 'Medium',
-      buyer_company_name: 'Harbour Foods SG',
-      yield_range: '12% - 16%',
-      is_insured: false,
-      remaining_time: '9 hari tersisa',
-      is_fully_funded: false,
-    },
-    {
-      pool_id: 'demo-3',
-      invoice_id: 'INV-DEMO-003',
-      project_title: 'Rempah Maluku Batch #07',
-      grade: 'C',
-      min_yield: 14,
-      max_yield: 18,
-      tenor_days: 75,
-      tenor_display: '75 Hari',
-      funding_progress: 100,
-      target_amount: 410_000_000,
-      funded_amount: 410_000_000,
-      remaining_amount: 0,
-      priority_interest_rate: 14,
-      catalyst_interest_rate: 18,
-      priority_progress: 100,
-      catalyst_progress: 100,
-      priority_target: 250_000_000,
-      priority_funded: 250_000_000,
-      catalyst_target: 160_000_000,
-      catalyst_funded: 160_000_000,
-      buyer_country_flag: '🇳🇱',
-      buyer_country: 'Belanda',
-      buyer_country_risk: 'Low',
-      buyer_company_name: 'Dutch Spice BV',
-      yield_range: '14% - 18%',
-      is_insured: true,
-      remaining_time: 'Selesai',
-      is_fully_funded: true,
-    },
-  ];
 
-  /* replaced demoPools */
   const [pools, setPools] = useState<MarketplacePool[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -255,8 +161,6 @@ function PoolInvestmentContent() {
             </p>
           </div>
         </div>
-
-        {/* Wallet already connected - no need for banner */}
 
         <div className="space-y-3 p-4 bg-slate-800/30 border border-slate-700/50 rounded-xl">
           <div className="flex flex-wrap gap-2">
@@ -465,11 +369,7 @@ function PoolInvestmentContent() {
                         )}
                         {pool.remaining_time && (
                           <span className="text-xs text-slate-500">
-                            {/* Keep demo data or use simple check. Demo data has '12 hari tersisa', which contains 'hari'. I'll try to use translation if possible or just render string */}
-                            {pool.remaining_time.includes('hari') ?
-                              pool.remaining_time.replace('hari tersisa', t('marketplace.daysRemaining'))
-                              : pool.remaining_time === 'Selesai' ? t('marketplace.finished') : pool.remaining_time
-                            }
+                            {pool.remaining_time}
                           </span>
                         )}
                       </div>
@@ -506,13 +406,7 @@ function PoolInvestmentContent() {
               </svg>
             </button>
             <span className="px-4 py-2 text-sm text-slate-400">
-              {/* t('common.pagination', {current: filters.page || 1, total: totalPages}) but need interpolation support. 
-                  Assume t() supports interpolation or just concat. 
-                  My t() hook is simple. I'll just concat for now or use placeholders if supported.
-                  Checking LanguageContext... usually t(key, params).
-                  I'll assume it does, if not I'll concat.
-               */}
-              {t('common.pagination').replace('{{current}}', String(filters.page || 1)).replace('{{total}}', String(totalPages))}
+              Halaman {filters.page || 1} dari {totalPages}
             </span>
             <button
               onClick={() => handlePageChange((filters.page || 1) + 1)}

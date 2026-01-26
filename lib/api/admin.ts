@@ -461,6 +461,18 @@ class AdminAPIExtended extends AdminAPI {
             method: 'POST',
         });
     }
+
+    async repayInvoice(invoiceId: string): Promise<APIResponse<{ message: string }>> {
+        return this.request<{ message: string }>(`/admin/invoices/${invoiceId}/repay`, {
+            method: 'POST',
+        });
+    }
+
+    async getPlatformRevenue(): Promise<APIResponse<{ total_revenue: number; monthly_revenue: number; fee_collected: number; active_pools: number }>> {
+        return this.request<{ total_revenue: number; monthly_revenue: number; fee_collected: number; active_pools: number }>('/admin/platform/revenue', {
+            method: 'GET',
+        });
+    }
 }
 
 export const adminAPI = new AdminAPIExtended(API_BASE_URL);
