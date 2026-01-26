@@ -1,110 +1,77 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { MarketplacePool, MarketplaceFilters } from '@/lib/api/user';
+import { fundingAPI, FundingPool } from '@/lib/api/funding';
+import { useInvestorWallet } from '@/lib/context/InvestorWalletContext';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+
+// Helper to map backend pool to UI model
+const mapPoolToUI = (pool: FundingPool): MarketplacePool => {
+  const fundingProgress = pool.target_amount > 0 ? (pool.funded_amount / pool.target_amount) * 100 : 0;
+  const priorityProgress = pool.priority_target > 0 ? (pool.priority_funded / pool.priority_target) * 100 : 0;
+  const catalystProgress = pool.catalyst_target > 0 ? (pool.catalyst_funded / pool.catalyst_target) * 100 : 0;
+  const yieldRange = `${pool.priority_interest_rate}% - ${pool.catalyst_interest_rate}%`;
+
+  return {
+    pool_id: pool.id,
+    invoice_id: pool.invoice_number,
+    project_title: pool.project_title || `Project ${pool.invoice_number}`,
+    grade: pool.grade || 'B',
+    min_yield: pool.priority_interest_rate,
+    max_yield: pool.catalyst_interest_rate,
+    tenor_days: pool.tenor_days,
+    tenor_display: `${pool.tenor_days} Hari`,
+    funding_progress: Math.min(fundingProgress, 100),
+    target_amount: pool.target_amount,
+    funded_amount: pool.funded_amount,
+    remaining_amount: pool.target_amount - pool.funded_amount,
+    priority_interest_rate: pool.priority_interest_rate,
+    catalyst_interest_rate: pool.catalyst_interest_rate,
+    priority_progress: Math.min(priorityProgress, 100),
+    catalyst_progress: Math.min(catalystProgress, 100),
+    priority_target: pool.priority_target,
+    priority_funded: pool.priority_funded,
+    catalyst_target: pool.catalyst_target,
+    catalyst_funded: pool.catalyst_funded,
+    buyer_country_flag: '🌍',
+    buyer_country: pool.buyer_country,
+    buyer_country_risk: 'Medium',
+    buyer_company_name: pool.buyer_company_name,
+    yield_range: yieldRange,
+    is_insured: true,
+    remaining_time: '7 hari tersisa',
+    is_fully_funded: pool.status === 'filled' || pool.status === 'closed',
+  };
+};
 
 function PoolInvestmentContent() {
   const router = useRouter();
   const { t } = useLanguage();
-  // ... (keep demoPools as is for now, treating them as mock API data)
-  const demoPools: MarketplacePool[] = [
-    {
-      pool_id: 'demo-1',
-      invoice_id: 'INV-DEMO-001',
-      project_title: 'Kopi Arabika Gayo Batch #12',
-      grade: 'A',
-      min_yield: 10,
-      max_yield: 15,
-      tenor_days: 60,
-      tenor_display: '60 Hari',
-      funding_progress: 75,
-      target_amount: 500_000_000,
-      funded_amount: 375_000_000,
-      remaining_amount: 125_000_000,
-      priority_interest_rate: 10,
-      catalyst_interest_rate: 15,
-      priority_progress: 80,
-      catalyst_progress: 65,
-      priority_target: 300_000_000,
-      priority_funded: 240_000_000,
-      catalyst_target: 200_000_000,
-      catalyst_funded: 130_000_000,
-      buyer_country_flag: '🇩🇪',
-      buyer_country: 'Jerman',
-      buyer_country_risk: 'Low',
-      buyer_company_name: 'Buyer Jerman',
-      yield_range: '10% - 15%',
-      is_insured: true,
-      remaining_time: '12 hari tersisa',
-      is_fully_funded: false,
-    },
-    {
-      pool_id: 'demo-2',
-      invoice_id: 'INV-DEMO-002',
-      project_title: 'Udang Vaname Sulawesi #03',
-      grade: 'B',
-      min_yield: 12,
-      max_yield: 16,
-      tenor_days: 45,
-      tenor_display: '45 Hari',
-      funding_progress: 52,
-      target_amount: 320_000_000,
-      funded_amount: 166_400_000,
-      remaining_amount: 153_600_000,
-      priority_interest_rate: 12,
-      catalyst_interest_rate: 16,
-      priority_progress: 55,
-      catalyst_progress: 48,
-      priority_target: 200_000_000,
-      priority_funded: 110_000_000,
-      catalyst_target: 120_000_000,
-      catalyst_funded: 57_600_000,
-      buyer_country_flag: '🇸🇬',
-      buyer_country: 'Singapura',
-      buyer_country_risk: 'Medium',
-      buyer_company_name: 'Harbour Foods SG',
-      yield_range: '12% - 16%',
-      is_insured: false,
-      remaining_time: '9 hari tersisa',
-      is_fully_funded: false,
-    },
-    {
-      pool_id: 'demo-3',
-      invoice_id: 'INV-DEMO-003',
-      project_title: 'Rempah Maluku Batch #07',
-      grade: 'C',
-      min_yield: 14,
-      max_yield: 18,
-      tenor_days: 75,
-      tenor_display: '75 Hari',
-      funding_progress: 100,
-      target_amount: 410_000_000,
-      funded_amount: 410_000_000,
-      remaining_amount: 0,
-      priority_interest_rate: 14,
-      catalyst_interest_rate: 18,
-      priority_progress: 100,
-      catalyst_progress: 100,
-      priority_target: 250_000_000,
-      priority_funded: 250_000_000,
-      catalyst_target: 160_000_000,
-      catalyst_funded: 160_000_000,
-      buyer_country_flag: '🇳🇱',
-      buyer_country: 'Belanda',
-      buyer_country_risk: 'Low',
-      buyer_company_name: 'Dutch Spice BV',
-      yield_range: '14% - 18%',
-      is_insured: true,
-      remaining_time: 'Selesai',
-      is_fully_funded: true,
-    },
-  ];
 
-  const [pools] = useState<MarketplacePool[]>(demoPools);
+  const [pools, setPools] = useState<MarketplacePool[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPools() {
+      try {
+        const res = await fundingAPI.listPools(1, 10);
+        if (res.success && res.data) {
+          const mapped = res.data.pools.map(mapPoolToUI);
+          setPools(mapped);
+        }
+      } catch (err) {
+        console.error('Failed to fetch pools', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPools();
+  }, []);
+
   const [error] = useState<string | null>(null);
   const [filters, setFilters] = useState<MarketplaceFilters>({
     sort_by: 'newest',
@@ -115,7 +82,7 @@ function PoolInvestmentContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'open' | 'done'>('open');
 
-  const loading = false;
+
 
   const handleFilterChange = (key: keyof MarketplaceFilters, value: string | number | boolean | undefined) => {
     setFilters((prev) => ({
@@ -193,8 +160,6 @@ function PoolInvestmentContent() {
             </p>
           </div>
         </div>
-
-        {/* Wallet already connected - no need for banner */}
 
         <div className="space-y-3 p-4 bg-slate-800/30 border border-slate-700/50 rounded-xl">
           <div className="flex flex-wrap gap-2">
@@ -403,11 +368,7 @@ function PoolInvestmentContent() {
                         )}
                         {pool.remaining_time && (
                           <span className="text-xs text-slate-500">
-                            {/* Keep demo data or use simple check. Demo data has '12 hari tersisa', which contains 'hari'. I'll try to use translation if possible or just render string */}
-                            {pool.remaining_time.includes('hari') ?
-                              pool.remaining_time.replace('hari tersisa', t('marketplace.daysRemaining'))
-                              : pool.remaining_time === 'Selesai' ? t('marketplace.finished') : pool.remaining_time
-                            }
+                            {pool.remaining_time}
                           </span>
                         )}
                       </div>
@@ -444,13 +405,7 @@ function PoolInvestmentContent() {
               </svg>
             </button>
             <span className="px-4 py-2 text-sm text-slate-400">
-              {/* t('common.pagination', {current: filters.page || 1, total: totalPages}) but need interpolation support. 
-                  Assume t() supports interpolation or just concat. 
-                  My t() hook is simple. I'll just concat for now or use placeholders if supported.
-                  Checking LanguageContext... usually t(key, params).
-                  I'll assume it does, if not I'll concat.
-               */}
-              {t('common.pagination').replace('{{current}}', String(filters.page || 1)).replace('{{total}}', String(totalPages))}
+              Halaman {filters.page || 1} dari {totalPages}
             </span>
             <button
               onClick={() => handlePageChange((filters.page || 1) + 1)}

@@ -133,6 +133,32 @@ class UserAPI {
         });
     }
 
+    async updateProfile(data: Partial<UserProfileResponse>): Promise<APIResponse<UserProfileResponse>> {
+        return this.request<UserProfileResponse>('/user/profile', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async getProfileData(): Promise<APIResponse<UserProfileDataResponse>> {
+        return this.request<UserProfileDataResponse>('/user/profile/data', {
+            method: 'GET',
+        });
+    }
+
+    async changePassword(data: { current_password: string; new_password: string; confirm_password: string }): Promise<APIResponse<{ message: string }>> {
+        return this.request<{ message: string }>('/user/profile/password', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async getBalance(): Promise<APIResponse<{ balance_idrx: number; balance_idr: number }>> {
+        return this.request<{ balance_idrx: number; balance_idr: number }>('/user/balance', {
+            method: 'GET',
+        });
+    }
+
     async getBankAccount(): Promise<APIResponse<unknown>> {
         return this.request<unknown>('/user/profile/bank-account', {
             method: 'GET',
@@ -145,7 +171,6 @@ class UserAPI {
         });
     }
 
-    // Mitra Methods
     async applyMitra(data: SubmitMitraApplicationRequest): Promise<APIResponse<unknown>> {
         return this.request<unknown>('/user/mitra/apply', {
             method: 'POST',
@@ -207,7 +232,28 @@ export interface UserProfileResponse {
     profile_completed: boolean;
     email_verified: boolean;
     balance_idr: number;
+    balance_idrx?: number;
+    wallet_address?: string;
+    member_status?: string;
     created_at: string;
+}
+
+export interface UserProfileDataResponse {
+    user: UserProfileResponse;
+    profile?: {
+        full_name?: string;
+        phone?: string;
+        nik?: string;
+        address?: string;
+        city?: string;
+        province?: string;
+        postal_code?: string;
+        country?: string;
+        company_name?: string;
+        bank_code?: string;
+        account_number?: string;
+        account_name?: string;
+    };
 }
 
 export interface SubmitMitraApplicationRequest {
@@ -591,6 +637,7 @@ export interface CreateInvoiceRequest {
     repeat_buyer_proof?: string;
     data_confirmation: boolean;
     description?: string;
+    wallet_address: string;
 }
 
 export interface Invoice {
@@ -717,14 +764,14 @@ class InvoiceAPI {
         });
     }
 
-    async getMyInvoices(page: number = 1, perPage: number = 10, status?: string): Promise<APIResponse<InvoiceListResponse>> {
+    async getMyInvoices(page: number = 1, perPage: number = 10, status?: string): Promise<APIResponse<Invoice[]>> {
         const params = new URLSearchParams({
             page: page.toString(),
             per_page: perPage.toString(),
         });
         if (status) params.append('status', status);
 
-        return this.request<InvoiceListResponse>(`/invoices?${params.toString()}`, {
+        return this.request<Invoice[]>(`/invoices?${params.toString()}`, {
             method: 'GET',
         });
     }
@@ -795,6 +842,43 @@ class InvoiceAPI {
     async getSupportedCurrencies(): Promise<APIResponse<Array<{ code: string; name: string }>>> {
         return this.request<Array<{ code: string; name: string }>>('/currency/supported', {
             method: 'GET',
+        });
+    }
+
+    async getDisbursementEstimate(invoiceId: string): Promise<APIResponse<{ invoice_id: string; estimated_amount: number; fee: number; net_amount: number }>> {
+        return this.request<{ invoice_id: string; estimated_amount: number; fee: number; net_amount: number }>(`/currency/disbursement-estimate?invoice_id=${invoiceId}`, {
+            method: 'GET',
+        });
+    }
+
+    async updateInvoice(invoiceId: string, data: Partial<CreateInvoiceRequest>): Promise<APIResponse<Invoice>> {
+        return this.request<Invoice>(`/invoices/${invoiceId}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deleteInvoice(invoiceId: string): Promise<APIResponse<{ message: string }>> {
+        return this.request<{ message: string }>(`/invoices/${invoiceId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getFundableInvoices(): Promise<APIResponse<Invoice[]>> {
+        return this.request<Invoice[]>('/invoices/fundable', {
+            method: 'GET',
+        });
+    }
+
+    async tokenizeInvoice(invoiceId: string): Promise<APIResponse<{ message: string; nft_token_id?: string; tx_hash?: string }>> {
+        return this.request<{ message: string; nft_token_id?: string; tx_hash?: string }>(`/invoices/${invoiceId}/tokenize`, {
+            method: 'POST',
+        });
+    }
+
+    async createPool(invoiceId: string): Promise<APIResponse<{ pool_id: string; message: string }>> {
+        return this.request<{ pool_id: string; message: string }>(`/invoices/${invoiceId}/pool`, {
+            method: 'POST',
         });
     }
 }

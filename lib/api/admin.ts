@@ -1,4 +1,4 @@
-import { APIResponse } from '../types/auth';
+import { APIResponse, APIPagination } from '../types/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 
@@ -105,9 +105,27 @@ class AdminAPI {
         if (role) params.append('role', role);
         if (search) params.append('search', search);
 
-        return this.request<ListUsersResponse>(`/admin/users?${params.toString()}`, {
+        const rawRes = await this.request<UserListItem[] | ListUsersResponse>(`/admin/users?${params.toString()}`, {
             method: 'GET',
         });
+
+        if (rawRes.success && rawRes.data) {
+            const pagination = rawRes.pagination as APIPagination | undefined;
+            if (Array.isArray(rawRes.data)) {
+                return {
+                    success: true,
+                    data: {
+                        users: rawRes.data as UserListItem[],
+                        total: pagination?.total ?? 0,
+                        page: pagination?.page ?? page,
+                        per_page: pagination?.per_page ?? perPage,
+                        total_pages: pagination?.total_pages ?? 1,
+                    },
+                };
+            }
+        }
+
+        return rawRes as APIResponse<ListUsersResponse>;
     }
 
     async grantBalance(data: GrantBalanceRequest): Promise<APIResponse<GrantBalanceResponse>> {
@@ -312,9 +330,29 @@ class AdminAPIExtended extends AdminAPI {
             page: page.toString(),
             per_page: perPage.toString(),
         });
-        return this.request<PendingInvoicesResponse>(`/admin/invoices/pending?${params.toString()}`, {
+        const rawRes = await this.request<PendingInvoice[] | PendingInvoicesResponse>(`/admin/invoices/pending?${params.toString()}`, {
             method: 'GET',
         });
+
+        // Backend returns data as array with pagination in separate field
+        // Transform to the expected PendingInvoicesResponse format
+        if (rawRes.success && rawRes.data) {
+            const pagination = rawRes.pagination as APIPagination | undefined;
+            if (Array.isArray(rawRes.data)) {
+                return {
+                    success: true,
+                    data: {
+                        invoices: rawRes.data as PendingInvoice[],
+                        total: pagination?.total ?? 0,
+                        page: pagination?.page ?? page,
+                        per_page: pagination?.per_page ?? perPage,
+                        total_pages: pagination?.total_pages ?? 1,
+                    },
+                };
+            }
+        }
+
+        return rawRes as APIResponse<PendingInvoicesResponse>;
     }
 
     async getInvoiceGradeSuggestion(invoiceId: string): Promise<APIResponse<GradeSuggestion>> {
@@ -332,7 +370,7 @@ class AdminAPIExtended extends AdminAPI {
     async approveInvoice(invoiceId: string, data: ApproveInvoiceRequest): Promise<APIResponse<{ message: string; invoice_id: string; grade: string; nft?: unknown }>> {
         return this.request<{ message: string; invoice_id: string; grade: string; nft?: unknown }>(`/admin/invoices/${invoiceId}/approve`, {
             method: 'POST',
-            body: JSON.stringify(data),
+            body: JSON.stringify({ action: 'approve', ...data }),
         });
     }
 
@@ -352,9 +390,27 @@ class AdminAPIExtended extends AdminAPI {
             per_page: perPage.toString(),
             status: 'approved',
         });
-        return this.request<PendingInvoicesResponse>(`/admin/invoices/approved?${params.toString()}`, {
+        const rawRes = await this.request<PendingInvoice[] | PendingInvoicesResponse>(`/admin/invoices/approved?${params.toString()}`, {
             method: 'GET',
         });
+
+        if (rawRes.success && rawRes.data) {
+            const pagination = rawRes.pagination as APIPagination | undefined;
+            if (Array.isArray(rawRes.data)) {
+                return {
+                    success: true,
+                    data: {
+                        invoices: rawRes.data as PendingInvoice[],
+                        total: pagination?.total ?? 0,
+                        page: pagination?.page ?? page,
+                        per_page: pagination?.per_page ?? perPage,
+                        total_pages: pagination?.total_pages ?? 1,
+                    },
+                };
+            }
+        }
+
+        return rawRes as APIResponse<PendingInvoicesResponse>;
     }
 
     async createFundingPool(invoiceId: string): Promise<APIResponse<FundingPool>> {
@@ -371,14 +427,50 @@ class AdminAPIExtended extends AdminAPI {
             page: page.toString(),
             per_page: perPage.toString(),
         });
-        return this.request<{ pools: FundingPool[]; total: number; page: number; per_page: number; total_pages: number }>(`/pools?${params.toString()}`, {
+        const rawRes = await this.request<FundingPool[] | { pools: FundingPool[]; total: number; page: number; per_page: number; total_pages: number }>(`/pools?${params.toString()}`, {
             method: 'GET',
         });
+
+        if (rawRes.success && rawRes.data) {
+            const pagination = rawRes.pagination as APIPagination | undefined;
+            if (Array.isArray(rawRes.data)) {
+                return {
+                    success: true,
+                    data: {
+                        pools: rawRes.data as FundingPool[],
+                        total: pagination?.total ?? 0,
+                        page: pagination?.page ?? page,
+                        per_page: pagination?.per_page ?? perPage,
+                        total_pages: pagination?.total_pages ?? 1,
+                    },
+                };
+            }
+        }
+
+        return rawRes as APIResponse<{ pools: FundingPool[]; total: number; page: number; per_page: number; total_pages: number }>;
     }
 
     async disbursePool(poolId: string): Promise<APIResponse<{ message: string }>> {
         return this.request<{ message: string }>(`/admin/pools/${poolId}/disburse`, {
             method: 'POST',
+        });
+    }
+
+    async closePool(poolId: string): Promise<APIResponse<{ message: string }>> {
+        return this.request<{ message: string }>(`/admin/pools/${poolId}/close`, {
+            method: 'POST',
+        });
+    }
+
+    async repayInvoice(invoiceId: string): Promise<APIResponse<{ message: string }>> {
+        return this.request<{ message: string }>(`/admin/invoices/${invoiceId}/repay`, {
+            method: 'POST',
+        });
+    }
+
+    async getPlatformRevenue(): Promise<APIResponse<{ total_revenue: number; monthly_revenue: number; fee_collected: number; active_pools: number }>> {
+        return this.request<{ total_revenue: number; monthly_revenue: number; fee_collected: number; active_pools: number }>('/admin/platform/revenue', {
+            method: 'GET',
         });
     }
 }

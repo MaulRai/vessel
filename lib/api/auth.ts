@@ -126,6 +126,27 @@ class AuthAPI {
       body: JSON.stringify(data),
     });
   }
+
+  async walletNonce(data: { wallet_address: string }): Promise<APIResponse<{ nonce: string; message: string }>> {
+    return this.request<{ nonce: string; message: string }>('/auth/wallet/nonce', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async walletLogin(data: { wallet_address: string; signature: string }): Promise<APIResponse<LoginResponse>> {
+    return this.request<LoginResponse>('/auth/wallet/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async walletRegister(data: { wallet_address: string; signature: string; role?: string }): Promise<APIResponse<LoginResponse>> {
+    return this.request<LoginResponse>('/auth/wallet/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const authAPI = new AuthAPI(API_BASE_URL);

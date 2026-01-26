@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
-import { userAPI, MitraApplicationResponse, SubmitMitraApplicationRequest } from '@/lib/api/user';
+import { userAPI, MitraApplicationResponse, SubmitMitraApplicationRequest, UserProfileResponse } from '@/lib/api/user';
 
 type DocumentType = 'nib' | 'akta_pendirian' | 'ktp_direktur';
 
@@ -29,6 +29,7 @@ export default function CompanyProfilePage() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState<MitraApplicationResponse | null>(null);
+    const [profile, setProfile] = useState<UserProfileResponse | null>(null);
     const [toast, setToast] = useState<Toast | null>(null);
     const [documentsStatus, setDocumentsStatus] = useState<DocumentUploadStatus>({
         nib: false,
@@ -61,13 +62,21 @@ export default function CompanyProfilePage() {
 
     const fetchStatus = async () => {
         try {
-            const res = await userAPI.getMitraStatus();
-            if (res.success && res.data) {
-                setStatus(res.data);
-                setDocumentsStatus(res.data.documents_status);
+            const [mitraRes, profileRes] = await Promise.all([
+                userAPI.getMitraStatus(),
+                userAPI.getProfile()
+            ]);
+
+            if (mitraRes.success && mitraRes.data) {
+                setStatus(mitraRes.data);
+                setDocumentsStatus(mitraRes.data.documents_status);
+            }
+
+            if (profileRes.success && profileRes.data) {
+                setProfile(profileRes.data);
             }
         } catch (error) {
-            console.error('Failed to fetch status', error);
+            console.error('Failed to fetch data', error);
         } finally {
             setLoading(false);
         }
@@ -93,16 +102,16 @@ export default function CompanyProfilePage() {
             const res = await userAPI.uploadMitraDocument(file, documentType);
             if (res.success) {
                 setDocumentsStatus(prev => ({ ...prev, [documentType]: true }));
-                setToast({ 
-                    message: `Dokumen ${getDocumentLabel(documentType)} berhasil diupload`, 
-                    type: 'success' 
+                setToast({
+                    message: `Dokumen ${getDocumentLabel(documentType)} berhasil diupload`,
+                    type: 'success'
                 });
                 // Refresh status to get updated data
                 await fetchStatus();
             } else {
-                setToast({ 
-                    message: res.error?.message || `Gagal mengupload ${getDocumentLabel(documentType)}`, 
-                    type: 'error' 
+                setToast({
+                    message: res.error?.message || `Gagal mengupload ${getDocumentLabel(documentType)}`,
+                    type: 'error'
                 });
             }
         } catch (error) {
@@ -151,14 +160,14 @@ export default function CompanyProfilePage() {
     const isDocumentsComplete = status?.is_complete;
 
     // Document Upload Card Component
-    const DocumentUploadCard = ({ 
-        type, 
-        label, 
+    const DocumentUploadCard = ({
+        type,
+        label,
         description,
-        inputRef 
-    }: { 
-        type: DocumentType; 
-        label: string; 
+        inputRef
+    }: {
+        type: DocumentType;
+        label: string;
         description: string;
         inputRef: React.RefObject<HTMLInputElement | null>;
     }) => {
@@ -166,11 +175,10 @@ export default function CompanyProfilePage() {
         const isUploading = uploading[type];
 
         return (
-            <div className={`p-4 rounded-xl border transition-all ${
-                isUploaded 
-                    ? 'bg-green-500/5 border-green-500/30' 
-                    : 'bg-slate-800/50 border-slate-700/50 hover:border-cyan-500/30'
-            }`}>
+            <div className={`p-4 rounded-xl border transition-all ${isUploaded
+                ? 'bg-green-500/5 border-green-500/30'
+                : 'bg-slate-800/50 border-slate-700/50 hover:border-cyan-500/30'
+                }`}>
                 <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-3">
                         <div className={`p-2 rounded-lg ${isUploaded ? 'bg-green-500/20' : 'bg-slate-700/50'}`}>
@@ -183,7 +191,7 @@ export default function CompanyProfilePage() {
                             <p className="text-xs text-slate-400 mt-0.5">{description}</p>
                         </div>
                     </div>
-                    
+
                     {isUploaded ? (
                         <span className="px-2 py-1 rounded-full text-xs bg-green-500/10 text-green-400 flex items-center space-x-1">
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -214,7 +222,7 @@ export default function CompanyProfilePage() {
                         </button>
                     )}
                 </div>
-                
+
                 <input
                     ref={inputRef}
                     type="file"
@@ -238,8 +246,8 @@ export default function CompanyProfilePage() {
             {/* Toast Notification */}
             {toast && (
                 <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-2xl border backdrop-blur-md transition-all max-w-sm ${toast.type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-400' :
-                        toast.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
-                            'bg-blue-500/20 border-blue-500/30 text-blue-400'
+                    toast.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
+                        'bg-blue-500/20 border-blue-500/30 text-blue-400'
                     }`}>
                     <div className="flex items-start space-x-3">
                         {toast.type === 'success' && (
@@ -268,7 +276,40 @@ export default function CompanyProfilePage() {
                 </div>
             )}
 
-            <div className="max-w-4xl mx-auto space-y-6">
+
+
+            <div className="max-w-4xl mx-auto space-y-8">
+                {/* User Profile Section */}
+                <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 backdrop-blur-sm">
+                    <h2 className="text-xl font-bold text-white mb-6">Profil Pengguna</h2>
+                    <div className="flex items-center space-x-6 mb-8">
+                        <div className="h-20 w-20 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-teal-500/20">
+                            {profile?.username?.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1">
+                            <div className="flex items-center space-x-3">
+                                <h3 className="text-2xl font-bold text-white">{profile?.username}</h3>
+                                {profile?.is_verified ? (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                                        <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Verified
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-600/50 text-slate-300">
+                                        Unverified
+                                    </span>
+                                )}
+                            </div>
+                            <p className="text-slate-400 mt-1">{profile?.email}</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div className="border-t border-slate-800 my-8"></div>
+
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-white">Profil Perusahaan</h1>
@@ -518,7 +559,7 @@ export default function CompanyProfilePage() {
                                             {Object.values(documentsStatus).filter(Boolean).length}/3 dokumen
                                         </span>
                                         <div className="w-20 h-2 bg-slate-700 rounded-full overflow-hidden">
-                                            <div 
+                                            <div
                                                 className="h-full bg-gradient-to-r from-cyan-500 to-teal-500 transition-all duration-300"
                                                 style={{ width: `${(Object.values(documentsStatus).filter(Boolean).length / 3) * 100}%` }}
                                             />
@@ -526,7 +567,7 @@ export default function CompanyProfilePage() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="p-6 space-y-4">
                                 <DocumentUploadCard
                                     type="nib"
