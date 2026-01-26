@@ -5,11 +5,8 @@ import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { MarketplacePool, MarketplaceFilters } from '@/lib/api/user';
-<<<<<<< HEAD
 import { fundingAPI, FundingPool } from '@/lib/api/funding';
 import { useInvestorWallet } from '@/lib/context/InvestorWalletContext';
-=======
->>>>>>> 3ff8080d73b7dfbd03d930cdd142e1bfac7b0538
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 // Helper to map backend pool to UI model
