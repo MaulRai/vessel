@@ -8,10 +8,11 @@ export interface UserListItem {
     username?: string;
     role: 'investor' | 'mitra' | 'admin';
     member_status: string;
-    balance_idr: number;
+
     is_verified: boolean;
     profile_completed: boolean;
     full_name?: string;
+    balance_idr: number;
     created_at: string;
 }
 
@@ -472,6 +473,72 @@ class AdminAPIExtended extends AdminAPI {
         return this.request<{ total_revenue: number; monthly_revenue: number; fee_collected: number; active_pools: number }>('/admin/platform/revenue', {
             method: 'GET',
         });
+    }
+
+    async getInvoicesByExporter(
+        userId: string,
+        page: number = 1,
+        perPage: number = 10,
+        status?: string
+    ): Promise<APIResponse<PendingInvoicesResponse>> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            per_page: perPage.toString(),
+        });
+        if (status) params.append('status', status);
+
+        const rawRes = await this.request<PendingInvoice[] | PendingInvoicesResponse>(`/admin/users/${userId}/invoices?${params.toString()}`, {
+            method: 'GET',
+        });
+
+        if (rawRes.success && rawRes.data) {
+            const pagination = rawRes.pagination as APIPagination | undefined;
+            if (Array.isArray(rawRes.data)) {
+                return {
+                    success: true,
+                    data: {
+                        invoices: rawRes.data as PendingInvoice[],
+                        total: pagination?.total ?? 0,
+                        page: pagination?.page ?? page,
+                        per_page: pagination?.per_page ?? perPage,
+                        total_pages: pagination?.total_pages ?? 1,
+                    },
+                };
+            }
+        }
+        return rawRes as APIResponse<PendingInvoicesResponse>;
+    }
+
+    async getPoolsByExporter(
+        userId: string,
+        page: number = 1,
+        perPage: number = 10
+    ): Promise<APIResponse<{ pools: FundingPool[]; total: number; page: number; per_page: number; total_pages: number }>> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            per_page: perPage.toString(),
+        });
+
+        const rawRes = await this.request<FundingPool[] | { pools: FundingPool[]; total: number; page: number; per_page: number; total_pages: number }>(`/admin/users/${userId}/pools?${params.toString()}`, {
+            method: 'GET',
+        });
+
+        if (rawRes.success && rawRes.data) {
+            const pagination = rawRes.pagination as APIPagination | undefined;
+            if (Array.isArray(rawRes.data)) {
+                return {
+                    success: true,
+                    data: {
+                        pools: rawRes.data as FundingPool[],
+                        total: pagination?.total ?? 0,
+                        page: pagination?.page ?? page,
+                        per_page: pagination?.per_page ?? perPage,
+                        total_pages: pagination?.total_pages ?? 1,
+                    },
+                };
+            }
+        }
+        return rawRes as APIResponse<{ pools: FundingPool[]; total: number; page: number; per_page: number; total_pages: number }>;
     }
 }
 

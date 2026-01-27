@@ -145,9 +145,10 @@ function ProjectDetailContent() {
         alert('Gagal mencatat investasi: ' + res.error?.message);
       }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Investment failed:', err);
-      alert('Investasi gagal: ' + (err.reason || err.message));
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      alert('Investasi gagal: ' + errorMessage);
     } finally {
       setIsProcessing(false);
       closeAll();

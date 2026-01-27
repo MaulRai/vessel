@@ -85,27 +85,27 @@ const getAdminNavItems = (t: (key: string) => string): NavItem[] => [
       </svg>
     ),
   },
-  {
-    href: '/admin/dashboard/balance',
-    label: t('nav.grantBalance'),
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-  },
-  {
-    href: '/admin/dashboard/users',
-    label: t('nav.users'),
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-      </svg>
-    ),
-  },
+  // {
+  //   href: '/admin/dashboard/users',
+  //   label: t('nav.users'),
+  //   icon: (
+  //     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+  //     </svg>
+  //   ),
+  // },
   {
     href: '/admin/dashboard/mitra',
     label: t('nav.mitraReview'),
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    ),
+  },
+  {
+    href: '/admin/dashboard/mitra/list',
+    label: t('nav.mitraList'),
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -195,7 +195,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
       <aside className="fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900/95 via-slate-900/90 to-slate-950/95 border-r border-slate-700/50 backdrop-blur-2xl z-40 shadow-2xl shadow-black/20">
         {/* Animated gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-teal-500/5 pointer-events-none" />
-        
+
         {/* Logo */}
         <div className="relative h-20 flex items-center px-6 border-b border-slate-700/50 bg-slate-900/50">
           <Link href="/" className="flex items-center space-x-2 group">
@@ -227,11 +227,10 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className={`group relative flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                      isActive
-                        ? `bg-gradient-to-r ${roleColor === 'cyan' ? 'from-cyan-500/20 to-cyan-600/10' : roleColor === 'purple' ? 'from-purple-500/20 to-purple-600/10' : 'from-teal-500/20 to-teal-600/10'} ${roleColor === 'cyan' ? 'text-cyan-300' : roleColor === 'purple' ? 'text-purple-300' : 'text-teal-300'} border ${roleColor === 'cyan' ? 'border-cyan-400/30' : roleColor === 'purple' ? 'border-purple-400/30' : 'border-teal-400/30'} shadow-lg ${roleColor === 'cyan' ? 'shadow-cyan-500/10' : roleColor === 'purple' ? 'shadow-purple-500/10' : 'shadow-teal-500/10'}`
-                        : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 border border-transparent hover:border-slate-700/50'
-                    }`}
+                    className={`group relative flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${isActive
+                      ? `bg-gradient-to-r ${roleColor === 'cyan' ? 'from-cyan-500/20 to-cyan-600/10' : roleColor === 'purple' ? 'from-purple-500/20 to-purple-600/10' : 'from-teal-500/20 to-teal-600/10'} ${roleColor === 'cyan' ? 'text-cyan-300' : roleColor === 'purple' ? 'text-purple-300' : 'text-teal-300'} border ${roleColor === 'cyan' ? 'border-cyan-400/30' : roleColor === 'purple' ? 'border-purple-400/30' : 'border-teal-400/30'} shadow-lg ${roleColor === 'cyan' ? 'shadow-cyan-500/10' : roleColor === 'purple' ? 'shadow-purple-500/10' : 'shadow-teal-500/10'}`
+                      : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 border border-transparent hover:border-slate-700/50'
+                      }`}
                   >
                     {/* Active indicator */}
                     {isActive && (
@@ -383,26 +382,9 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                 </div>
               )}
 
-              {/* Balance - only show for non-investors (mitra/admin) */}
-              {role !== 'investor' && (
-                <div className="flex items-center gap-2.5 px-4 py-2.5 bg-gradient-to-r from-cyan-500/15 to-teal-500/10 rounded-xl border border-cyan-400/30 backdrop-blur-sm shadow-lg shadow-cyan-500/10">
-                  <div className="w-9 h-9 bg-cyan-500/20 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-cyan-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-cyan-300 font-medium uppercase tracking-wider">Balance</p>
-                    <p className="text-sm font-bold text-cyan-100">
-                      Rp {(user?.balance_idr || 0).toLocaleString('id-ID')}
-                    </p>
-                  </div>
-                </div>
-              )}
-              
               {/* Language Switcher */}
               <LanguageSwitcher />
-              
+
               {/* Notifications */}
               <button className="relative p-2.5 text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 border border-transparent hover:border-slate-700/50 rounded-xl transition-all duration-300 group">
                 <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -9,7 +9,11 @@
         "funding": "Pendanaan",
         "company": "Perusahaan",
         "logout": "Keluar",
-        "disconnectWallet": "Putuskan Wallet"
+        "disconnectWallet": "Putuskan Wallet",
+        "mitraList": "Daftar Mitra",
+        "mitraReview": "Verifikasi Mitra",
+        "invoiceReview": "Tinjauan Invoice",
+        "fundingPools": "Pool Pendanaan"
     },
     "common": {
         "loading": "Memuat...",

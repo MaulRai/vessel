@@ -196,7 +196,6 @@ function AdminDashboardContent() {
                   <tr className="text-left text-slate-400 text-sm border-b border-slate-700/50">
                     <th className="pb-3 font-medium">User</th>
                     <th className="pb-3 font-medium">Role</th>
-                    <th className="pb-3 font-medium">Saldo</th>
                     <th className="pb-3 font-medium">Status</th>
                   </tr>
                 </thead>
@@ -204,16 +203,15 @@ function AdminDashboardContent() {
                   {recentUsers.map((u) => (
                     <tr key={u.id} className="text-sm">
                       <td className="py-3">
-                        <p className="text-white font-medium">{u.email}</p>
+                        <p className="text-white font-medium">{u.email || 'Wallet User'}</p>
                         <p className="text-slate-400 text-xs">{u.full_name || u.username || '-'}</p>
                       </td>
                       <td className="py-3">{getRoleBadge(u.role)}</td>
-                      <td className="py-3 text-slate-300">Rp {(u.balance_idr ?? 0).toLocaleString('id-ID')}</td>
                       <td className="py-3">
                         <span
                           className={`px-2 py-0.5 rounded text-xs ${u.is_verified
-                              ? 'bg-green-500/10 text-green-400'
-                              : 'bg-yellow-500/10 text-yellow-400'
+                            ? 'bg-green-500/10 text-green-400'
+                            : 'bg-yellow-500/10 text-yellow-400'
                             }`}
                         >
                           {u.is_verified ? 'Verified' : 'Pending'}

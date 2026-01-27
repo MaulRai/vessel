@@ -225,7 +225,7 @@ class UserAPI {
 
 export interface UserProfileResponse {
     id: string;
-    email: string;
+    email?: string;
     username: string;
     role: 'mitra' | 'investor' | 'admin';
     is_verified: boolean;
@@ -541,7 +541,7 @@ class InvestmentAPI {
     }
 
     async getActiveInvestments(page: number = 1, perPage: number = 10): Promise<APIResponse<ActiveInvestmentListResponse>> {
-        return this.request<ActiveInvestmentListResponse>(`/investments/active?page=${page}&per_page=${perPage}`, {
+        return this.request<ActiveInvestmentListResponse>(`/investments?page=${page}&per_page=${perPage}`, {
             method: 'GET',
         });
     }
@@ -668,6 +668,22 @@ export interface Invoice {
     updated_at: string;
 }
 
+export interface InvoiceDocument {
+    id: string;
+    invoice_id: string;
+    document_type: string;
+    file_url: string;
+    file_hash: string;
+    is_valid: boolean;
+    created_at: string;
+}
+
+export interface InvoiceDetail extends Invoice {
+    documents: InvoiceDocument[];
+    file_url?: string;
+    notes?: string;
+}
+
 interface InvoiceListResponse {
     invoices: Invoice[];
     total: number;
@@ -785,6 +801,12 @@ class InvoiceAPI {
     async submitInvoice(invoiceId: string): Promise<APIResponse<{ message: string }>> {
         return this.request<{ message: string }>(`/invoices/${invoiceId}/submit`, {
             method: 'POST',
+        });
+    }
+
+    async getInvoiceDetail(invoiceId: string): Promise<APIResponse<InvoiceDetail>> {
+        return this.request<InvoiceDetail>(`/invoices/${invoiceId}/detail`, {
+            method: 'GET',
         });
     }
 

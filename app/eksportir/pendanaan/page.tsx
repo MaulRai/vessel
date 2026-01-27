@@ -117,7 +117,10 @@ function PendanaanEksportirContent() {
 										activePools.map((pool) => (
 											<article
 												key={pool.pool_id}
-												className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 shadow-lg shadow-black/20 cursor-pointer hover:border-cyan-500/30 transition-all"
+												className={`rounded-2xl border bg-slate-900/50 p-6 shadow-lg shadow-black/20 cursor-pointer transition-all duration-300 ${selectedPool?.pool_id === pool.pool_id
+													? 'border-cyan-500/50 ring-1 ring-cyan-500/20 bg-slate-900/80 scale-[1.01]'
+													: 'border-slate-800 hover:border-cyan-500/30 hover:bg-slate-900/60'
+													}`}
 												onClick={() => setSelectedPool(selectedPool?.pool_id === pool.pool_id ? null : pool)}
 											>
 												<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -168,24 +171,81 @@ function PendanaanEksportirContent() {
 												</div>
 
 												{selectedPool?.pool_id === pool.pool_id && (
-													<div className="mt-4 p-4 bg-slate-800/60 rounded-xl border border-slate-700/50">
-														<h3 className="text-sm font-semibold text-slate-200 mb-3">Detail Pool</h3>
-														<div className="grid grid-cols-2 gap-3 text-sm">
-															<div>
-																<p className="text-slate-500">Deadline</p>
-																<p className="text-slate-200">{pool.deadline ? new Date(pool.deadline).toLocaleDateString('id-ID') : '-'}</p>
+													<div className="mt-6 pt-6 border-t border-slate-700/50 animate-in fade-in slide-in-from-top-4 duration-300">
+														<h3 className="text-sm font-semibold text-cyan-300 mb-4 uppercase tracking-wider">Detail Pool Pendanaan</h3>
+														<div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+															<div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
+																<p className="text-slate-500 text-xs mb-1">Deadline</p>
+																<p className="text-slate-200 font-medium whitespace-nowrap">
+																	{pool.deadline ? new Date(pool.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+																</p>
 															</div>
-															<div>
-																<p className="text-slate-500">Status</p>
-																<p className="text-slate-200 capitalize">{pool.status}</p>
+															<div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
+																<p className="text-slate-500 text-xs mb-1">Status</p>
+																<p className="text-slate-200 font-medium capitalize flex items-center gap-2">
+																	<span className={`w-2 h-2 rounded-full ${pool.status === 'open' ? 'bg-green-400' : 'bg-slate-400'}`}></span>
+																	{pool.status}
+																</p>
 															</div>
-															<div>
-																<p className="text-slate-500">Dibuat</p>
-																<p className="text-slate-200">{pool.created_at ? new Date(pool.created_at).toLocaleDateString('id-ID') : '-'}</p>
+															<div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
+																<p className="text-slate-500 text-xs mb-1">Dibuat Pada</p>
+																<p className="text-slate-200 font-medium whitespace-nowrap">
+																	{pool.created_at ? new Date(pool.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+																</p>
 															</div>
-															<div>
-																<p className="text-slate-500">Invoice</p>
-																<p className="text-slate-200">{pool.invoice_number}</p>
+															<div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
+																<p className="text-slate-500 text-xs mb-1">Total Investor</p>
+																<p className="text-slate-200 font-medium">
+																	{pool.investor_count || 0} Investor
+																</p>
+															</div>
+														</div>
+
+														<div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+															<div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30">
+																<div className="flex justify-between items-center mb-2">
+																	<p className="text-xs text-slate-400 uppercase tracking-widest font-semibold">Priority Tranche</p>
+																	<span className="text-xs px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded border border-cyan-500/20">Senior</span>
+																</div>
+																<div className="flex justify-between items-end">
+																	<div>
+																		<p className="text-2xl font-bold text-slate-200">{pool.priority_interest_rate}%</p>
+																		<p className="text-xs text-slate-500">Return Rate</p>
+																	</div>
+																	<div className="text-right">
+																		<p className="text-sm font-medium text-slate-300">Rp {numberId.format(pool.priority_funded || 0)}</p>
+																		<p className="text-xs text-slate-500">dari Rp {numberId.format(pool.priority_target || 0)}</p>
+																	</div>
+																</div>
+																<div className="mt-2 w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+																	<div
+																		className="bg-cyan-500 h-full rounded-full"
+																		style={{ width: `${(pool.priority_target || 0) > 0 ? ((pool.priority_funded || 0) / (pool.priority_target || 0)) * 100 : 0}%` }}
+																	/>
+																</div>
+															</div>
+
+															<div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30">
+																<div className="flex justify-between items-center mb-2">
+																	<p className="text-xs text-slate-400 uppercase tracking-widest font-semibold">Catalyst Tranche</p>
+																	<span className="text-xs px-2 py-0.5 bg-purple-500/10 text-purple-400 rounded border border-purple-500/20">Junior</span>
+																</div>
+																<div className="flex justify-between items-end">
+																	<div>
+																		<p className="text-2xl font-bold text-slate-200">{pool.catalyst_interest_rate}%</p>
+																		<p className="text-xs text-slate-500">Return Rate</p>
+																	</div>
+																	<div className="text-right">
+																		<p className="text-sm font-medium text-slate-300">Rp {numberId.format(pool.catalyst_funded || 0)}</p>
+																		<p className="text-xs text-slate-500">dari Rp {numberId.format(pool.catalyst_target || 0)}</p>
+																	</div>
+																</div>
+																<div className="mt-2 w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+																	<div
+																		className="bg-purple-500 h-full rounded-full"
+																		style={{ width: `${(pool.catalyst_target || 0) > 0 ? ((pool.catalyst_funded || 0) / (pool.catalyst_target || 0)) * 100 : 0}%` }}
+																	/>
+																</div>
 															</div>
 														</div>
 													</div>
