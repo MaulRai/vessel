@@ -188,7 +188,7 @@ function AdminDashboardContent() {
         {/* Quick Actions */}
         <div>
           <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-4 gap-4">
             <Link
               href="/admin/dashboard/invoices"
               className="group relative overflow-hidden rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] p-6 hover:border-violet-500/50 transition-all duration-300"
@@ -241,13 +241,35 @@ function AdminDashboardContent() {
               <div className="relative">
                 <div className="p-3 bg-fuchsia-500/10 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform">
                   <svg className="w-6 h-6 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <h3 className="font-semibold text-white text-lg mb-2">Mitra Review</h3>
                 <p className="text-sm text-zinc-400">Review aplikasi mitra</p>
                 <div className="mt-4 flex items-center text-fuchsia-400 text-sm font-medium">
-                  <span>Manage</span>
+                  <span>Start Review</span>
+                  <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              href="/admin/dashboard/mitra/list"
+              className="group relative overflow-hidden rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] p-6 hover:border-teal-500/50 transition-all duration-300"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative">
+                <div className="p-3 bg-teal-500/10 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform">
+                  <svg className="w-6 h-6 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-white text-lg mb-2">Mitra List</h3>
+                <p className="text-sm text-zinc-400">Daftar mitra terverifikasi</p>
+                <div className="mt-4 flex items-center text-teal-400 text-sm font-medium">
+                  <span>View List</span>
                   <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -297,7 +319,6 @@ function AdminDashboardContent() {
                   <tr className="text-left text-zinc-400 text-xs font-semibold uppercase tracking-wider border-b border-[rgb(39,39,42)]">
                     <th className="px-6 py-4">User</th>
                     <th className="px-6 py-4">Role</th>
-                    <th className="px-6 py-4">Balance</th>
                     <th className="px-6 py-4">Status</th>
                   </tr>
                 </thead>
@@ -319,15 +340,10 @@ function AdminDashboardContent() {
                       </td>
                       <td className="px-6 py-4">{getRoleBadge(u.role)}</td>
                       <td className="px-6 py-4">
-                        <span className="text-white font-mono text-sm">
-                          {'Rp '}{u.balance_idr.toLocaleString('id-ID')}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${u.is_verified
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                              : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                             }`}
                         >
                           <div className={`h-1.5 w-1.5 rounded-full ${u.is_verified ? 'bg-emerald-400' : 'bg-amber-400'}`} />

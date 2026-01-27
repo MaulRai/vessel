@@ -28,6 +28,11 @@ export interface MitraPoolSummary {
     tenor_days: number;
     deadline: string;
     created_at: string;
+    investor_count?: number;
+    priority_target?: number;
+    priority_funded?: number;
+    catalyst_target?: number;
+    catalyst_funded?: number;
 }
 
 export interface MitraInvoice {

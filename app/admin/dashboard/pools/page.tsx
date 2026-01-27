@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { adminAPI, FundingPool } from '@/lib/api/admin';
-import { JSX } from 'react/jsx-runtime'; // Import JSX
 
 function PoolListContent() {
   const [pools, setPools] = useState<FundingPool[]>([]);
@@ -48,7 +47,7 @@ function PoolListContent() {
   };
 
   const getStatusBadge = (status: string) => {
-    const config: Record<string, { label: string; className: string; icon: JSX.Element }> = {
+    const config: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
       open: {
         label: 'Open',
         className: 'bg-blue-500/10 text-blue-400 border border-blue-500/30',

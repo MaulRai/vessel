@@ -9,7 +9,11 @@
         "funding": "Funding",
         "company": "Company",
         "logout": "Logout",
-        "disconnectWallet": "Disconnect Wallet"
+        "disconnectWallet": "Disconnect Wallet",
+        "mitraList": "Mitra List",
+        "mitraReview": "Mitra Review",
+        "invoiceReview": "Invoice Review",
+        "fundingPools": "Funding Pools"
     },
     "common": {
         "loading": "Loading...",

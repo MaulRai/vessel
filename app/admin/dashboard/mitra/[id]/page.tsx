@@ -4,163 +4,81 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
-import { adminAPI, MitraApplicationDetail } from '@/lib/api/admin';
+import { adminAPI, MitraApplicationDetail, PendingInvoice, FundingPool } from '@/lib/api/admin';
 
-type DocumentItem = {
-  id: string;
-  name: string;
-  description: string;
-  url: string | null;
-};
+type Tab = 'profile' | 'invoices' | 'pools';
 
-const statusStyles: Record<string, { label: string; className: string }> = {
-  pending: {
-    label: 'Menunggu Verifikasi',
-    className: 'bg-amber-500/10 text-amber-200 border border-amber-500/30'
-  },
-  approved: {
-    label: 'Disetujui',
-    className: 'bg-emerald-500/10 text-emerald-200 border border-emerald-500/30'
-  },
-  rejected: {
-    label: 'Ditolak',
-    className: 'bg-rose-500/10 text-rose-200 border border-rose-500/30'
-  }
-};
-
-export default function MitraApplicationDetailPage() {
-  const params = useParams<{ id: string }>();
-  const applicationId = params?.id;
-
+export default function MitraDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const [activeTab, setActiveTab] = useState<Tab>('profile');
   const [application, setApplication] = useState<MitraApplicationDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [selectedDocUrl, setSelectedDocUrl] = useState<string | null>(null);
+  const [invoices, setInvoices] = useState<PendingInvoice[]>([]);
+  const [pools, setPools] = useState<FundingPool[]>([]);
 
+  // Load Application Detail
   useEffect(() => {
-    if (!applicationId) return;
-
-    const fetchDetail = async () => {
-      setLoading(true);
+    const loadDetail = async () => {
       try {
-        const res = await adminAPI.getMitraApplicationDetail(applicationId);
+        const res = await adminAPI.getMitraApplicationDetail(id);
         if (res.success && res.data) {
           setApplication(res.data);
-          // Set default preview to first available document
-          const firstDoc = res.data.nib_document_url || res.data.akta_pendirian_url || res.data.ktp_direktur_url;
-          if (firstDoc) setSelectedDocUrl(firstDoc);
-        } else {
-          setError(res.error?.message || 'Gagal memuat detail aplikasi');
         }
       } catch (err) {
-        setError('Terjadi kesalahan saat memuat data');
+        console.error('Failed to load mitra detail', err);
       } finally {
         setLoading(false);
       }
     };
+    loadDetail();
+  }, [id]);
 
-    fetchDetail();
-  }, [applicationId]);
+  // Load Invoices and Pools specific to this Mitra's user_id
+  useEffect(() => {
+    if (!application?.user_id) return;
 
-  const handleApprove = async () => {
-    if (!applicationId) return;
-    setActionLoading(true);
-    try {
-      const res = await adminAPI.approveMitraApplication(applicationId);
-      if (res.success) {
-        setToast({ message: 'Aplikasi berhasil disetujui!', type: 'success' });
-        // Refresh data
-        const updated = await adminAPI.getMitraApplicationDetail(applicationId);
-        if (updated.success && updated.data) {
-          setApplication(updated.data);
+    const loadRelatedData = async () => {
+      try {
+        const [invRes, poolRes] = await Promise.all([
+          adminAPI.getInvoicesByExporter(application.user_id, 1, 50), // Fetch up to 50 recent
+          adminAPI.getPoolsByExporter(application.user_id, 1, 50)
+        ]);
+
+        if (invRes.success && invRes.data) {
+          setInvoices(invRes.data.invoices);
         }
-      } else {
-        setToast({ message: res.error?.message || 'Gagal menyetujui aplikasi', type: 'error' });
-      }
-    } catch (err) {
-      setToast({ message: 'Terjadi kesalahan', type: 'error' });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleReject = async () => {
-    if (!applicationId || !rejectReason.trim()) return;
-    setActionLoading(true);
-    try {
-      const res = await adminAPI.rejectMitraApplication(applicationId, rejectReason);
-      if (res.success) {
-        setToast({ message: 'Aplikasi berhasil ditolak', type: 'success' });
-        setShowRejectModal(false);
-        setRejectReason('');
-        // Refresh data
-        const updated = await adminAPI.getMitraApplicationDetail(applicationId);
-        if (updated.success && updated.data) {
-          setApplication(updated.data);
+        if (poolRes.success && poolRes.data) {
+          setPools(poolRes.data.pools);
         }
-      } else {
-        setToast({ message: res.error?.message || 'Gagal menolak aplikasi', type: 'error' });
+      } catch (err) {
+        console.error('Failed to load related data', err);
       }
-    } catch (err) {
-      setToast({ message: 'Terjadi kesalahan', type: 'error' });
-    } finally {
-      setActionLoading(false);
+    };
+
+    if (activeTab !== 'profile') {
+      loadRelatedData();
     }
-  };
-
-  // Build documents list from application data
-  const getDocuments = (): DocumentItem[] => {
-    if (!application) return [];
-    return [
-      {
-        id: 'nib',
-        name: 'NIB (Nomor Induk Berusaha)',
-        description: 'Dokumen NIB dari OSS',
-        url: application.nib_document_url || null
-      },
-      {
-        id: 'akta',
-        name: 'Akta Pendirian',
-        description: 'Akta pendirian perusahaan yang disahkan notaris',
-        url: application.akta_pendirian_url || null
-      },
-      {
-        id: 'ktp',
-        name: 'KTP Direktur',
-        description: 'KTP direktur atau penanggung jawab perusahaan',
-        url: application.ktp_direktur_url || null
-      }
-    ];
-  };
-
-  const documents = getDocuments();
-  const allDocsUploaded = documents.every(doc => doc.url);
-  const canApprove = application?.status === 'pending' && allDocsUploaded;
+  }, [application?.user_id, activeTab]);
 
   if (loading) {
     return (
       <DashboardLayout role="admin">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex justify-center items-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
         </div>
       </DashboardLayout>
     );
   }
 
-  if (error || !application) {
+  if (!application) {
     return (
       <DashboardLayout role="admin">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <p className="text-red-400 mb-4">{error || 'Aplikasi tidak ditemukan'}</p>
-            <Link href="/admin/dashboard/mitra" className="text-cyan-400 font-semibold hover:text-cyan-300">
-              Kembali ke Dashboard
-            </Link>
-          </div>
+        <div className="text-center py-20">
+          <h2 className="text-xl text-slate-300">Mitra tidak ditemukan</h2>
+          <Link href="/admin/dashboard/mitra" className="text-cyan-400 hover:text-cyan-300 mt-4 inline-block">
+            Kembali ke Daftar
+          </Link>
         </div>
       </DashboardLayout>
     );
@@ -169,361 +87,244 @@ export default function MitraApplicationDetailPage() {
   return (
     <DashboardLayout role="admin">
       <div className="space-y-6">
-        {/* Breadcrumb */}
-        <nav className="text-sm text-slate-400">
-          <Link href="/admin/dashboard/mitra" className="text-cyan-400 hover:text-cyan-300">
-            Verifikasi Mitra
-          </Link>{' '}
-          / <span className="text-slate-500">{application.company_name}</span>
-        </nav>
-
-        {/* Header */}
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-400">ID Pengajuan: {application.id}</p>
-            <h1 className="text-3xl font-bold text-slate-50">Verifikasi Profil Bisnis</h1>
-            <p className="text-slate-400">Review data dan dokumen perusahaan sebelum menyetujui.</p>
+            <Link href="/admin/dashboard/mitra" className="text-slate-400 hover:text-slate-200 text-sm mb-2 inline-flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Kembali
+            </Link>
+            <h1 className="text-3xl font-bold text-slate-50">{application.company_name}</h1>
+            <p className="text-slate-400 text-sm mt-1">
+              Bergabung sejak {new Date(application.created_at).toLocaleDateString('id-ID')}
+            </p>
           </div>
-          <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold ${statusStyles[application.status]?.className}`}>
-            {statusStyles[application.status]?.label}
-          </span>
-        </header>
-
-        {/* Toast */}
-        {toast && (
-          <div className={`rounded-xl px-4 py-3 text-sm flex items-center justify-between ${
-            toast.type === 'success' 
-              ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300' 
-              : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'
-          }`}>
-            <span>{toast.message}</span>
-            <button onClick={() => setToast(null)} className="text-slate-400 hover:text-slate-200 text-xs font-semibold">
-              Tutup
-            </button>
+          <div className={`px-4 py-2 rounded-full text-sm font-semibold border ${application.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+              application.status === 'rejected' ? 'bg-rose-500/10 text-rose-400 border-rose-500/30' :
+                'bg-amber-500/10 text-amber-400 border-amber-500/30'
+            }`}>
+            {application.status === 'approved' ? 'Disetujui' : application.status === 'rejected' ? 'Ditolak' : 'Menunggu Verifikasi'}
           </div>
-        )}
+        </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Left Column - Data & Documents */}
-          <section className="space-y-6">
-            {/* Company Info */}
-            <article className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-4">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-100">Informasi Perusahaan</h2>
-                <p className="text-sm text-slate-400">Data yang diisi saat apply mitra</p>
-              </div>
-              <dl className="grid gap-4 sm:grid-cols-2 text-sm">
-                <div>
-                  <dt className="text-slate-500">Nama Perusahaan</dt>
-                  <dd className="text-slate-100 font-medium">{application.company_name}</dd>
-                </div>
-                <div>
-                  <dt className="text-slate-500">Tipe Perusahaan</dt>
-                  <dd className="text-slate-100 font-medium">{application.company_type}</dd>
-                </div>
-                <div>
-                  <dt className="text-slate-500">NPWP</dt>
-                  <dd className="text-slate-100 font-mono">{application.npwp}</dd>
-                </div>
-                <div>
-                  <dt className="text-slate-500">Pendapatan Tahunan</dt>
-                  <dd className="text-slate-100">{application.annual_revenue}</dd>
-                </div>
-                <div>
-                  <dt className="text-slate-500">Tahun Berdiri</dt>
-                  <dd className="text-slate-100">{application.year_founded}</dd>
-                </div>
-                <div>
-                  <dt className="text-slate-500">Website</dt>
-                  <dd className="text-slate-100">
-                    {application.website_url ? (
-                      <a href={application.website_url} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300">
-                        {application.website_url}
-                      </a>
-                    ) : '-'}
-                  </dd>
-                </div>
-                <div className="sm:col-span-2">
-                  <dt className="text-slate-500">Alamat</dt>
-                  <dd className="text-slate-100">{application.address}</dd>
-                </div>
-                <div className="sm:col-span-2">
-                  <dt className="text-slate-500">Deskripsi Bisnis</dt>
-                  <dd className="text-slate-100">{application.business_description}</dd>
-                </div>
-                <div className="sm:col-span-2">
-                  <dt className="text-slate-500">Produk Utama</dt>
-                  <dd className="text-slate-100">{application.key_products}</dd>
-                </div>
-                <div className="sm:col-span-2">
-                  <dt className="text-slate-500">Pasar Ekspor</dt>
-                  <dd className="text-slate-100">{application.export_markets}</dd>
-                </div>
-              </dl>
-            </article>
+        {/* Tabs */}
+        <div className="border-b border-slate-800">
+          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+            {[
+              { id: 'profile', name: 'Profil Perusahaan' },
+              { id: 'invoices', name: 'Invoice' },
+              { id: 'pools', name: 'Funding Pools' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as Tab)}
+                className={`
+                  whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                  ${activeTab === tab.id
+                    ? 'border-cyan-500 text-cyan-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'}
+                `}
+              >
+                {tab.name}
+              </button>
+            ))}
+          </nav>
+        </div>
 
-            {/* Applicant Info */}
-            <article className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-4">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-100">Informasi Pemohon</h2>
-                <p className="text-sm text-slate-400">Akun user yang mengajukan</p>
-              </div>
-              <dl className="grid gap-4 sm:grid-cols-2 text-sm">
+        {/* Tab Content */}
+        <div className="mt-6">
+          {activeTab === 'profile' && (
+            <div className="bg-slate-900/50 rounded-2xl border border-slate-800 p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <dt className="text-slate-500">Email</dt>
-                  <dd className="text-slate-100">{application.user?.email || '-'}</dd>
-                </div>
-                <div>
-                  <dt className="text-slate-500">Username</dt>
-                  <dd className="text-slate-100">{application.user?.username || '-'}</dd>
-                </div>
-                <div>
-                  <dt className="text-slate-500">Tanggal Pengajuan</dt>
-                  <dd className="text-slate-100">
-                    {new Date(application.created_at).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </dd>
-                </div>
-              </dl>
-            </article>
-
-            {/* Documents List */}
-            <article className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-100">Dokumen</h2>
-                  <p className="text-sm text-slate-400">Pilih dokumen untuk melihat pratinjau di panel kanan</p>
-                </div>
-                <span className="text-xs text-slate-500">
-                  {documents.filter(d => d.url).length}/{documents.length} terupload
-                </span>
-              </div>
-
-              {/* Document Selector Tabs */}
-              <div className="flex flex-wrap gap-2">
-                {documents.map((doc) => {
-                  const isActive = selectedDocUrl === doc.url && doc.url;
-                  const hasDoc = !!doc.url;
-                  
-                  return (
-                    <button
-                      key={`tab-${doc.id}`}
-                      onClick={() => doc.url && setSelectedDocUrl(doc.url)}
-                      disabled={!hasDoc}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-                        isActive
-                          ? 'bg-cyan-500/20 border-2 border-cyan-500 text-cyan-300 shadow-lg shadow-cyan-500/10'
-                          : hasDoc
-                            ? 'bg-slate-800/60 border border-slate-700 text-slate-300 hover:border-cyan-500/50 hover:bg-slate-800'
-                            : 'bg-slate-900/50 border border-slate-800 text-slate-500 cursor-not-allowed opacity-50'
-                      }`}
-                    >
-                      {hasDoc ? (
-                        <svg className={`w-4 h-4 ${isActive ? 'text-cyan-400' : 'text-emerald-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      )}
-                      {doc.id === 'nib' ? 'NIB' : doc.id === 'akta' ? 'Akta Pendirian' : 'KTP Direktur'}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Document Details List */}
-              <div className="space-y-3">
-                {documents.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className={`border rounded-xl p-4 transition-all cursor-pointer ${
-                      selectedDocUrl === doc.url && doc.url
-                        ? 'border-cyan-500/50 bg-cyan-500/10 ring-1 ring-cyan-500/30'
-                        : doc.url 
-                          ? 'border-slate-800 bg-slate-950/40 hover:border-slate-700 hover:bg-slate-900/60'
-                          : 'border-slate-800/50 bg-slate-950/20 opacity-60'
-                    }`}
-                    onClick={() => doc.url && setSelectedDocUrl(doc.url)}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-slate-100 font-semibold flex items-center gap-2">
-                          {doc.name}
-                          {selectedDocUrl === doc.url && doc.url && (
-                            <span className="text-xs text-cyan-300">(Sedang ditinjau)</span>
-                          )}
-                        </p>
-                        <p className="text-xs text-slate-400 mt-1">{doc.description}</p>
-                      </div>
-                      {doc.url ? (
-                        <span className="px-2.5 py-1 text-xs rounded-full font-semibold bg-emerald-600/30 text-emerald-200">
-                          Uploaded
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-1 text-xs rounded-full font-semibold bg-rose-600/20 text-rose-200">
-                          Belum Upload
-                        </span>
-                      )}
+                  <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">Informasi Umum</h3>
+                  <dl className="space-y-4">
+                    <div>
+                      <dt className="text-xs text-slate-500">NPWP</dt>
+                      <dd className="text-slate-200 font-mono">{application.npwp}</dd>
                     </div>
-                    {doc.url && (
-                      <div className="mt-3">
+                    <div>
+                      <dt className="text-xs text-slate-500">Tipe Perusahaan</dt>
+                      <dd className="text-slate-200">{application.company_type}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-slate-500">Pendapatan Tahunan</dt>
+                      <dd className="text-slate-200">{application.annual_revenue}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-slate-500">Tahun Berdiri</dt>
+                      <dd className="text-slate-200">{application.year_founded || '-'}</dd>
+                    </div>
+                  </dl>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">Kontak & Alamat</h3>
+                  <dl className="space-y-4">
+                    <div>
+                      <dt className="text-xs text-slate-500">Email Akun</dt>
+                      <dd className="text-slate-200">{application.user?.email || '-'}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-slate-500">Alamat</dt>
+                      <dd className="text-slate-200 whitespace-pre-wrap">{application.address}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-slate-500">Website</dt>
+                      <dd className="text-cyan-400">
+                        {application.website_url ? (
+                          <a href={application.website_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                            {application.website_url}
+                          </a>
+                        ) : '-'}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-800 pt-6">
+                <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">Deskripsi Bisnis</h3>
+                <p className="text-slate-300 leading-relaxed bg-slate-950/30 p-4 rounded-xl border border-slate-800/50">
+                  {application.business_description || 'Tidak ada deskripsi'}
+                </p>
+              </div>
+
+              <div className="border-t border-slate-800 pt-6">
+                <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">Dokumen Legalitas</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {[
+                    { label: 'NIB', url: application.nib_document_url },
+                    { label: 'Akta Pendirian', url: application.akta_pendirian_url },
+                    { label: 'KTP Direktur', url: application.ktp_direktur_url },
+                  ].map((doc) => (
+                    <div key={doc.label} className="p-4 bg-slate-950/50 rounded-xl border border-slate-800 flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-slate-300">{doc.label}</p>
+                        <p className={`text-xs mt-1 ${doc.url ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {doc.url ? 'Terupload' : 'Belum Upload'}
+                        </p>
+                      </div>
+                      {doc.url && (
                         <a
                           href={doc.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300"
-                          onClick={(e) => e.stopPropagation()}
+                          className="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors text-cyan-400"
                         >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
-                          Buka di Tab Baru
                         </a>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Action Buttons */}
-              {application.status === 'pending' && (
-                <div className="flex flex-col gap-3 border-t border-slate-800 pt-4">
-                  <button
-                    onClick={handleApprove}
-                    disabled={!canApprove || actionLoading}
-                    className="px-4 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed"
-                  >
-                    {actionLoading ? 'Memproses...' : '✅ Setujui Aplikasi'}
-                  </button>
-                  <button
-                    onClick={() => setShowRejectModal(true)}
-                    disabled={actionLoading}
-                    className="px-4 py-3 rounded-xl text-sm font-semibold bg-rose-600/20 text-rose-300 border border-rose-600/30 hover:bg-rose-600/30 disabled:opacity-50"
-                  >
-                    ❌ Tolak Aplikasi
-                  </button>
-                  {!allDocsUploaded && (
-                    <p className="text-xs text-amber-400">
-                      ⚠️ Tidak bisa menyetujui karena dokumen belum lengkap.
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {application.status === 'rejected' && application.rejection_reason && (
-                <div className="border-t border-slate-800 pt-4">
-                  <p className="text-sm text-slate-400 mb-2">Alasan Penolakan:</p>
-                  <p className="text-rose-300 bg-rose-500/10 p-3 rounded-lg text-sm">{application.rejection_reason}</p>
-                </div>
-              )}
-            </article>
-          </section>
-
-          {/* Right Column - Document Preview */}
-          <section className="space-y-4 lg:sticky lg:top-6">
-            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 h-full flex flex-col min-h-[600px]">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-400">Preview Dokumen</p>
-                  <h2 className="text-lg font-semibold text-slate-100">
-                    {selectedDocUrl ? documents.find(d => d.url === selectedDocUrl)?.name || 'Dokumen' : 'Pilih dokumen'}
-                  </h2>
-                </div>
-                {selectedDocUrl && (
-                  <a
-                    href={selectedDocUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-all"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                    Buka Tab Baru
-                  </a>
-                )}
-              </div>
-
-              {/* Document Navigation Pills */}
-              {documents.some(d => d.url) && (
-                <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
-                  {documents.filter(d => d.url).map((doc) => (
-                    <button
-                      key={`preview-tab-${doc.id}`}
-                      onClick={() => doc.url && setSelectedDocUrl(doc.url)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                        selectedDocUrl === doc.url
-                          ? 'bg-cyan-500 text-white'
-                          : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
-                      }`}
-                    >
-                      {doc.id === 'nib' ? 'NIB' : doc.id === 'akta' ? 'Akta Pendirian' : 'KTP Direktur'}
-                    </button>
+                      )}
+                    </div>
                   ))}
                 </div>
-              )}
+              </div>
+            </div>
+          )}
 
-              <div className="mt-4 flex-1 border border-slate-800 rounded-xl bg-slate-950/50 overflow-hidden">
-                {selectedDocUrl ? (
-                  <iframe
-                    src={selectedDocUrl}
-                    title="Document Preview"
-                    className="w-full h-full min-h-[500px]"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-slate-500 text-sm">
-                    Pilih dokumen pada panel kiri untuk melihat pratinjau.
+          {activeTab === 'invoices' && (
+            <div className="bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden">
+              <table className="min-w-full divide-y divide-slate-800">
+                <thead className="bg-slate-950/50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Invoice #</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Buyer</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Jatuh Tempo</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  {invoices.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
+                        Belum ada invoice yang diajukan
+                      </td>
+                    </tr>
+                  ) : (
+                    invoices.map((inv) => (
+                      <tr key={inv.id} className="hover:bg-slate-800/30">
+                        <td className="px-6 py-4 text-sm font-medium text-slate-200">{inv.invoice_number}</td>
+                        <td className="px-6 py-4 text-sm text-slate-300">{inv.buyer_name}</td>
+                        <td className="px-6 py-4 text-sm font-mono text-cyan-300">
+                          {inv.currency} {inv.amount.toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-400">
+                          {new Date(inv.due_date).toLocaleDateString('id-ID')}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded text-xs font-medium border ${inv.status === 'funded' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                              inv.status === 'rejected' ? 'bg-rose-500/10 text-rose-400 border-rose-500/30' :
+                                'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                            }`}>
+                            {inv.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <Link href={`/admin/dashboard/invoices/${inv.id}`} className="text-cyan-400 hover:text-cyan-300 text-sm font-medium">
+                            Review
+                          </Link>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {activeTab === 'pools' && (
+            <div className="bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden">
+              <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3">
+                {pools.length === 0 ? (
+                  <div className="col-span-full text-center py-12 text-slate-500">
+                    Belum ada funding pool yang dibuat
                   </div>
+                ) : (
+                  pools.map(pool => (
+                    <div key={pool.id} className="bg-slate-950/50 border border-slate-800 rounded-xl p-5 hover:border-cyan-500/30 transition-all">
+                      <div className="flex justify-between items-start mb-3">
+                        <h3 className="text-slate-200 font-medium truncate">Pool {pool.invoice?.invoice_number || pool.id.slice(0, 8)}</h3>
+                        <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${pool.status === 'open' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                            'bg-slate-700 text-slate-400 border-slate-600'
+                          }`}>
+                          {pool.status}
+                        </span>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Target</span>
+                          <span className="text-slate-200 text-right">{pool.pool_currency} {pool.target_amount.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Funded</span>
+                          <span className="text-emerald-400 text-right">{pool.pool_currency} {pool.funded_amount.toLocaleString()}</span>
+                        </div>
+                        <div className="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
+                          <div
+                            className="bg-emerald-500 h-1.5 rounded-full"
+                            style={{ width: `${Math.min(100, (pool.funded_amount / pool.target_amount) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                      <Link
+                        href={`/admin/dashboard/pools/${pool.id}`}
+                        className="mt-4 block w-full text-center py-2 rounded-lg border border-slate-700 hover:bg-slate-800 text-slate-300 text-sm transition-colors"
+                      >
+                        Lihat Detail Pool
+                      </Link>
+                    </div>
+                  ))
                 )}
               </div>
             </div>
-          </section>
+          )}
         </div>
       </div>
-
-      {/* Reject Modal */}
-      {showRejectModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-md w-full space-y-4">
-            <h3 className="text-lg font-semibold text-slate-100">Tolak Aplikasi</h3>
-            <p className="text-sm text-slate-400">
-              Berikan alasan penolakan yang jelas agar mitra dapat memperbaiki aplikasinya.
-            </p>
-            <textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Contoh: Dokumen NIB tidak valid atau tidak terbaca..."
-              className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-sm focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-              rows={4}
-            />
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowRejectModal(false);
-                  setRejectReason('');
-                }}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-800 text-slate-200 hover:bg-slate-700"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleReject}
-                disabled={!rejectReason.trim() || actionLoading}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-rose-600 text-white hover:bg-rose-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {actionLoading ? 'Memproses...' : 'Konfirmasi Tolak'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </DashboardLayout>
   );
 }
