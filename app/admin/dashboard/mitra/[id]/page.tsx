@@ -93,7 +93,7 @@ export default function MitraDetailPage() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Kembali
+              Kembali ke Laman Verifikasi Mitra
             </Link>
             <h1 className="text-3xl font-bold text-slate-50">{application.company_name}</h1>
             <p className="text-slate-400 text-sm mt-1">
