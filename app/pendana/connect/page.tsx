@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ConnectWallet, Wallet } from '@coinbase/onchainkit/wallet';
-import { useAccount, useChainId, useSwitchChain } from 'wagmi';
+import { useAccount, useChainId, useConnect } from 'wagmi';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ONCHAINKIT_CONFIG } from '@/lib/config/onchainkit';
 
@@ -13,10 +12,11 @@ export default function InvestorConnectPage() {
     const router = useRouter();
     const { isConnected } = useAccount();
     const chainId = useChainId();
-    const { switchChain, isPending: isSwitching, error: switchError } = useSwitchChain();
+    const { connect, connectors, isPending } = useConnect();
     const { t, language, setLanguage } = useLanguage();
     const expectedChainId = ONCHAINKIT_CONFIG.chain.id;
     const isWrongChain = isConnected && chainId !== expectedChainId;
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         if (isConnected && !isWrongChain) {
@@ -24,8 +24,20 @@ export default function InvestorConnectPage() {
         }
     }, [isConnected, isWrongChain, router]);
 
+    // Prioritize Coinbase Wallet, then others
+    const sortedConnectors = [...connectors].sort((a, b) => {
+        if (a.id === 'coinbaseWalletSDK') return -1;
+        if (b.id === 'coinbaseWalletSDK') return 1;
+        return 0;
+    });
+
+    const handleConnect = (connector: any) => {
+        connect({ connector });
+        setShowModal(false);
+    };
+
     return (
-        <div className="min-h-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">
+        <div className="min-h-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden relative">
             <div className="w-full max-w-5xl h-[calc(100vh-2rem)] max-h-[700px] bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
                 <div className="grid md:grid-cols-2 h-full">
                     {/* Left Column - Connection Interface */}
@@ -97,59 +109,15 @@ export default function InvestorConnectPage() {
                                 ))}
                             </div>
 
-                            {isWrongChain && (
-                                <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/50 rounded-lg text-sm text-amber-100 space-y-2">
-                                    <div className="flex items-start gap-2">
-                                        <svg className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                        <div>
-                                            <p className="font-medium text-xs mb-1">{t('investorConnect.wrongNetworkTitle')}</p>
-                                            <p className="text-xs text-amber-200/80">{t('investorConnect.wrongNetworkBody')} {ONCHAINKIT_CONFIG.chain.name}</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => switchChain({ chainId: expectedChainId })}
-                                        disabled={isSwitching}
-                                        className="w-full px-3 py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-100 rounded-lg text-xs font-medium transition-all disabled:opacity-60"
-                                    >
-                                        {isSwitching ? t('investorConnect.switching') : `${t('investorConnect.switchTo')} ${ONCHAINKIT_CONFIG.chain.name}`}
-                                    </button>
-                                    {switchError && <p className="text-xs text-amber-200/80">{switchError.message}</p>}
-                                </div>
-                            )}
-
                             <div className="flex items-center gap-3">
                                 <div className="flex-1" aria-hidden />
-                                <Wallet>
-                                    <ConnectWallet className="min-w-[220px] justify-center px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-lg font-bold text-base text-white transition-all shadow-lg shadow-cyan-900/50" />
-                                </Wallet>
+                                <button
+                                    onClick={() => setShowModal(true)}
+                                    className="min-w-[220px] justify-center px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-lg font-bold text-base text-white transition-all shadow-lg shadow-cyan-900/50"
+                                >
+                                    Connect Wallet
+                                </button>
                                 <div className="flex-1" aria-hidden />
-                            </div>
-
-                            {/* Don't have a wallet? */}
-                            <div className="mt-4 p-3 bg-slate-900/50 border border-slate-700/50 rounded-lg">
-                                <p className="text-slate-400 text-xs text-center mb-2">
-                                    {t('investorConnect.noWalletTitle')}
-                                </p>
-                                <div className="flex flex-wrap gap-2 justify-center">
-                                    <a
-                                        href="https://metamask.io/download/"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
-                                    >
-                                        {t('investorConnect.getMetaMask')}
-                                    </a>
-                                    <a
-                                        href="https://www.coinbase.com/wallet"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
-                                    >
-                                        {t('investorConnect.getCoinbase')}
-                                    </a>
-                                </div>
                             </div>
 
                             <div className="relative my-6">
@@ -202,6 +170,71 @@ export default function InvestorConnectPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Wallet Selection Modal */}
+            {showModal && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-sm w-full p-6 relative">
+                        <button
+                            onClick={() => setShowModal(false)}
+                            className="absolute top-4 right-4 text-slate-400 hover:text-white"
+                        >
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <h3 className="text-xl font-bold text-white mb-6 text-center">Select Wallet</h3>
+
+                        <div className="space-y-3">
+                            {sortedConnectors.map((connector) => {
+                                // icon logic
+                                const getWalletIcon = (id: string) => {
+                                    if (id === 'coinbaseWalletSDK') return 'https://avatars.githubusercontent.com/u/18060234?s=200&v=4';
+                                    if (id === 'metaMask') return 'https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg';
+                                    if (id === 'walletConnect') return 'https://explorer-api.walletconnect.com/v3/logo/lg/2b272c72-4682-4aa4-297c-9a4b3b3e2b02?format=png';
+                                    return connector.icon;
+                                };
+                                const iconUrl = getWalletIcon(connector.id);
+
+                                return (
+                                    <button
+                                        key={connector.uid}
+                                        onClick={() => handleConnect(connector)}
+                                        disabled={isPending}
+                                        className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${connector.id === 'coinbaseWalletSDK'
+                                                ? 'bg-blue-600 hover:bg-blue-500 border-blue-500 text-white'
+                                                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            {iconUrl ? (
+                                                <div className="w-8 h-8 rounded-full bg-white/10 p-1 flex items-center justify-center overflow-hidden">
+                                                    <img
+                                                        src={iconUrl}
+                                                        alt={connector.name}
+                                                        className="w-full h-full object-contain"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
+                                                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                            <span className="font-semibold text-lg">{connector.name}</span>
+                                        </div>
+                                        {connector.id === 'coinbaseWalletSDK' && (
+                                            <span className="bg-white/20 text-xs px-2 py-1 rounded">Recommended</span>
+                                        )}
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

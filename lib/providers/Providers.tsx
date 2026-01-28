@@ -11,7 +11,7 @@ import { AuthProvider } from '../context/AuthContext';
 import { LanguageProvider } from '../i18n/LanguageContext';
 
 const wagmiConfig = createConfig({
-  chains: [base, baseSepolia], // Base-first but do not block other chains
+  chains: [baseSepolia, base],
   connectors: [
     injected({ shimDisconnect: true }),
     coinbaseWallet({
@@ -32,7 +32,7 @@ const wagmiConfig = createConfig({
   ],
   transports: {
     [base.id]: http(),
-    [baseSepolia.id]: http(),
+    [baseSepolia.id]: http('https://base-sepolia.drpc.org'),
   },
   ssr: true,
 });
