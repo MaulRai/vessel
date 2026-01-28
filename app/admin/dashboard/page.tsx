@@ -124,7 +124,7 @@ function AdminDashboardContent() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="group relative overflow-hidden rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] p-6 hover:border-violet-500/50 transition-all duration-300">
+          <div className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 hover:border-violet-500/50 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative">
               <div className="flex items-start justify-between mb-4">
@@ -140,7 +140,7 @@ function AdminDashboardContent() {
             </div>
           </div>
 
-          <div className="group relative overflow-hidden rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] p-6 hover:border-blue-500/50 transition-all duration-300">
+          <div className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 hover:border-blue-500/50 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative">
               <div className="flex items-start justify-between mb-4">
@@ -156,7 +156,7 @@ function AdminDashboardContent() {
             </div>
           </div>
 
-          <div className="group relative overflow-hidden rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] p-6 hover:border-fuchsia-500/50 transition-all duration-300">
+          <div className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 hover:border-fuchsia-500/50 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative">
               <div className="flex items-start justify-between mb-4">
@@ -172,7 +172,7 @@ function AdminDashboardContent() {
             </div>
           </div>
 
-          <div className="group relative overflow-hidden rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] p-6 hover:border-emerald-500/50 transition-all duration-300">
+          <div className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 hover:border-emerald-500/50 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative">
               <div className="flex items-start justify-between mb-4">
@@ -197,7 +197,7 @@ function AdminDashboardContent() {
           <div className="grid md:grid-cols-4 gap-4">
             <Link
               href="/admin/dashboard/invoices"
-              className="group relative overflow-hidden rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] p-6 hover:border-violet-500/50 transition-all duration-300"
+              className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 hover:border-violet-500/50 transition-all duration-300"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative">
@@ -219,7 +219,7 @@ function AdminDashboardContent() {
 
             <Link
               href="/admin/dashboard/pools"
-              className="group relative overflow-hidden rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] p-6 hover:border-blue-500/50 transition-all duration-300"
+              className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 hover:border-blue-500/50 transition-all duration-300"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative">
@@ -241,7 +241,7 @@ function AdminDashboardContent() {
 
             <Link
               href="/admin/dashboard/mitra"
-              className="group relative overflow-hidden rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] p-6 hover:border-fuchsia-500/50 transition-all duration-300"
+              className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 hover:border-fuchsia-500/50 transition-all duration-300"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative">
@@ -263,7 +263,7 @@ function AdminDashboardContent() {
 
             <Link
               href="/admin/dashboard/mitra/list"
-              className="group relative overflow-hidden rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] p-6 hover:border-teal-500/50 transition-all duration-300"
+              className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 hover:border-teal-500/50 transition-all duration-300"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative">
@@ -286,8 +286,8 @@ function AdminDashboardContent() {
         </div>
 
         {/* Recent Users */}
-        <div className="rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] overflow-hidden">
-          <div className="flex items-center justify-between p-6 border-b border-[rgb(39,39,42)]">
+        <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 overflow-hidden">
+          <div className="flex items-center justify-between p-6 border-b border-white/10">
             <div>
               <h2 className="text-xl font-bold text-white">Recent Users</h2>
               <p className="text-sm text-zinc-400 mt-1">Latest registered users on the platform</p>
@@ -322,13 +322,13 @@ function AdminDashboardContent() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-zinc-400 text-xs font-semibold uppercase tracking-wider border-b border-[rgb(39,39,42)]">
+                  <tr className="text-left text-zinc-400 text-xs font-semibold uppercase tracking-wider border-b border-white/5">
                     <th className="px-6 py-4">User</th>
                     <th className="px-6 py-4">Role</th>
                     <th className="px-6 py-4">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[rgb(39,39,42)]">
+                <tbody className="divide-y divide-white/5">
                   {recentUsers.map((u) => (
                     <tr key={u.id} className="hover:bg-white/[0.02] transition-colors">
                       <td className="px-6 py-4">

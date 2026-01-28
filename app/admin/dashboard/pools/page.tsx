@@ -156,7 +156,7 @@ function PoolListContent() {
           </div>
         </div>
 
-        <div className="rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] overflow-hidden">
+        <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="relative">
@@ -188,7 +188,7 @@ function PoolListContent() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="text-left text-zinc-400 text-xs font-semibold uppercase tracking-wider border-b border-[rgb(39,39,42)]">
+                    <tr className="text-left text-zinc-200 text-xs font-semibold uppercase tracking-wider border-b border-white/10 bg-white/5 backdrop-blur">
                       <th className="px-6 py-4">Invoice</th>
                       <th className="px-6 py-4">Target Amount</th>
                       <th className="px-6 py-4">Progress</th>
@@ -198,11 +198,11 @@ function PoolListContent() {
                       <th className="px-6 py-4">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[rgb(39,39,42)]">
+                  <tbody className="divide-y divide-white/5">
                     {pools.map((pool, index) => {
                       const progress = getProgress(pool);
                       return (
-                        <tr key={pool.id || `pool-${index}`} className="hover:bg-white/[0.02] transition-colors">
+                        <tr key={pool.id || `pool-${index}`} className="hover:bg-white/5 transition-colors">
                           <td className="px-6 py-5">
                             <div>
                               <p className="text-violet-400 font-semibold text-sm">{pool.invoice?.invoice_number || '-'}</p>
@@ -221,7 +221,7 @@ function PoolListContent() {
                                 <span className="text-zinc-400 font-medium">{progress.toFixed(1)}%</span>
                                 <span className="text-zinc-500">{formatCurrency(pool.funded_amount)}</span>
                               </div>
-                              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                              <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                                 <div
                                   className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full transition-all shadow-lg shadow-violet-500/50"
                                   style={{ width: `${Math.min(progress, 100)}%` }}
@@ -261,7 +261,7 @@ function PoolListContent() {
                               )}
                               <Link
                                 href={`/admin/dashboard/pools/${pool.id}`}
-                                className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs font-semibold text-zinc-300 transition-all"
+                                className="px-3 py-2 bg-white/5 backdrop-blur hover:bg-white/10 border border-white/15 rounded-lg text-xs font-semibold text-zinc-100 transition-all"
                               >
                                 View Details
                               </Link>
@@ -275,22 +275,22 @@ function PoolListContent() {
               </div>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-6 py-4 border-t border-slate-700/50">
-                  <p className="text-sm text-slate-400">
+                <div className="flex items-center justify-between px-6 py-4 border-t border-white/10">
+                  <p className="text-sm text-slate-200">
                     Halaman {page} dari {totalPages}
                   </p>
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      className="px-3 py-1 bg-slate-700/50 hover:bg-slate-700 disabled:bg-slate-800 disabled:text-slate-600 rounded text-sm text-slate-300 transition-colors"
+                      className="px-3 py-1 bg-white/5 backdrop-blur hover:bg-white/10 disabled:bg-white/5 disabled:text-slate-600 rounded text-sm text-slate-100 transition-colors"
                     >
                       Sebelumnya
                     </button>
                     <button
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      className="px-3 py-1 bg-slate-700/50 hover:bg-slate-700 disabled:bg-slate-800 disabled:text-slate-600 rounded text-sm text-slate-300 transition-colors"
+                      className="px-3 py-1 bg-white/5 backdrop-blur hover:bg-white/10 disabled:bg-white/5 disabled:text-slate-600 rounded text-sm text-slate-100 transition-colors"
                     >
                       Selanjutnya
                     </button>

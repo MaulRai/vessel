@@ -146,7 +146,7 @@ function InvoiceReviewDetailContent() {
     return (
       <DashboardLayout role="admin">
         <div className="max-w-xl mx-auto">
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700/50 p-8 text-center">
+          <div className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-8 text-center">
             <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${actionCompleted === 'approved' ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
               {actionCompleted === 'approved' ? (
                 <svg className="w-8 h-8 text-green-400" fill="currentColor" viewBox="0 0 20 20">
@@ -224,7 +224,7 @@ function InvoiceReviewDetailContent() {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
               <h2 className="text-lg font-semibold text-white mb-4">Informasi Invoice</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
@@ -255,7 +255,7 @@ function InvoiceReviewDetailContent() {
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-slate-700/50">
+              <div className="mt-6 pt-6 border-t border-white/10">
                 <h3 className="text-sm font-medium text-slate-300 mb-3">Konfigurasi Tranche</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
@@ -272,7 +272,7 @@ function InvoiceReviewDetailContent() {
               </div>
             </div>
 
-            <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
               <h2 className="text-lg font-semibold text-white mb-4">Informasi Buyer</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
@@ -292,7 +292,7 @@ function InvoiceReviewDetailContent() {
               </div>
             </div>
 
-            <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
               <h2 className="text-lg font-semibold text-white mb-4">Informasi Mitra</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
@@ -314,12 +314,12 @@ function InvoiceReviewDetailContent() {
               </div>
             </div>
 
-            <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
               <h2 className="text-lg font-semibold text-white mb-4">Dokumen</h2>
               {documents && documents.length > 0 ? (
                 <div className="space-y-3">
                   {documents.map((doc, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-lg rounded-lg border border-white/10">
                       <div className="flex items-center space-x-3">
                         <svg className="w-8 h-8 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
@@ -348,11 +348,11 @@ function InvoiceReviewDetailContent() {
 
           <div className="space-y-6">
             {gradeSuggestion && (
-              <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
                 <h2 className="text-lg font-semibold text-white mb-4">Grade Suggestion</h2>
 
                 <div className="text-center mb-6">
-                  <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full text-3xl font-bold border-2 ${getGradeColor(gradeSuggestion.suggested_grade)}`}>
+                  <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full text-3xl font-bold border-2 backdrop-blur ${getGradeColor(gradeSuggestion.suggested_grade)}`}>
                     {gradeSuggestion.suggested_grade}
                   </div>
                   <p className="text-slate-400 text-sm mt-2">Score: {gradeSuggestion.grade_score}/100</p>
@@ -385,7 +385,7 @@ function InvoiceReviewDetailContent() {
               </div>
             )}
 
-            <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
               <h2 className="text-lg font-semibold text-white mb-4">Pilih Grade</h2>
 
               <div className="grid grid-cols-3 gap-3 mb-4">
@@ -396,7 +396,7 @@ function InvoiceReviewDetailContent() {
                     className={`p-4 rounded-lg border-2 text-2xl font-bold transition-all ${
                       selectedGrade === grade
                         ? getGradeColor(grade)
-                        : 'text-slate-500 bg-slate-800/50 border-slate-700 hover:border-slate-600'
+                        : 'text-slate-200 bg-white/5 backdrop-blur border-white/15 hover:border-white/30'
                     }`}
                   >
                     {grade}
@@ -410,7 +410,7 @@ function InvoiceReviewDetailContent() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-slate-100 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                  className="w-full px-4 py-3 bg-white/5 backdrop-blur border border-white/15 rounded-lg text-slate-100 focus:ring-2 focus:ring-purple-500 focus:outline-none"
                   placeholder="Tambahkan catatan..."
                 />
               </div>
@@ -435,8 +435,8 @@ function InvoiceReviewDetailContent() {
         </div>
 
         {showApproveModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-md w-full mx-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur flex items-center justify-center z-50">
+            <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6 max-w-md w-full mx-4">
               <h3 className="text-xl font-bold text-white mb-4">Konfirmasi Persetujuan</h3>
               <p className="text-slate-300 mb-6">
                 Apakah Anda yakin ingin menyetujui invoice ini dengan Grade <span className={`font-bold ${getGradeColor(selectedGrade).split(' ')[0]}`}>{selectedGrade}</span>?
@@ -444,7 +444,7 @@ function InvoiceReviewDetailContent() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setShowApproveModal(false)}
-                  className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-all"
+                  className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-slate-100 rounded-lg transition-all"
                 >
                   Batal
                 </button>
@@ -461,8 +461,8 @@ function InvoiceReviewDetailContent() {
         )}
 
         {showRejectModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-md w-full mx-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur flex items-center justify-center z-50">
+            <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6 max-w-md w-full mx-4">
               <h3 className="text-xl font-bold text-white mb-4">Tolak Invoice</h3>
               <div className="mb-4">
                 <label className="block text-sm text-slate-400 mb-2">Alasan Penolakan <span className="text-red-400">*</span></label>
@@ -470,14 +470,14 @@ function InvoiceReviewDetailContent() {
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
                   rows={4}
-                  className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-slate-100 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                  className="w-full px-4 py-3 bg-white/5 backdrop-blur border border-white/15 rounded-lg text-slate-100 focus:ring-2 focus:ring-red-500 focus:outline-none"
                   placeholder="Masukkan alasan penolakan..."
                 />
               </div>
               <div className="flex space-x-3">
                 <button
                   onClick={() => setShowRejectModal(false)}
-                  className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-all"
+                  className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 text-slate-100 rounded-lg transition-all"
                 >
                   Batal
                 </button>

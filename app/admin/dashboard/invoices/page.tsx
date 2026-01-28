@@ -56,7 +56,7 @@ function InvoiceReviewListContent() {
   return (
     <DashboardLayout role="admin">
       <div className="space-y-8">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600/10 via-fuchsia-600/10 to-transparent border border-violet-500/20 p-8">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600/10 via-fuchsia-600/10 to-transparent border border-violet-500/20 p-8 backdrop-blur-xl">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]" />
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -81,7 +81,7 @@ function InvoiceReviewListContent() {
           </div>
         </div>
 
-        <div className="rounded-2xl bg-[rgb(15,15,15)] border border-[rgb(39,39,42)] overflow-hidden">
+        <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="relative">
@@ -104,7 +104,7 @@ function InvoiceReviewListContent() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="text-left text-slate-400 text-sm border-b border-slate-700/50 bg-slate-800/50">
+                    <tr className="text-left text-slate-200 text-sm border-b border-white/10 bg-white/5 backdrop-blur">
                       <th className="px-6 py-4 font-medium">Invoice</th>
                       <th className="px-6 py-4 font-medium">Mitra</th>
                       <th className="px-6 py-4 font-medium">Buyer</th>
@@ -114,11 +114,11 @@ function InvoiceReviewListContent() {
                       <th className="px-6 py-4 font-medium">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-700/50">
+                  <tbody className="divide-y divide-white/5">
                     {invoices.map((invoice) => {
                       const docScore = getDocumentScore(invoice.document_complete_score);
                       return (
-                        <tr key={invoice.id} className="hover:bg-slate-800/30 transition-colors">
+                        <tr key={invoice.id} className="hover:bg-white/5 transition-colors">
                           <td className="px-6 py-4">
                             <div>
                               <p className="text-purple-400 font-medium">{invoice.invoice_number}</p>
@@ -173,22 +173,22 @@ function InvoiceReviewListContent() {
               </div>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-6 py-4 border-t border-slate-700/50">
-                  <p className="text-sm text-slate-400">
+                <div className="flex items-center justify-between px-6 py-4 border-t border-white/10">
+                  <p className="text-sm text-slate-200">
                     Halaman {page} dari {totalPages}
                   </p>
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      className="px-3 py-1 bg-slate-700/50 hover:bg-slate-700 disabled:bg-slate-800 disabled:text-slate-600 rounded text-sm text-slate-300 transition-colors"
+                      className="px-3 py-1 bg-white/5 backdrop-blur hover:bg-white/10 disabled:bg-white/5 disabled:text-slate-600 rounded text-sm text-slate-100 transition-colors"
                     >
                       Sebelumnya
                     </button>
                     <button
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      className="px-3 py-1 bg-slate-700/50 hover:bg-slate-700 disabled:bg-slate-800 disabled:text-slate-600 rounded text-sm text-slate-300 transition-colors"
+                      className="px-3 py-1 bg-white/5 backdrop-blur hover:bg-white/10 disabled:bg-white/5 disabled:text-slate-600 rounded text-sm text-slate-100 transition-colors"
                     >
                       Selanjutnya
                     </button>
