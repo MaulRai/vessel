@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useAuth } from '@/lib/context/AuthContext';
 
 export default function AdminLoginPage() {
@@ -35,95 +36,126 @@ export default function AdminLoginPage() {
     };
 
     return (
-        <div className="min-h-screen h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">
-            <div className="w-full max-w-md bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50 p-8">
-                <div className="mb-8 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-amber-500 to-orange-500 rounded-2xl mb-4">
-                        <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                    </div>
-                    <h1 className="text-2xl font-bold bg-linear-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent mb-1">
-                        Admin Panel
-                    </h1>
-                    <p className="text-slate-300 text-sm">
-                        Vessel Finance Backoffice
-                    </p>
-                </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">
+            <div className="w-full max-w-5xl h-[calc(100vh-2rem)] max-h-[720px] bg-slate-900/60 backdrop-blur-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
+                <div className="grid md:grid-cols-2 h-full">
+                    {/* Left Panel */}
+                    <div className="p-6 md:p-8 lg:p-10 flex flex-col justify-center overflow-y-auto scrollbar-hide">
+                        <div className="max-w-sm w-full mx-auto space-y-6">
+                            {/* Brand */}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                    <Image
+                                        src="/vessel-logo.png"
+                                        alt="VESSEL Logo"
+                                        width={130}
+                                        height={36}
+                                        className="h-10 w-auto object-contain"
+                                        priority
+                                    />
+                                </div>
+                                <span className="text-[11px] font-semibold px-3 py-1 rounded-full bg-violet-500/10 border border-violet-400/30 text-violet-200 uppercase tracking-wide">Admin</span>
+                            </div>
 
-                <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-                    <div className="flex items-center gap-2 mb-2">
-                        <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="text-amber-400 font-semibold text-sm">Kredensial Admin (MVP)</span>
-                    </div>
-                    <div className="space-y-1 text-sm">
-                        <p className="text-slate-300">
-                            <span className="text-slate-400">Username:</span>{' '}
-                            <code className="bg-slate-700/50 px-2 py-0.5 rounded text-amber-300">admin</code>
-                        </p>
-                        <p className="text-slate-300">
-                            <span className="text-slate-400">Password:</span>{' '}
-                            <code className="bg-slate-700/50 px-2 py-0.5 rounded text-amber-300">admin123</code>
-                        </p>
-                    </div>
-                </div>
+                            {/* Header */}
+                            <div className="space-y-2">
+                                <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight">Masuk ke Admin Panel</h1>
+                                <p className="text-slate-400 text-sm">Kelola platform, tinjau invoice, dan atur funding pools.</p>
+                            </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {error && (
-                        <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg">
-                            <p className="text-red-400 text-sm">{error}</p>
+                            {/* Credential hint */}
+                            <div className="p-4 rounded-xl border border-violet-500/30 bg-violet-500/10 shadow-inner">
+                                <div className="flex items-center gap-2 mb-2 text-violet-200 font-semibold text-sm">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>Kredensial Admin (MVP)</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 text-xs text-slate-200">
+                                    <div className="flex flex-col rounded-lg bg-slate-900/60 border border-violet-500/20 px-3 py-2">
+                                        <span className="text-slate-400">Username</span>
+                                        <span className="font-mono text-violet-200">admin</span>
+                                    </div>
+                                    <div className="flex flex-col rounded-lg bg-slate-900/60 border border-violet-500/20 px-3 py-2">
+                                        <span className="text-slate-400">Password</span>
+                                        <span className="font-mono text-violet-200">admin123</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Form */}
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                {error && (
+                                    <div className="p-3 rounded-lg border border-red-500/50 bg-red-500/10 text-red-200 text-sm">
+                                        {error}
+                                    </div>
+                                )}
+
+                                <div className="space-y-1.5">
+                                    <label htmlFor="emailOrUsername" className="text-sm font-medium text-slate-200">Email atau Username</label>
+                                    <input
+                                        type="text"
+                                        id="emailOrUsername"
+                                        value={emailOrUsername}
+                                        onChange={(e) => setEmailOrUsername(e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg bg-slate-900/70 border border-slate-700 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/40 text-slate-100 text-sm placeholder:text-slate-500 transition"
+                                        placeholder="admin"
+                                        required
+                                        disabled={isLoading}
+                                    />
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label htmlFor="password" className="text-sm font-medium text-slate-200">Password</label>
+                                    <input
+                                        type="password"
+                                        id="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="w-full px-3 py-2.5 rounded-lg bg-slate-900/70 border border-slate-700 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/40 text-slate-100 text-sm placeholder:text-slate-500 transition"
+                                        placeholder="admin123"
+                                        required
+                                        disabled={isLoading}
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full py-2.5 rounded-lg bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-400 hover:via-purple-400 hover:to-fuchsia-400 text-white font-semibold shadow-lg shadow-violet-900/40 transition disabled:opacity-60"
+                                >
+                                    {isLoading ? 'Memproses...' : 'Masuk ke Admin Panel'}
+                                </button>
+                            </form>
+
+                            <div className="pt-3 border-t border-slate-800 text-xs text-slate-500 flex items-center gap-2">
+                                <svg className="w-4 h-4 text-violet-300" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                </svg>
+                                <span>Akses terbatas hanya untuk admin.</span>
+                            </div>
                         </div>
-                    )}
-
-                    <div>
-                        <label htmlFor="emailOrUsername" className="block text-sm font-medium text-slate-300 mb-1.5">
-                            Email atau Username
-                        </label>
-                        <input
-                            type="text"
-                            id="emailOrUsername"
-                            value={emailOrUsername}
-                            onChange={(e) => setEmailOrUsername(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all text-slate-100 text-sm placeholder:text-slate-500"
-                            placeholder="admin"
-                            required
-                            disabled={isLoading}
-                        />
                     </div>
 
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-1.5">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-slate-900/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all text-slate-100 text-sm placeholder:text-slate-500"
-                            placeholder="admin123"
-                            required
-                            disabled={isLoading}
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-medium py-2.5 px-4 rounded-lg transition-all text-sm shadow-lg shadow-amber-900/50"
-                    >
-                        {isLoading ? 'Memproses...' : 'Masuk ke Admin Panel'}
-                    </button>
-                </form>
-
-                <div className="mt-6 pt-4 border-t border-slate-700">
-                    <div className="flex items-center justify-center text-xs text-slate-400">
-                        <svg className="w-4 h-4 text-amber-400 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                        </svg>
-                        <span>Akses Terbatas - Hanya Admin</span>
+                    {/* Right Visual */}
+                    <div className="hidden md:block relative bg-gradient-to-br from-violet-700 via-purple-700 to-slate-900">
+                        <div className="absolute inset-0">
+                            <Image
+                                src="/assets/auth/auth-image-4.png"
+                                alt="VESSEL Admin"
+                                fill
+                                className="object-cover object-left"
+                                priority
+                            />
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/70 via-purple-900/40 to-transparent" />
+                        <div className="relative h-full flex items-end p-8 text-violet-100">
+                            <div className="max-w-md space-y-2">
+                                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-200/80">Vessel Admin</p>
+                                <h3 className="text-2xl font-bold">Kontrol penuh atas ekosistem pembiayaan ekspor.</h3>
+                                <p className="text-sm text-violet-100/80">Kelola pengguna, tinjau invoice, dan pantau pool pendanaan secara real-time.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
