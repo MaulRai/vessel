@@ -6,6 +6,7 @@ import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
 import { investmentAPI, InvestorPortfolio, ActiveInvestment } from '@/lib/api/user';
 import Link from 'next/link';
+import { StatRibbonCard } from '@/lib/components/StatRibbonCard';
 
 function PortfolioContent() {
   const [portfolio, setPortfolio] = useState<InvestorPortfolio | null>(null);
@@ -108,64 +109,60 @@ function PortfolioContent() {
             </Link>
           )}
         />
+        <section className="grid gap-4 md:grid-cols-4">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 bg-slate-800/30 border border-slate-700/50 rounded-xl backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-slate-400 text-sm">Total Pendanaan Aktif</p>
-            <p className="text-xl font-bold text-white mt-1">
+          <StatRibbonCard
+            color="#0f4c81"
+            imageSrc="/assets/portofolio/active.png"
+            imageAlt="Total Pendanaan Aktif"
+          >
+            <p className="text-sm font-semibold text-slate-300">
+              Total Pendanaan Aktif
+            </p>
+            <p className="text-2xl font-bold text-slate-50">
               Rp {(portfolio?.total_funding || 0).toLocaleString('id-ID')}
             </p>
-          </div>
+          </StatRibbonCard>
 
-          <div className="p-5 bg-slate-800/30 border border-slate-700/50 rounded-xl backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-green-500/10 rounded-lg text-green-400">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-slate-400 text-sm">Estimasi Imbal Hasil</p>
-            <p className="text-xl font-bold text-green-400 mt-1">
+          <StatRibbonCard
+            color="#0f4c81"
+            imageSrc="/assets/portofolio/estimation.png"
+            imageAlt="Estimasi Imbal Hasil"
+          >
+            <p className="text-sm font-semibold text-slate-300">
+              Estimasi Imbal Hasil
+            </p>
+            <p className="text-2xl font-bold text-slate-50">
               Rp {(portfolio?.total_expected_gain || 0).toLocaleString('id-ID')}
             </p>
-          </div>
+          </StatRibbonCard>
 
-          <div className="p-5 bg-slate-800/30 border border-slate-700/50 rounded-xl backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-teal-500/10 rounded-lg text-teal-400">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-slate-400 text-sm">Profit Terealisasi</p>
-            <p className="text-xl font-bold text-teal-400 mt-1">
+          <StatRibbonCard
+            color="#0f4c81"
+            imageSrc="/assets/portofolio/realized.png"
+            imageAlt="Profit Terealisasi"
+          >
+            <p className="text-sm font-semibold text-slate-300">
+              Profit Terealisasi
+            </p>
+            <p className="text-2xl font-bold text-slate-50">
               Rp {(portfolio?.total_realized_gain || 0).toLocaleString('id-ID')}
             </p>
-          </div>
+          </StatRibbonCard>
 
-          <div className="p-5 bg-slate-800/30 border border-slate-700/50 rounded-xl backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-slate-400 text-sm">Saldo Tersedia</p>
-            <p className="text-xl font-bold text-white mt-1">
+          <StatRibbonCard
+            color="#0f4c81"
+            imageSrc="/assets/portofolio/saved.png"
+            imageAlt="Saldo Tersedia"
+          >
+            <p className="text-sm font-semibold text-slate-300">
+              Saldo Tersedia
+            </p>
+            <p className="text-2xl font-bold text-slate-50">
               Rp {(portfolio?.available_balance || 0).toLocaleString('id-ID')}
             </p>
-          </div>
-        </div>
+          </StatRibbonCard>
+        </section>
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="p-6 bg-slate-800/30 border border-slate-700/50 rounded-xl backdrop-blur-sm">
