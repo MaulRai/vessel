@@ -814,8 +814,8 @@ function ProfilBisnisContent() {
           key={tab.key}
           onClick={() => setActiveTab(tab.key)}
           className={`w-full text-left px-4 py-3 rounded-xl transition-all border ${activeTab === tab.key
-              ? 'bg-cyan-600/20 border-cyan-500 text-cyan-200'
-              : 'bg-slate-900/30 border-slate-700 text-slate-300 hover:border-slate-600'
+            ? 'bg-cyan-600/20 border-cyan-500 text-cyan-200'
+            : 'bg-slate-900/30 border-slate-700 text-slate-300 hover:border-slate-600'
             }`}
         >
           <div className="text-sm font-semibold">{tab.label}</div>

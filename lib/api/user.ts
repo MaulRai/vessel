@@ -221,6 +221,17 @@ class UserAPI {
             };
         }
     }
+    async updateWallet(data: { wallet_address: string; message: string; signature: string; nonce: string }): Promise<APIResponse<WalletUpdateResponse>> {
+        return this.request<WalletUpdateResponse>('/user/wallet', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+}
+
+export interface WalletUpdateResponse {
+    message: string;
+    wallet_address: string;
 }
 
 export interface UserProfileResponse {
@@ -549,75 +560,6 @@ class InvestmentAPI {
 
 
 
-interface WalletUpdateResponse {
-    message: string;
-    wallet_address: string;
-}
-
-class WalletAPI {
-    private baseURL: string;
-
-    constructor(baseURL: string) {
-        this.baseURL = baseURL;
-    }
-
-    private getAuthHeaders(): HeadersInit {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('vessel_access_token') : null;
-        return {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        };
-    }
-
-    private async request<T>(
-        endpoint: string,
-        options: RequestInit = {}
-    ): Promise<APIResponse<T>> {
-        const url = `${this.baseURL}${endpoint}`;
-
-        const config: RequestInit = {
-            ...options,
-            headers: {
-                ...this.getAuthHeaders(),
-                ...options.headers,
-            },
-        };
-
-        try {
-            const response = await fetch(url, config);
-            const data = await response.json();
-
-            if (!response.ok) {
-                const errorMessage = typeof data.error === 'string' ? data.error : (data.error?.message || 'Terjadi kesalahan');
-                return {
-                    success: false,
-                    error: {
-                        code: 'API_ERROR',
-                        message: errorMessage,
-                    },
-                };
-            }
-
-            return data;
-        } catch {
-            return {
-                success: false,
-                error: {
-                    code: 'NETWORK_ERROR',
-                    message: 'Gagal terhubung ke server',
-                },
-            };
-        }
-    }
-
-    async updateWallet(walletAddress: string): Promise<APIResponse<WalletUpdateResponse>> {
-        return this.request<WalletUpdateResponse>('/user/wallet', {
-            method: 'PUT',
-            body: JSON.stringify({ wallet_address: walletAddress }),
-        });
-    }
-}
-
 export interface CreateInvoiceRequest {
     buyer_company_name: string;
     buyer_country: string;
@@ -910,4 +852,4 @@ export const invoiceAPI = new InvoiceAPI(API_BASE_URL);
 export const riskQuestionnaireAPI = new RiskQuestionnaireAPI(API_BASE_URL);
 
 export const investmentAPI = new InvestmentAPI(API_BASE_URL);
-export const walletAPI = new WalletAPI(API_BASE_URL);
+

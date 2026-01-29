@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/lib/context/AuthContext';
+import { ExporterConnectWallet } from '@/lib/components/ExporterConnectWallet';
 import { userAPI, MitraApplicationResponse } from '@/lib/api/user';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { LanguageSwitcher } from '@/lib/components/LanguageSwitcher';
@@ -115,14 +116,14 @@ function PendingApprovalScreen({ application }: { application?: MitraApplication
                                 {t('completeProfile.pending.statusPending')}
                             </span>
                         </div>
-                        
+
                         {/* Progress Steps */}
                         <div className="relative">
                             {/* Progress Line */}
                             <div className="absolute top-5 left-0 right-0 h-0.5 bg-slate-700">
                                 <div className="h-full w-1/2 bg-gradient-to-r from-cyan-500 to-teal-500 transition-all duration-500" />
                             </div>
-                            
+
                             {/* Steps */}
                             <div className="relative flex justify-between">
                                 {/* Step 1 - Submitted (Complete) */}
@@ -134,7 +135,7 @@ function PendingApprovalScreen({ application }: { application?: MitraApplication
                                     </div>
                                     <span className="text-xs text-cyan-400 font-medium text-center">{t('completeProfile.pending.statusSubmitted')}</span>
                                 </div>
-                                
+
                                 {/* Step 2 - Under Review (Current) */}
                                 <div className="flex flex-col items-center">
                                     <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border-2 border-cyan-500 flex items-center justify-center mb-2 animate-pulse">
@@ -142,7 +143,7 @@ function PendingApprovalScreen({ application }: { application?: MitraApplication
                                     </div>
                                     <span className="text-xs text-cyan-400 font-medium text-center">{t('completeProfile.pending.statusReview')}</span>
                                 </div>
-                                
+
                                 {/* Step 3 - Approved (Pending) */}
                                 <div className="flex flex-col items-center">
                                     <div className="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center mb-2">
@@ -174,6 +175,7 @@ export default function CompleteProfilePage() {
     const [error, setError] = useState<string | null>(null);
     const [currentStep, setCurrentStep] = useState<1 | 2>(1);
     const [mitraStatus, setMitraStatus] = useState<MitraApplicationResponse | null>(null);
+    const [currentWallet, setCurrentWallet] = useState<string | undefined>(undefined);
 
     const [docs, setDocs] = useState<Record<DocumentType, File | null>>({
         nib: null,
@@ -206,6 +208,9 @@ export default function CompleteProfilePage() {
     useEffect(() => {
         if (user?.profile_completed) {
             router.push('/eksportir/dashboard');
+        }
+        if (user?.wallet_address) {
+            setCurrentWallet(user.wallet_address);
         }
     }, [user, router]);
 
@@ -465,6 +470,28 @@ export default function CompleteProfilePage() {
                                         </div>
                                     ))}
                                 </div>
+
+                                <div className="mb-8 p-6 bg-slate-900/30 border border-slate-700/50 rounded-xl">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+                                            <svg className="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-white">Dompet Kripto</h3>
+                                            <p className="text-sm text-slate-400">Hubungkan wallet untuk menerima pencairan dana</p>
+                                        </div>
+                                    </div>
+                                    <ExporterConnectWallet 
+                                        currentWallet={currentWallet} 
+                                        onSuccess={(addr) => {
+                                            setCurrentWallet(addr);
+                                            refreshProfile();
+                                        }} 
+                                    />
+                                </div>
+
                                 <div className="mt-8 space-y-4">
                                     {/* Progress Indicator */}
                                     <div className="flex items-center justify-center gap-3">
@@ -510,9 +537,9 @@ export default function CompleteProfilePage() {
                                 </div>
                             </div>
                         )}
-                    </div>
-                </div>
+                            </div>
             </div>
-        </AuthGuard>
+                </div>
+        </AuthGuard >
     );
 }
