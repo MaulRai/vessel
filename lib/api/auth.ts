@@ -134,7 +134,7 @@ class AuthAPI {
     });
   }
 
-  async walletLogin(data: { wallet_address: string; signature: string }): Promise<APIResponse<LoginResponse>> {
+  async walletLogin(data: { wallet_address: string; signature: string; message: string; nonce: string }): Promise<APIResponse<LoginResponse>> {
     return this.request<LoginResponse>('/auth/wallet/login', {
       method: 'POST',
       body: JSON.stringify(data),

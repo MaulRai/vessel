@@ -1,30 +1,84 @@
 'use client';
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ConnectWallet, Wallet } from '@coinbase/onchainkit/wallet';
-import { useAccount, useChainId, useSwitchChain } from 'wagmi';
+import { useAccount, useChainId, useSwitchChain, useSignMessage } from 'wagmi';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ONCHAINKIT_CONFIG } from '@/lib/config/onchainkit';
+import { authAPI } from '@/lib/api/auth';
 
 export default function InvestorConnectPage() {
     const router = useRouter();
-    const { isConnected } = useAccount();
+    const { isConnected, address } = useAccount();
     const chainId = useChainId();
     const { switchChain, isPending: isSwitching, error: switchErrorRaw } = useSwitchChain();
+    const { signMessageAsync } = useSignMessage();
     const { t, language, setLanguage } = useLanguage();
     const expectedChainId = ONCHAINKIT_CONFIG.chain.id;
     const switchError = switchErrorRaw instanceof Error ? switchErrorRaw : null;
     const isWrongChain = isConnected && chainId !== expectedChainId;
 
-    useEffect(() => {
-        if (isConnected && !isWrongChain) {
+    // Backend authentication state
+    const [isAuthenticating, setIsAuthenticating] = useState(false);
+    const [authError, setAuthError] = useState<string | null>(null);
+    const [hasAuthenticated, setHasAuthenticated] = useState(false);
+
+    // Backend authentication after wallet connects
+    const authenticateWithBackend = useCallback(async (walletAddress: string) => {
+        if (isAuthenticating || hasAuthenticated) return;
+
+        setIsAuthenticating(true);
+        setAuthError(null);
+
+        try {
+            // Step 1: Get nonce from backend
+            const nonceResponse = await authAPI.walletNonce({ wallet_address: walletAddress });
+            if (!nonceResponse.success || !nonceResponse.data) {
+                throw new Error(nonceResponse.error?.message || 'Failed to get nonce');
+            }
+
+            const { nonce, message } = nonceResponse.data;
+
+            // Step 2: Sign the message with wallet
+            const signature = await signMessageAsync({ message });
+
+            // Step 3: Login/Register with backend
+            const loginResponse = await authAPI.walletLogin({
+                wallet_address: walletAddress,
+                signature,
+                message,
+                nonce,
+            });
+
+            if (!loginResponse.success || !loginResponse.data) {
+                throw new Error(loginResponse.error?.message || 'Failed to authenticate');
+            }
+
+            // Step 4: Store tokens for authenticated API calls
+            localStorage.setItem('access_token', loginResponse.data.access_token);
+            localStorage.setItem('refresh_token', loginResponse.data.refresh_token);
+            localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
+
+            setHasAuthenticated(true);
+
+            // Redirect to dashboard
             router.push('/pendana/dashboard');
+        } catch (error: any) {
+            console.error('Backend authentication failed:', error);
+            setAuthError(error.message || 'Authentication failed. Please try again.');
+            setIsAuthenticating(false);
         }
-    }, [isConnected, isWrongChain, router]);
+    }, [isAuthenticating, hasAuthenticated, signMessageAsync, router]);
+
+    useEffect(() => {
+        if (isConnected && !isWrongChain && address && !hasAuthenticated && !isAuthenticating) {
+            authenticateWithBackend(address);
+        }
+    }, [isConnected, isWrongChain, address, hasAuthenticated, isAuthenticating, authenticateWithBackend]);
 
     return (
         <div className="min-h-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">
@@ -98,6 +152,26 @@ export default function InvestorConnectPage() {
                                     </div>
                                 ))}
                             </div>
+
+                            {/* Authentication Error */}
+                            {authError && (
+                                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg">
+                                    <p className="text-red-400 text-sm">{authError}</p>
+                                </div>
+                            )}
+
+                            {/* Authenticating State */}
+                            {isAuthenticating && (
+                                <div className="mb-4 p-3 bg-cyan-500/10 border border-cyan-500/50 rounded-lg">
+                                    <p className="text-cyan-400 text-sm flex items-center gap-2">
+                                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        {t('investorConnect.authenticating') || 'Authenticating... Please sign the message in your wallet.'}
+                                    </p>
+                                </div>
+                            )}
 
                             {isWrongChain && (
                                 <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/50 rounded-lg text-sm text-amber-100 space-y-2">
