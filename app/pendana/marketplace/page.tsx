@@ -6,23 +6,30 @@ import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { MarketplacePool, MarketplaceFilters } from '@/lib/api/user';
 import { fundingAPI, FundingPool } from '@/lib/api/funding';
-import { useInvestorWallet } from '@/lib/context/InvestorWalletContext';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 function PoolInvestmentContent() {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   // Helper to map backend pool to UI model with localization
   const mapPoolToUI = (pool: FundingPool): MarketplacePool => {
     const fundingProgress = pool.target_amount > 0 ? (pool.funded_amount / pool.target_amount) * 100 : 0;
     const priorityProgress = pool.priority_target > 0 ? (pool.priority_funded / pool.priority_target) * 100 : 0;
     const catalystProgress = pool.catalyst_target > 0 ? (pool.catalyst_funded / pool.catalyst_target) * 100 : 0;
     const yieldRange = `${pool.priority_interest_rate}% - ${pool.catalyst_interest_rate}%`;
+    const formatRemainingTime = (deadline?: string) => {
+      if (!deadline) return '';
+      const deadlineDate = new Date(deadline);
+      const now = new Date();
+      const diffDays = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays <= 0) return language === 'en' ? 'Closed' : 'Ditutup';
+      return language === 'en' ? `${diffDays} days remaining` : `${diffDays} hari tersisa`;
+    };
 
     return {
       pool_id: pool.id,
       invoice_id: pool.invoice_number,
-      project_title: pool.project_title || t('marketplace.defaultProject', { invoice: pool.invoice_number }),
+      project_title: pool.project_title || `${t('marketplace.defaultProject')} ${pool.invoice_number || ''}`.trim(),
       grade: pool.grade || 'B',
       min_yield: pool.priority_interest_rate,
       max_yield: pool.catalyst_interest_rate,
@@ -40,13 +47,13 @@ function PoolInvestmentContent() {
       priority_funded: pool.priority_funded,
       catalyst_target: pool.catalyst_target,
       catalyst_funded: pool.catalyst_funded,
-      buyer_country_flag: pool.buyer_country_flag || '🌍',
+      buyer_country_flag: '🌍',
       buyer_country: pool.buyer_country,
-      buyer_country_risk: pool.buyer_country_risk,
+      buyer_country_risk: '',
       buyer_company_name: pool.buyer_company_name,
       yield_range: yieldRange,
-      is_insured: pool.is_insured ?? true,
-      remaining_time: pool.remaining_time || t('marketplace.daysRemaining', { days: 7 }),
+      is_insured: true,
+      remaining_time: formatRemainingTime(pool.deadline),
       is_fully_funded: pool.status === 'filled' || pool.status === 'closed',
     };
   };
@@ -263,7 +270,7 @@ function PoolInvestmentContent() {
               const minYield = pool.min_yield ?? pool.priority_interest_rate ?? 0;
               const maxYield = pool.max_yield ?? pool.catalyst_interest_rate ?? pool.min_yield ?? 0;
               const tenorText = pool.tenor_display || (pool.tenor_days ? `${pool.tenor_days} ${t('common.days')}` : t('marketplace.tenorNA'));
-              const buyerLabel = `${pool.buyer_country_flag || ''} ${pool.buyer_country || pool.buyer_company_name || 'Buyer'}`.trim();
+              const buyerLabel = `${pool.buyer_country_flag || ''} ${pool.buyer_country || pool.buyer_company_name || t('marketplace.defaultBuyer')}`.trim();
               const yieldRange = pool.yield_range || `${minYield}% - ${maxYield}%`;
               return (
                 <div
@@ -287,7 +294,7 @@ function PoolInvestmentContent() {
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-semibold text-white truncate group-hover:text-cyan-400 transition-colors">
-                        {pool.project_title || t('marketplace.defaultProject', { invoice: pool.invoice_id })}
+                        {pool.project_title || `${t('marketplace.defaultProject')} ${pool.invoice_id || ''}`.trim()}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-lg" aria-hidden>{pool.buyer_country_flag || '🇮🇩'}</span>
@@ -403,9 +410,11 @@ function PoolInvestmentContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-              <span className="px-4 py-2 text-sm text-slate-400">
-                {t('common.pagination', { current: filters.page || 1, total: totalPages })}
-              </span>
+            <span className="px-4 py-2 text-sm text-slate-400">
+              {language === 'en'
+                ? `Page ${filters.page || 1} of ${totalPages}`
+                : `Halaman ${filters.page || 1} dari ${totalPages}`}
+            </span>
             <button
               onClick={() => handlePageChange((filters.page || 1) + 1)}
               disabled={(filters.page || 1) >= totalPages}
