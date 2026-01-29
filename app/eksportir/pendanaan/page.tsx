@@ -80,13 +80,13 @@ function PendanaanEksportirContent() {
 						/>
 						<StatCard
 							label="Total Target"
-							value={`Rp ${numberId.format(totalTarget)}`}
+							value={`IDRX ${numberId.format(totalTarget)}`}
 							badge="Seluruh Pool"
 							tone="amber"
 						/>
 						<StatCard
 							label="Total Terdanai"
-							value={`Rp ${numberId.format(totalFunded)}`}
+							value={`IDRX ${numberId.format(totalFunded)}`}
 							badge={totalTarget > 0 ? `${Math.round((totalFunded / totalTarget) * 100)}%` : '0%'}
 							tone="emerald"
 						/>
@@ -142,10 +142,10 @@ function PendanaanEksportirContent() {
 												</div>
 
 												<div className="mt-6 grid gap-4 sm:grid-cols-3">
-													<Metric label="Target" value={`Rp ${numberId.format(pool.target_amount)}`} />
+													<Metric label="Target" value={`IDRX ${numberId.format(pool.target_amount)}`} />
 													<Metric
 														label="Terdanai"
-														value={`Rp ${numberId.format(pool.funded_amount)}`}
+														value={`IDRX ${numberId.format(pool.funded_amount)}`}
 														note={`${pool.target_amount > 0 ? Math.round((pool.funded_amount / pool.target_amount) * 100) : 0}%`}
 													/>
 													<Metric
@@ -213,8 +213,8 @@ function PendanaanEksportirContent() {
 																		<p className="text-xs text-slate-500">Return Rate</p>
 																	</div>
 																	<div className="text-right">
-																		<p className="text-sm font-medium text-slate-300">Rp {numberId.format(pool.priority_funded || 0)}</p>
-																		<p className="text-xs text-slate-500">dari Rp {numberId.format(pool.priority_target || 0)}</p>
+																		<p className="text-sm font-medium text-slate-300">IDRX {numberId.format(pool.priority_funded || 0)}</p>
+																		<p className="text-xs text-slate-500">dari IDRX {numberId.format(pool.priority_target || 0)}</p>
 																	</div>
 																</div>
 																<div className="mt-2 w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
@@ -236,8 +236,8 @@ function PendanaanEksportirContent() {
 																		<p className="text-xs text-slate-500">Return Rate</p>
 																	</div>
 																	<div className="text-right">
-																		<p className="text-sm font-medium text-slate-300">Rp {numberId.format(pool.catalyst_funded || 0)}</p>
-																		<p className="text-xs text-slate-500">dari Rp {numberId.format(pool.catalyst_target || 0)}</p>
+																		<p className="text-sm font-medium text-slate-300">IDRX {numberId.format(pool.catalyst_funded || 0)}</p>
+																		<p className="text-xs text-slate-500">dari IDRX {numberId.format(pool.catalyst_target || 0)}</p>
 																	</div>
 																</div>
 																<div className="mt-2 w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
@@ -322,13 +322,13 @@ function PendanaanEksportirContent() {
 												<div>
 													<p className="text-slate-500">Target</p>
 													<p className="font-semibold">
-														Rp {numberId.format(pool.target_amount)}
+														IDRX {numberId.format(pool.target_amount)}
 													</p>
 												</div>
 												<div>
 													<p className="text-slate-500">Terdanai</p>
 													<p className="font-semibold">
-														Rp {numberId.format(pool.funded_amount)}
+														IDRX {numberId.format(pool.funded_amount)}
 													</p>
 												</div>
 											</div>

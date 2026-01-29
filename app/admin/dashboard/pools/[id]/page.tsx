@@ -239,14 +239,30 @@ export default function AdminPoolDetailPage() {
                                     {t('admin.pools.detail.invoice.view')}
                                 </Link>
                             </div>
-                            <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                                <p className="text-lg font-bold text-slate-200">{pool.invoice.invoice_number}</p>
-                                <p className="text-sm text-slate-400 mb-3">{pool.invoice.buyer_name}</p>
-                                <div className="flex gap-2">
-                                    <span className="px-2 py-1 bg-slate-800 rounded text-xs text-slate-300">
-                                        {formatCurrency(pool.invoice.amount, pool.invoice.currency)}
-                                    </span>
-                                    <span className="px-2 py-1 bg-slate-800 rounded text-xs text-slate-300">
+                            <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-4">
+                                <div>
+                                    <p className="text-lg font-bold text-slate-200">{pool.invoice.invoice_number}</p>
+                                    <p className="text-sm text-slate-400">{pool.invoice.buyer_name}</p>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800/50">
+                                    <div>
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{t('admin.invoiceDetail.info.originalAmount')}</p>
+                                        <p className="text-sm font-semibold text-slate-300">{formatCurrency(pool.invoice.amount, pool.invoice.currency)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Advance Percentage</p>
+                                        <p className="text-sm font-semibold text-cyan-400">{(pool.invoice as any).advance_percentage || 80}%</p>
+                                    </div>
+                                </div>
+
+                                <div className="pt-2">
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Target Funding</p>
+                                    <p className="text-base font-bold text-emerald-400">{formatCurrency(pool.target_amount, pool.pool_currency)}</p>
+                                </div>
+
+                                <div className="pt-2">
+                                    <span className="px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-400">
                                         {t('admin.pools.detail.invoice.due')}: {new Date(pool.invoice.due_date).toLocaleDateString(locale)}
                                     </span>
                                 </div>

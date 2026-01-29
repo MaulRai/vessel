@@ -152,11 +152,11 @@ function InvestorDashboardContent() {
               imageAlt="Simpanan dan pembiayaan"
             >
               <p className="text-sm font-semibold text-slate-200">Total Simpanan & Pembiayaan</p>
-              <p className="text-2xl font-bold text-slate-50">{`Rp ${numberId.format(totalPembiayaanBerjalan)}`}</p>
+              <p className="text-2xl font-bold text-slate-50">{`IDRX ${numberId.format(totalPembiayaanBerjalan)}`}</p>
               <p className="text-xs font-semibold text-slate-300">Saldo Tersedia</p>
-              <p className="text-xl font-bold text-slate-300">{`Rp ${numberId.format(portfolio?.available_balance || 0)}`}</p>
+              <p className="text-xl font-bold text-slate-300">{`IDRX ${numberId.format(portfolio?.available_balance || 0)}`}</p>
               <p className="text-xs font-semibold text-slate-300">Dana Sedang Disalurkan</p>
-              <p className="text-xl font-bold text-slate-300">{`Rp ${numberId.format(portfolio?.total_funding || 0)}`}</p>
+              <p className="text-xl font-bold text-slate-300">{`IDRX ${numberId.format(portfolio?.total_funding || 0)}`}</p>
             </StatRibbonCard>
             <StatRibbonCard
               color="#1d5fa6"
@@ -164,9 +164,9 @@ function InvestorDashboardContent() {
               imageAlt="Imbal hasil"
             >
               <p className="text-sm font-semibold text-slate-200">Total Imbal Hasil Diterima</p>
-              <p className="text-2xl font-bold text-slate-50">{`Rp ${numberId.format(portfolio?.total_realized_gain || 0)}`}</p>
+              <p className="text-2xl font-bold text-slate-50">{`IDRX ${numberId.format(portfolio?.total_realized_gain || 0)}`}</p>
               <p className="text-xs font-semibold text-slate-300">Estimasi</p>
-              <p className="text-xl font-bold text-slate-300">{`Rp ${numberId.format(portfolio?.total_expected_gain || 0)}`}</p>
+              <p className="text-xl font-bold text-slate-300">{`IDRX ${numberId.format(portfolio?.total_expected_gain || 0)}`}</p>
             </StatRibbonCard>
             <div className="relative rounded-r-2xl rounded-l-none border border-slate-800 bg-slate-900/40 p-5 shadow-inner shadow-black/30 overflow-hidden">
               <div className="absolute left-0 top-0 h-full w-1.5 bg-[#0f4c81]" />
@@ -242,8 +242,8 @@ function InvestorDashboardContent() {
                             {row.tranche_display}
                           </span>
                         </Td>
-                        <Td className="text-slate-200">Rp {numberId.format(row.principal)}</Td>
-                        <Td className="text-slate-200">Rp {numberId.format(row.estimated_return)}</Td>
+                        <Td className="text-slate-200">IDRX {numberId.format(row.principal)}</Td>
+                        <Td className="text-slate-200">IDRX {numberId.format(row.estimated_return)}</Td>
                         <Td>
                           <StatusBadge status={row.status} label={row.status_display} color={row.status_color} />
                         </Td>

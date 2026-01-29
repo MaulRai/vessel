@@ -20,7 +20,7 @@ export default function PencairanDanaPage() {
 		e.preventDefault();
 
 		if (nominal < 10000) {
-			setSnackbar("Minimal penarikan Rp 10.000");
+			setSnackbar("Minimal penarikan IDRX 10.000");
 			return;
 		}
 
@@ -46,10 +46,10 @@ export default function PencairanDanaPage() {
 					<div className="flex items-center justify-between">
 						<div>
 							<p className="text-sm text-slate-400">Saldo Tertahan</p>
-							<p className="text-2xl font-bold text-slate-50">Rp {numberId.format(saldoTertahan)}</p>
+							<p className="text-2xl font-bold text-slate-50">IDRX {numberId.format(saldoTertahan)}</p>
 						</div>
 						<div className="rounded-full bg-slate-800 px-4 py-2 text-xs text-slate-300">
-							Biaya Admin: Rp {numberId.format(biayaAdmin)}
+							Biaya Admin: IDRX {numberId.format(biayaAdmin)}
 						</div>
 					</div>
 				</section>
@@ -64,10 +64,10 @@ export default function PencairanDanaPage() {
 								max={saldoTertahan}
 								value={nominal || ""}
 								onChange={(e) => setNominal(parseInt(e.target.value || "0", 10))}
-								placeholder="Masukkan nominal (min Rp 10.000)"
+								placeholder="Masukkan nominal (min IDRX 10.000)"
 								className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
 							/>
-							<p className="text-xs text-slate-500">Min Rp 10.000 • Maks sesuai saldo</p>
+							<p className="text-xs text-slate-500">Min IDRX 10.000 • Maks sesuai saldo</p>
 						</div>
 
 						<div className="space-y-2">
@@ -100,11 +100,11 @@ export default function PencairanDanaPage() {
 						<div className="space-y-1 text-sm text-slate-400">
 							<div className="flex items-center justify-between">
 								<span>Total Penarikan</span>
-								<span className="font-semibold text-slate-100">Rp {numberId.format(Math.max(nominal - biayaAdmin, 0))}</span>
+								<span className="font-semibold text-slate-100">IDRX {numberId.format(Math.max(nominal - biayaAdmin, 0))}</span>
 							</div>
 							<div className="flex items-center justify-between text-xs text-slate-500">
 								<span>Biaya Admin</span>
-								<span>Rp {numberId.format(biayaAdmin)}</span>
+								<span>IDRX {numberId.format(biayaAdmin)}</span>
 							</div>
 						</div>
 

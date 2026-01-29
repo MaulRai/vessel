@@ -10,32 +10,33 @@ import {
   RiskQuestionnaireStatusResponse,
 } from '@/lib/api/user';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
+import Link from 'next/link';
 
-// Demo questions to use when API fails - kept as fallback data
-const demoQuestions: RiskQuestion[] = [
+const buildDemoQuestions = (t: (key: string) => string): RiskQuestion[] => [
   {
     id: 1,
-    question: 'Berapa lama pengalaman investasi Anda?',
+    question: t('riskAssessment.demoQ1'),
     options: [
-      { value: 1, label: 'Kurang dari 1 tahun' },
-      { value: 2, label: '1-3 tahun' },
-      { value: 3, label: 'Lebih dari 3 tahun' },
+      { value: 1, label: t('riskAssessment.demoQ1Opt1') },
+      { value: 2, label: t('riskAssessment.demoQ1Opt2') },
+      { value: 3, label: t('riskAssessment.demoQ1Opt3') },
     ],
   },
   {
     id: 2,
-    question: 'Bagaimana sikap Anda terhadap risiko investasi?',
+    question: t('riskAssessment.demoQ2'),
     options: [
-      { value: 1, label: 'Saya lebih memilih keamanan meski return rendah' },
-      { value: 2, label: 'Saya bersedia mengambil risiko untuk return lebih tinggi' },
+      { value: 1, label: t('riskAssessment.demoQ2Opt1') },
+      { value: 2, label: t('riskAssessment.demoQ2Opt2') },
     ],
   },
   {
     id: 3,
-    question: 'Apa yang akan Anda lakukan jika nilai investasi turun 20%?',
+    question: t('riskAssessment.demoQ3'),
     options: [
-      { value: 1, label: 'Menarik dana segera' },
-      { value: 2, label: 'Menahan dan menunggu pemulihan' },
+      { value: 1, label: t('riskAssessment.demoQ3Opt1') },
+      { value: 2, label: t('riskAssessment.demoQ3Opt2') },
     ],
   },
 ];
@@ -72,11 +73,11 @@ function RiskAssessmentContent() {
           setQuestions(questionsRes.data.questions);
         } else {
           // Use demo questions if API fails
-          setQuestions(demoQuestions);
+          setQuestions(buildDemoQuestions(t));
         }
       } catch {
         // Use demo questions on error
-        setQuestions(demoQuestions);
+        setQuestions(buildDemoQuestions(t));
       } finally {
         setLoading(false);
       }
@@ -227,16 +228,14 @@ function RiskAssessmentContent() {
   return (
     <DashboardLayout role="investor">
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">{t('riskAssessment.title')}</h1>
-          <p className="text-slate-400">
-            {t('riskAssessment.subtitle')}
-          </p>
-        </div>
+        <MarketplaceHero
+          imageSrc="/assets/general/risk-management.png"
+          title={t('riskAssessment.title')}
+          subtitle={t('riskAssessment.subtitle')}
+        />
 
         {/* Progress */}
-        <div className="mb-8">
+        <div className="my-8">
           <div className="flex items-center justify-between text-sm text-slate-400 mb-2">
             <span>
               {t('riskAssessment.question')} {currentStep + 1} {t('riskAssessment.of')} {questions.length || 1}
