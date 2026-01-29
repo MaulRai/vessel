@@ -6,12 +6,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import { useAccount, useDisconnect, useChainId, useSwitchChain, useChains } from 'wagmi';
+import { useAccount, useDisconnect, useChainId, useSwitchChain, useChains, useReadContract } from 'wagmi';
+import { formatUnits, erc20Abi } from 'viem';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { UserRole } from '../types/auth';
 import { base, baseSepolia } from 'wagmi/chains';
 import { useInvestorWallet } from '../context/InvestorWalletContext';
+
+const IDRX_ADDRESS = process.env.NEXT_PUBLIC_IDRX_TOKEN_ADDRESS as `0x${string}`;
 
 interface NavItem {
   href: string;
@@ -173,6 +176,31 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const currentChain = chains.find((item) => item.id === chainId);
   const shortAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '';
 
+  const { data: balanceData } = useReadContract({
+    address: IDRX_ADDRESS,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+      refetchInterval: 10000,
+    }
+  });
+
+  const { data: decimals } = useReadContract({
+    address: IDRX_ADDRESS,
+    abi: erc20Abi,
+    functionName: 'decimals',
+  });
+
+  const formattedBalance = React.useMemo(() => {
+    if (balanceData === undefined || decimals === undefined) return null;
+    const balance = Number(formatUnits(balanceData, decimals));
+    return new Intl.NumberFormat('id-ID', {
+      maximumFractionDigits: 2,
+    }).format(balance);
+  }, [balanceData, decimals]);
+
   const isOnBase = chainId === base.id || chainId === baseSepolia.id;
 
   const navItems = role === 'investor' ? getInvestorNavItems(t) : role === 'admin' ? getAdminNavItems(t) : getMitraNavItems(t);
@@ -274,6 +302,11 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-slate-400 font-medium mb-0.5">{t('common.walletConnected')}</p>
                       <p className="text-sm font-mono font-semibold text-cyan-300 truncate">{shortAddress}</p>
+                      {formattedBalance && (
+                        <p className="text-xs text-slate-300 mt-1 font-medium bg-slate-900/40 px-2 py-1 rounded-lg border border-slate-700/50 inline-block">
+                          {formattedBalance} <span className="text-cyan-400/80">IDRX</span>
+                        </p>
+                      )}
                       {!isOnBase && (
                         <p className="text-[10px] text-amber-300 mt-1 flex items-center gap-1">
                           <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
