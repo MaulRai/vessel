@@ -220,9 +220,9 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
     // Clear investor wallet context
     disconnectWallet();
     // Clear auth tokens explicitly
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('vessel_access_token');
+    localStorage.removeItem('vessel_refresh_token');
+    localStorage.removeItem('vessel_user');
 
     router.push('/pendana/connect');
   };

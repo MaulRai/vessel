@@ -73,9 +73,9 @@ export default function InvestorConnectPage() {
             }
 
             // Step 4: Store tokens for authenticated API calls
-            localStorage.setItem('access_token', loginResponse.data.access_token);
-            localStorage.setItem('refresh_token', loginResponse.data.refresh_token);
-            localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
+            localStorage.setItem('vessel_access_token', loginResponse.data.access_token);
+            localStorage.setItem('vessel_refresh_token', loginResponse.data.refresh_token);
+            localStorage.setItem('vessel_user', JSON.stringify(loginResponse.data.user));
 
             // Step 5: Update InvestorWalletContext state directly
             loginInvestor(walletAddress);
