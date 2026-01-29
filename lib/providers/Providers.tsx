@@ -8,6 +8,7 @@ import { base, baseSepolia } from 'wagmi/chains';
 import { coinbaseWallet, injected, walletConnect } from 'wagmi/connectors';
 import { ONCHAINKIT_CONFIG, WALLET_CONNECT_PROJECT_ID } from '../config/onchainkit';
 import { AuthProvider } from '../context/AuthContext';
+import { InvestorWalletProvider } from '../context/InvestorWalletContext';
 import { LanguageProvider } from '../i18n/LanguageContext';
 
 const wagmiConfig = createConfig({
@@ -45,7 +46,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <OnchainKitProvider apiKey={ONCHAINKIT_CONFIG.apiKey} chain={ONCHAINKIT_CONFIG.chain}>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <InvestorWalletProvider>{children}</InvestorWalletProvider>
+            </AuthProvider>
           </OnchainKitProvider>
         </QueryClientProvider>
       </WagmiProvider>

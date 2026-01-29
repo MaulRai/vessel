@@ -1,7 +1,7 @@
 'use client';
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,26 +10,40 @@ import { useAccount, useChainId, useSwitchChain, useSignMessage } from 'wagmi';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ONCHAINKIT_CONFIG } from '@/lib/config/onchainkit';
 import { authAPI } from '@/lib/api/auth';
+import { useInvestorWallet } from '@/lib/context/InvestorWalletContext';
+
+const INVESTOR_WALLET_KEY = 'vessel_investor_wallet';
 
 export default function InvestorConnectPage() {
     const router = useRouter();
-    const { isConnected, address } = useAccount();
+    const { isConnected: wagmiConnected, address } = useAccount();
     const chainId = useChainId();
     const { switchChain, isPending: isSwitching, error: switchErrorRaw } = useSwitchChain();
     const { signMessageAsync } = useSignMessage();
     const { t, language, setLanguage } = useLanguage();
+    const { isConnected: investorConnected, loginInvestor } = useInvestorWallet();
     const expectedChainId = ONCHAINKIT_CONFIG.chain.id;
     const switchError = switchErrorRaw instanceof Error ? switchErrorRaw : null;
-    const isWrongChain = isConnected && chainId !== expectedChainId;
+    const isWrongChain = wagmiConnected && chainId !== expectedChainId;
 
     // Backend authentication state
     const [isAuthenticating, setIsAuthenticating] = useState(false);
     const [authError, setAuthError] = useState<string | null>(null);
     const [hasAuthenticated, setHasAuthenticated] = useState(false);
+    const authAttemptedRef = useRef(false);
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (investorConnected) {
+            router.push('/pendana/dashboard');
+        }
+    }, [investorConnected, router]);
 
     // Backend authentication after wallet connects
     const authenticateWithBackend = useCallback(async (walletAddress: string) => {
-        if (isAuthenticating || hasAuthenticated) return;
+        // Prevent multiple attempts
+        if (isAuthenticating || hasAuthenticated || authAttemptedRef.current) return;
+        authAttemptedRef.current = true;
 
         setIsAuthenticating(true);
         setAuthError(null);
@@ -63,6 +77,9 @@ export default function InvestorConnectPage() {
             localStorage.setItem('refresh_token', loginResponse.data.refresh_token);
             localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
 
+            // Step 5: Update InvestorWalletContext state directly
+            loginInvestor(walletAddress);
+
             setHasAuthenticated(true);
 
             // Redirect to dashboard
@@ -72,14 +89,16 @@ export default function InvestorConnectPage() {
             const message = error instanceof Error ? error.message : 'Authentication failed. Please try again.';
             setAuthError(message);
             setIsAuthenticating(false);
+            authAttemptedRef.current = false; // Allow retry on error
         }
-    }, [isAuthenticating, hasAuthenticated, signMessageAsync, router]);
+    }, [isAuthenticating, hasAuthenticated, signMessageAsync, router, loginInvestor]);
 
     useEffect(() => {
-        if (isConnected && !isWrongChain && address && !hasAuthenticated && !isAuthenticating) {
+        // Only attempt auth if wagmi connected, correct chain, address exists, and not already authenticated
+        if (wagmiConnected && !isWrongChain && address && !hasAuthenticated && !isAuthenticating && !authAttemptedRef.current) {
             authenticateWithBackend(address);
         }
-    }, [isConnected, isWrongChain, address, hasAuthenticated, isAuthenticating, authenticateWithBackend]);
+    }, [wagmiConnected, isWrongChain, address, hasAuthenticated, isAuthenticating, authenticateWithBackend]);
 
     return (
         <div className="min-h-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">

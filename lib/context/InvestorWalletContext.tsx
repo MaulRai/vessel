@@ -29,6 +29,8 @@ interface InvestorWalletContextType {
     disconnectWallet: () => void;
     switchToCorrectChain: () => Promise<boolean>;
     refreshBalance: () => Promise<void>;
+    loginInvestor: (address: string) => void;
+    isLoading: boolean;
 }
 
 const InvestorWalletContext = createContext<InvestorWalletContextType | undefined>(undefined);
@@ -41,6 +43,7 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
     const [investor, setInvestor] = useState<InvestorUser | null>(null);
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [isConnecting, setIsConnecting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [chainId, setChainId] = useState<number | null>(null);
@@ -101,6 +104,7 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
                     localStorage.removeItem(INVESTOR_WALLET_KEY);
                 }
             }
+            setIsLoading(false);
             return;
         }
 
@@ -126,7 +130,8 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
                         }
                     }
                 })
-                .catch(console.error);
+                .catch(console.error)
+                .finally(() => setIsLoading(false));
 
             // Get current chain ID
             window.ethereum.request({ method: 'eth_chainId' })
@@ -134,6 +139,8 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
                     setChainId(parseInt(id as string, 16));
                 })
                 .catch(console.error);
+        } else {
+            setIsLoading(false);
         }
     }, [isMock]);
 
@@ -303,6 +310,18 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
         localStorage.removeItem(INVESTOR_WALLET_KEY);
     }, []);
 
+    // Method for external components (like connect page) to update state after login
+    const loginInvestor = useCallback((address: string) => {
+        const newInvestor: InvestorUser = {
+            walletAddress: address,
+            role: 'investor',
+            connectedAt: new Date().toISOString(),
+        };
+        setInvestor(newInvestor);
+        setWalletAddress(address);
+        localStorage.setItem(INVESTOR_WALLET_KEY, JSON.stringify(newInvestor));
+    }, []);
+
     const value: InvestorWalletContextType = {
         investor,
         walletAddress,
@@ -316,6 +335,8 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
         disconnectWallet,
         switchToCorrectChain,
         refreshBalance,
+        loginInvestor,
+        isLoading,
     };
 
     return <InvestorWalletContext.Provider value={value}>{children}</InvestorWalletContext.Provider>;
