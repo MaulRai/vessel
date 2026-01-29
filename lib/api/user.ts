@@ -605,6 +605,9 @@ export interface Invoice {
     original_currency?: string;
     original_amount?: number;
     exchange_rate?: number;
+    advance_percentage: number;
+    advance_amount?: number;
+    funding_limit_percentage?: number;
     funding_duration_days: number;
     created_at: string;
     updated_at: string;
