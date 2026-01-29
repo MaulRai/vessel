@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import type { ReactNode } from 'react';
 
 export function MarketplaceHero({
   imageSrc,
@@ -9,7 +10,7 @@ export function MarketplaceHero({
   imageSrc: string;
   title: string;
   subtitle: string;
-  cta?: React.ReactNode;
+  cta?: ReactNode;
 }) {
   return (
     <header className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-900/50 via-sky-800/40 to-transparent p-6 sm:p-8">
