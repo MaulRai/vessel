@@ -41,11 +41,17 @@ export function AuthGuard({
 
     // For investor-only routes
     if (isInvestorRoute) {
-      if (!isConnected) {
+      if (!isConnected && !isAuthenticated) {
         router.push('/pendana/connect');
         return;
       }
-      // Investor is connected via wallet, allow access
+      // If authenticating, check role if available
+      if (isAuthenticated && user && user.role !== 'investor') {
+        router.push('/');
+        return;
+      }
+
+      // Investor is connected via wallet OR has valid session
       return;
     }
 
@@ -104,9 +110,9 @@ export function AuthGuard({
     );
   }
 
-  // For investor routes - check wallet connection
+  // For investor routes - check wallet connection or session
   if (isInvestorRoute) {
-    if (!isConnected) {
+    if (!isConnected && !isAuthenticated) {
       return (
         <div className="min-h-screen bg-slate-950 flex items-center justify-center">
           <div className="flex flex-col items-center space-y-4">
@@ -116,7 +122,7 @@ export function AuthGuard({
         </div>
       );
     }
-    // Wallet connected, render children
+    // Access granted
     return <>{children}</>;
   }
 

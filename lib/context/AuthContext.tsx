@@ -24,6 +24,7 @@ interface AuthContextType extends AuthState {
   register: (data: RegisterRequest) => Promise<APIResponse<RegisterResponse>>;
   sendOTP: (data: SendOTPRequest) => Promise<APIResponse<SendOTPResponse>>;
   verifyOTP: (data: VerifyOTPRequest) => Promise<APIResponse<VerifyOTPResponse>>;
+  walletLogin: (data: { wallet_address: string; signature: string; message: string; nonce: string }) => Promise<APIResponse<LoginResponse>>;
   logout: () => void;
   refreshAccessToken: () => Promise<boolean>;
   refreshProfile: () => Promise<void>;
@@ -166,6 +167,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return authAPI.verifyOTP(data);
   }, []);
 
+  const walletLogin = useCallback(async (data: { wallet_address: string; signature: string; message: string; nonce: string }): Promise<APIResponse<LoginResponse>> => {
+    const response = await authAPI.walletLogin(data);
+    if (response.success && response.data) {
+      saveAuthData(response.data);
+    }
+    return response;
+  }, [saveAuthData]);
+
   const logout = useCallback(() => {
     clearAuthData();
   }, [clearAuthData]);
@@ -215,6 +224,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     register,
     sendOTP,
     verifyOTP,
+    walletLogin,
     logout,
     refreshAccessToken,
     refreshProfile,

@@ -186,6 +186,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
 
   const handleDisconnectWallet = () => {
     disconnect();
+    logout(); // Also clear backend session
     router.push('/pendana/connect');
   };
 
@@ -253,18 +254,24 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
             // Wallet info for investors
             <>
               <div className="mb-3 p-3 rounded-xl bg-slate-800/60 border border-slate-700/50">
-                {address ? (
+                {(address || (user?.wallet_address && role === 'investor')) ? (
                   <div className="flex items-center space-x-3">
                     <div className="relative">
                       <div className="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-500/30 to-teal-500/30 ring-2 ring-cyan-500/30 flex items-center justify-center text-sm font-semibold text-slate-900">
-                        {address.slice(2, 4).toUpperCase()}
+                        {(address || user?.wallet_address)?.slice(2, 4).toUpperCase()}
                       </div>
                       <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-slate-900 shadow-lg shadow-emerald-400/50" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-slate-400 font-medium mb-0.5">{t('common.walletConnected')}</p>
-                      <p className="text-sm font-mono font-semibold text-cyan-300 truncate">{shortAddress}</p>
-                      {!isOnBase && (
+                      <p className="text-sm font-mono font-semibold text-cyan-300 truncate">
+                        {address
+                          ? `${address.slice(0, 6)}...${address.slice(-4)}`
+                          : user?.wallet_address
+                            ? `${user.wallet_address.slice(0, 6)}...${user.wallet_address.slice(-4)}`
+                            : ''}
+                      </p>
+                      {!isOnBase && address && (
                         <p className="text-[10px] text-amber-300 mt-1 flex items-center gap-1">
                           <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
                           {currentChain?.name || 'Jaringan lain'}

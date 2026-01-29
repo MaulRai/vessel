@@ -6,7 +6,6 @@ import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { MarketplacePool, MarketplaceFilters } from '@/lib/api/user';
 import { fundingAPI, FundingPool } from '@/lib/api/funding';
-import { useInvestorWallet } from '@/lib/context/InvestorWalletContext';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 // Helper to map backend pool to UI model

@@ -1,43 +1,128 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useAccount, useChainId, useConnect } from 'wagmi';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { ONCHAINKIT_CONFIG } from '@/lib/config/onchainkit';
+import { useAuth } from '@/lib/context/AuthContext';
+import { authAPI } from '@/lib/api/auth';
+import { createBaseAccountSDK } from '@base-org/account';
+import { SignInWithBaseButton } from '@base-org/account-ui/react';
 
 export default function InvestorConnectPage() {
     const router = useRouter();
-    const { isConnected } = useAccount();
-    const chainId = useChainId();
-    const { connect, connectors, isPending } = useConnect();
+    const { walletLogin } = useAuth();
     const { t, language, setLanguage } = useLanguage();
-    const expectedChainId = ONCHAINKIT_CONFIG.chain.id;
-    const isWrongChain = isConnected && chainId !== expectedChainId;
-    const [showModal, setShowModal] = useState(false);
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        if (isConnected && !isWrongChain) {
-            router.push('/pendana/dashboard');
+    const handleSignIn = async () => {
+        setError('');
+        setIsLoading(true);
+        try {
+            // Initialize Base SDK
+            const sdk = createBaseAccountSDK({
+                appName: 'Vessel Finance',
+            });
+            const provider = sdk.getProvider();
+
+            // 1. Get nonce from backend
+            // We use a temporary address or just request a nonce generically?
+            // AuthAPI expects basic request, but usually nonce is generated for a specific address.
+            // Documentation says: "get a fresh nonce (generate locally or prefetch from backend)"
+            // BUT backend expects nonce to be stored associated with wallet if we use `get_wallet_nonce`.
+            // Wait, backend `get_wallet_nonce` stores it keyed by wallet address. 
+            // So we need the address FIRST?
+            // The Base Auth flow (SIWE cap) sends nonce IN the connection request. 
+            // This implies we need the nonce BEFORE we know the address (or at least we send it blindly).
+            // IF we use SIWE capability, the wallet signs it.
+
+            // Backend `get_wallet_nonce` requires `wallet_address`.
+            // This creates a chicken-and-egg problem if we strictly follow the backend's current flow
+            // which assumes: Connect Wallet -> Get Address -> Request Nonce -> Sign Message.
+
+            // The Base "Sign In with Base" (SIWE capability) flow is: 
+            //   Connect(with SIWE params including nonce) -> Returns Address + Signature.
+
+            // If we generate a nonce locally (random UUID), the backend won't know about it 
+            // UNLESS we send it during verification and the backend validates it stateless (checking format/time) 
+            // OR we registered it somehow.
+
+            // Looking at backend `verify_wallet_signature`:
+            // It expects `wallet_nonces` to have the nonce stored for that wallet.
+
+            // HACK/ADJUSTMENT: 
+            // We cannot use `authAPI.walletNonce` (which requires address) BEFORE connecting.
+            // So we must use the standard Connect -> Sign flow if we want to use existing backend logic perfectly,
+            // OR we change the backend to accept any nonce (stateless SIWE) which it doesn't seem to do.
+
+            // However, `createBaseAccountSDK` documentation says:
+            // "const nonce = window.crypto.randomUUID().replace(/-/g, "");"
+            // This nonce is client-side generated? 
+            // If backend validates it, it must be stored or stateless (replay protection).
+            // Backend `wallet_login` checks: `if stored_nonce != &req.nonce`.
+            // So backend MUST have stored it.
+
+            // STRATEGY:
+            // 1. Connect first (without SIWE capability or just basic connect) to get Address.
+            // 2. Request Nonce from Backend for that Address.
+            // 3. Request Signature (using `personal_sign` or SIWE).
+
+            // BUT Base Account SDK emphasizes "Sign In with Ethereum" capability in `wallet_connect`.
+
+            // Let's try to do it in two steps if possible, or use a "Pre-request" to backend to get a "session nonce"?
+            // Current backend: `get_wallet_nonce` takes `wallet_address`.
+
+            // Workaround: 
+            // 1. `eth_requestAccounts` to get address.
+            // 2. `authAPI.walletNonce` to get key.
+            // 3. `personal_sign` (or SIWE) to sign.
+
+            // Let's use the provider from SDK but do standard flow to ensure backend compatibility.
+
+            const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
+            const address = accounts[0];
+
+            if (!address) throw new Error("No account found");
+
+            // 2. Get Nonce from Backend
+            const nonceRes = await authAPI.walletNonce({ wallet_address: address });
+            if (!nonceRes.success || !nonceRes.data) {
+                throw new Error(nonceRes.error?.message || "Failed to generate nonce");
+            }
+            const { nonce, message } = nonceRes.data;
+
+            // 3. Sign Message
+            const signature = await provider.request({
+                method: 'personal_sign',
+                params: [message, address],
+            }) as string;
+
+            // 4. Verify & Login
+            const loginRes = await walletLogin({
+                wallet_address: address,
+                signature,
+                message,
+                nonce
+            });
+
+            if (loginRes.success) {
+                router.push('/pendana/dashboard');
+            } else {
+                setError(loginRes.error?.message || "Login failed");
+            }
+
+        } catch (err: unknown) {
+            console.error("Sign In Error:", err);
+            setError(err instanceof Error ? err.message : "Failed to sign in");
+        } finally {
+            setIsLoading(false);
         }
-    }, [isConnected, isWrongChain, router]);
-
-    // Prioritize Coinbase Wallet, then others
-    const sortedConnectors = [...connectors].sort((a, b) => {
-        if (a.id === 'coinbaseWalletSDK') return -1;
-        if (b.id === 'coinbaseWalletSDK') return 1;
-        return 0;
-    });
-
-    const handleConnect = (connector: any) => {
-        connect({ connector });
-        setShowModal(false);
     };
 
     return (
-        <div className="min-h-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden relative">
+        <div className="min-h-screen h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden relative">
             <div className="w-full max-w-5xl h-[calc(100vh-2rem)] max-h-[700px] bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
                 <div className="grid md:grid-cols-2 h-full">
                     {/* Left Column - Connection Interface */}
@@ -109,14 +194,23 @@ export default function InvestorConnectPage() {
                                 ))}
                             </div>
 
+                            {/* Error Message */}
+                            {error && (
+                                <div className="p-3 mb-4 bg-red-500/10 border border-red-500/50 rounded-lg">
+                                    <p className="text-red-400 text-sm">{error}</p>
+                                </div>
+                            )}
+
                             <div className="flex items-center gap-3">
                                 <div className="flex-1" aria-hidden />
-                                <button
-                                    onClick={() => setShowModal(true)}
-                                    className="min-w-[220px] justify-center px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-lg font-bold text-base text-white transition-all shadow-lg shadow-cyan-900/50"
-                                >
-                                    Connect Wallet
-                                </button>
+                                {/* Use Base UI Button but override click to handle flow manually to ensure backend compat */}
+                                {/* Or acts as a trigger */}
+                                <div className="w-full">
+                                    <SignInWithBaseButton
+                                        colorScheme="dark"
+                                        onClick={isLoading ? undefined : handleSignIn}
+                                    />
+                                </div>
                                 <div className="flex-1" aria-hidden />
                             </div>
 
@@ -157,7 +251,7 @@ export default function InvestorConnectPage() {
                     </div>
 
                     {/* Right Column - Image */}
-                    <div className="hidden md:block relative bg-gradient-to-br from-slate-800 via-cyan-900 to-teal-900">
+                    <div className="hidden md:block relative bg-linear-to-br from-slate-800 via-cyan-900 to-teal-900">
                         <div className="absolute inset-0">
                             <Image
                                 src="/assets/auth/auth-image-4.png"
@@ -170,71 +264,6 @@ export default function InvestorConnectPage() {
                     </div>
                 </div>
             </div>
-
-            {/* Wallet Selection Modal */}
-            {showModal && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-w-sm w-full p-6 relative">
-                        <button
-                            onClick={() => setShowModal(false)}
-                            className="absolute top-4 right-4 text-slate-400 hover:text-white"
-                        >
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-
-                        <h3 className="text-xl font-bold text-white mb-6 text-center">Select Wallet</h3>
-
-                        <div className="space-y-3">
-                            {sortedConnectors.map((connector) => {
-                                // icon logic
-                                const getWalletIcon = (id: string) => {
-                                    if (id === 'coinbaseWalletSDK') return 'https://avatars.githubusercontent.com/u/18060234?s=200&v=4';
-                                    if (id === 'metaMask') return 'https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg';
-                                    if (id === 'walletConnect') return 'https://explorer-api.walletconnect.com/v3/logo/lg/2b272c72-4682-4aa4-297c-9a4b3b3e2b02?format=png';
-                                    return connector.icon;
-                                };
-                                const iconUrl = getWalletIcon(connector.id);
-
-                                return (
-                                    <button
-                                        key={connector.uid}
-                                        onClick={() => handleConnect(connector)}
-                                        disabled={isPending}
-                                        className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${connector.id === 'coinbaseWalletSDK'
-                                                ? 'bg-blue-600 hover:bg-blue-500 border-blue-500 text-white'
-                                                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-                                            }`}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            {iconUrl ? (
-                                                <div className="w-8 h-8 rounded-full bg-white/10 p-1 flex items-center justify-center overflow-hidden">
-                                                    <img
-                                                        src={iconUrl}
-                                                        alt={connector.name}
-                                                        className="w-full h-full object-contain"
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
-                                                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                                    </svg>
-                                                </div>
-                                            )}
-                                            <span className="font-semibold text-lg">{connector.name}</span>
-                                        </div>
-                                        {connector.id === 'coinbaseWalletSDK' && (
-                                            <span className="bg-white/20 text-xs px-2 py-1 rounded">Recommended</span>
-                                        )}
-                                    </button>
-                                )
-                            })}
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

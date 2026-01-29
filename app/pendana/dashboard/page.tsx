@@ -7,7 +7,22 @@ import { investmentAPI, InvestorPortfolio, ActiveInvestment } from '@/lib/api/us
 
 const numberId = new Intl.NumberFormat('id-ID');
 
+import { useAuth } from '@/lib/context/AuthContext';
+import {
+  Identity,
+  Name,
+  Address,
+  Avatar,
+  EthBalance
+} from '@coinbase/onchainkit/identity';
+import { OnchainKitProvider } from '@coinbase/onchainkit';
+import { base } from 'wagmi/chains';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// Removed invalid color import
+
+// Re-implementing logic
 function InvestorDashboardContent() {
+  const { user } = useAuth();
   const [portfolio, setPortfolio] = useState<InvestorPortfolio | null>(null);
   const [investments, setInvestments] = useState<ActiveInvestment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,12 +106,35 @@ function InvestorDashboardContent() {
     <DashboardLayout role="investor">
       <div className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
         <div className="mx-auto flex max-w-6xl flex-col gap-8">
-          <header className="space-y-2">
-            <p className="text-sm font-semibold tracking-wide text-cyan-300/80">Pendana &bull; Dashboard</p>
-            <h1 className="text-3xl font-bold text-slate-50">Ringkasan Aset</h1>
-            <p className="max-w-3xl text-sm text-slate-400">
-              Pantau Nilai Pembiayaan Berjalan, realisasi imbal hasil, dan distribusi aset lintas prioritas.
-            </p>
+          <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <p className="text-sm font-semibold tracking-wide text-cyan-300/80">Pendana &bull; Dashboard</p>
+              <h1 className="text-3xl font-bold text-slate-50">Ringkasan Aset</h1>
+              <p className="max-w-3xl text-sm text-slate-400">
+                Pantau Nilai Pembiayaan Berjalan, realisasi imbal hasil, dan distribusi aset lintas prioritas.
+              </p>
+            </div>
+
+            {/* User Profile & Basename Identity */}
+            <div className="flex items-center gap-4 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+              {user?.wallet_address && (
+                <Identity
+                  address={user.wallet_address as `0x${string}`}
+                  schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
+                >
+                  <Avatar className="h-10 w-10" />
+                  <div className="flex flex-col">
+                    <Name className="text-sm font-semibold text-slate-100" />
+                    <Address className="text-xs text-slate-400" />
+                  </div>
+                </Identity>
+              )}
+              <div className="h-8 w-[1px] bg-slate-700 mx-2 hidden md:block" />
+              <div className="flex flex-col">
+                <span className="text-xs text-slate-400">Akun Vessel</span>
+                <span className="text-sm font-medium text-slate-200">{user?.profile?.full_name || user?.username}</span>
+              </div>
+            </div>
           </header>
 
           <section className="grid gap-4 md:grid-cols-3">
@@ -165,11 +203,10 @@ function InvestorDashboardContent() {
                         </Td>
                         <Td>
                           <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                              row.tranche === 'priority'
-                                ? 'bg-blue-500/15 text-blue-200 border border-blue-500/40'
-                                : 'bg-amber-500/15 text-amber-200 border border-amber-500/40'
-                            }`}
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${row.tranche === 'priority'
+                              ? 'bg-blue-500/15 text-blue-200 border border-blue-500/40'
+                              : 'bg-amber-500/15 text-amber-200 border border-amber-500/40'
+                              }`}
                           >
                             {row.tranche_display}
                           </span>

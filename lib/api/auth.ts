@@ -134,14 +134,14 @@ class AuthAPI {
     });
   }
 
-  async walletLogin(data: { wallet_address: string; signature: string }): Promise<APIResponse<LoginResponse>> {
+  async walletLogin(data: { wallet_address: string; signature: string; message: string; nonce: string }): Promise<APIResponse<LoginResponse>> {
     return this.request<LoginResponse>('/auth/wallet/login', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async walletRegister(data: { wallet_address: string; signature: string; role?: string }): Promise<APIResponse<LoginResponse>> {
+  async walletRegister(data: { wallet_address: string; signature: string; message: string; nonce: string; cooperative_agreement: boolean }): Promise<APIResponse<LoginResponse>> {
     return this.request<LoginResponse>('/auth/wallet/register', {
       method: 'POST',
       body: JSON.stringify(data),
