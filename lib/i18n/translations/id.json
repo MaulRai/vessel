@@ -69,7 +69,8 @@
         "exporterCta": "Anda seorang eksportir?",
         "registerExporter": "Daftar sebagai Eksportir/Mitra",
         "nonCustodial": "Non-Kustodial",
-        "onChain": "On-Chain"
+        "onChain": "On-Chain",
+        "authenticating": "Mengautentikasikan..."
     },
     "roles": {
         "investor": "Pendana",
