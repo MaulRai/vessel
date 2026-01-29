@@ -11,6 +11,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { UserRole } from '../types/auth';
 import { base, baseSepolia } from 'wagmi/chains';
+import { useInvestorWallet } from '../context/InvestorWalletContext';
 
 interface NavItem {
   href: string;
@@ -164,7 +165,8 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const { user, logout } = useAuth();
   const { t } = useLanguage();
   const { address } = useAccount();
-  const { disconnect } = useDisconnect();
+  const { disconnect: wagmiDisconnect } = useDisconnect();
+  const { disconnectWallet } = useInvestorWallet();
   const chainId = useChainId();
   const chains = useChains();
   const { switchChain, isPending: isSwitching } = useSwitchChain();
@@ -185,7 +187,15 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   };
 
   const handleDisconnectWallet = () => {
-    disconnect();
+    // Clear wagmi connection
+    wagmiDisconnect();
+    // Clear investor wallet context
+    disconnectWallet();
+    // Clear auth tokens explicitly
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+
     router.push('/pendana/connect');
   };
 

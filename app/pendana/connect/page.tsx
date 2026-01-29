@@ -21,7 +21,7 @@ export default function InvestorConnectPage() {
     const { switchChain, isPending: isSwitching, error: switchErrorRaw } = useSwitchChain();
     const { signMessageAsync } = useSignMessage();
     const { t, language, setLanguage } = useLanguage();
-    const { isConnected: investorConnected, loginInvestor } = useInvestorWallet();
+    const { isConnected: investorConnected, loginInvestor, isLoading: isInvestorLoading } = useInvestorWallet();
     const expectedChainId = ONCHAINKIT_CONFIG.chain.id;
     const switchError = switchErrorRaw instanceof Error ? switchErrorRaw : null;
     const isWrongChain = wagmiConnected && chainId !== expectedChainId;
@@ -95,10 +95,11 @@ export default function InvestorConnectPage() {
 
     useEffect(() => {
         // Only attempt auth if wagmi connected, correct chain, address exists, and not already authenticated
-        if (wagmiConnected && !isWrongChain && address && !hasAuthenticated && !isAuthenticating && !authAttemptedRef.current) {
+        // AND investor wallet context is done loading (to ensure we don't re-auth if already connected)
+        if (!isInvestorLoading && wagmiConnected && !isWrongChain && address && !hasAuthenticated && !isAuthenticating && !authAttemptedRef.current) {
             authenticateWithBackend(address);
         }
-    }, [wagmiConnected, isWrongChain, address, hasAuthenticated, isAuthenticating, authenticateWithBackend]);
+    }, [isInvestorLoading, wagmiConnected, isWrongChain, address, hasAuthenticated, isAuthenticating, authenticateWithBackend]);
 
     return (
         <div className="min-h-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">
