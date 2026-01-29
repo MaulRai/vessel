@@ -143,8 +143,8 @@ function PoolListContent() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">{t('admin.pools.list.heroTitle')}</h1>
-                <p className="text-blue-200/70 mt-1">{t('admin.pools.list.heroSubtitle')}</p>
+                <h1 className="text-3xl font-bold text-white">{t('admin.invoiceList.heroTitle')}</h1>
+                <p className="text-blue-200/70 mt-1">{t('admin.invoiceList.heroSubtitle')}</p>
               </div>
             </div>
             <Link
@@ -154,7 +154,7 @@ function PoolListContent() {
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span>{t('admin.pools.list.createCta')}</span>
+              <span>{t('admin.invoiceDetail.pools.list.createCta')}</span>
             </Link>
           </div>
         </div>

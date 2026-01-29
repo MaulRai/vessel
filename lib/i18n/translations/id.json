@@ -339,6 +339,72 @@
             "review": "Review",
             "processing": "Memproses..."
         },
+        "dashboard": {
+            "hero": {
+                "welcome": "Selamat datang kembali,",
+                "defaultName": "Admin",
+                "subtitle": "Panel Kontrol Admin VESSEL"
+            },
+            "stats": {
+                "totalUsers": {
+                    "label": "Total Pengguna",
+                    "badge": "Aktif"
+                },
+                "investors": {
+                    "label": "Investor"
+                },
+                "mitras": {
+                    "label": "Mitra"
+                },
+                "system": {
+                    "label": "Status Sistem",
+                    "value": "Operasional"
+                }
+            },
+            "quickActions": {
+                "title": "Aksi Cepat",
+                "invoices": {
+                    "label": "Review Invoice",
+                    "description": "Tinjau permohonan invoice",
+                    "cta": "Kelola"
+                },
+                "pools": {
+                    "label": "Pool Pendanaan",
+                    "description": "Kelola pool pendanaan",
+                    "cta": "Kelola"
+                },
+                "mitra": {
+                    "label": "Review Mitra",
+                    "description": "Tinjau aplikasi mitra",
+                    "cta": "Mulai Review"
+                },
+                "mitraList": {
+                    "label": "Daftar Mitra",
+                    "description": "Daftar mitra terverifikasi",
+                    "cta": "Lihat Daftar"
+                }
+            },
+            "recent": {
+                "title": "Pengguna Terbaru",
+                "subtitle": "Pengguna terbaru yang mendaftar",
+                "viewAll": "Lihat Semua",
+                "empty": "Belum ada pengguna",
+                "columns": {
+                    "user": "Pengguna",
+                    "role": "Peran",
+                    "status": "Status"
+                },
+                "status": {
+                    "verified": "Terverifikasi",
+                    "pending": "Menunggu"
+                }
+            },
+            "roles": {
+                "investor": "Investor",
+                "mitra": "Mitra",
+                "admin": "Admin"
+            }
+        },
         "balance": {
             "back": "Kembali ke Dashboard",
             "tag": "Admin Panel",
@@ -462,6 +528,20 @@
                 "submit": "Tolak Aplikasi"
             }
         },
+        "mitraDirectory": {
+            "title": "Daftar Mitra",
+            "subtitle": "Seluruh mitra terverifikasi yang terdaftar dalam platform.",
+            "table": {
+                "company": "Perusahaan",
+                "account": "Akun",
+                "revenue": "Pendapatan",
+                "joined": "Tanggal Bergabung",
+                "action": "Aksi"
+            },
+            "empty": "Belum ada mitra terverifikasi.",
+            "viewDetail": "Lihat Detail",
+            "noteApproved": "Menampilkan mitra dengan status Approved"
+        },
         "invoiceList": {
             "heroTitle": "Review Invoice",
             "heroSubtitle": "Review dan setujui permintaan pendanaan dari mitra",
@@ -501,8 +581,8 @@
             },
             "actions": {
                 "createPool": "Buat Funding Pool",
-                "approve": "Approve Invoice",
-                "reject": "Reject Invoice"
+                "approve": "Setujui Invoice",
+                "reject": "Tolak Invoice"
             },
             "info": {
                 "title": "Informasi Invoice",
@@ -537,13 +617,13 @@
                 "view": "Lihat"
             },
             "gradeSuggestion": {
-                "title": "Grade Suggestion",
-                "score": "Score",
-                "countryRisk": "Country Risk",
-                "countryScore": "Country Score",
-                "historyScore": "History Score",
-                "documentScore": "Document Score",
-                "fundingLimit": "Funding Limit"
+                "title": "Rekomendasi Grade",
+                "score": "Skor",
+                "countryRisk": "Risiko Negara",
+                "countryScore": "Skor Negara",
+                "historyScore": "Skor Riwayat",
+                "documentScore": "Skor Dokumen",
+                "fundingLimit": "Batas Pendanaan"
             },
             "gradePicker": {
                 "title": "Pilih Grade",
@@ -559,7 +639,7 @@
             "modals": {
                 "approveTitle": "Konfirmasi Persetujuan",
                 "approveQuestion": "Apakah Anda yakin ingin menyetujui invoice ini dengan Grade",
-                "yesApprove": "Ya, Approve",
+                "yesApprove": "Ya, Setujui",
                 "cancel": "Batal",
                 "rejectTitle": "Tolak Invoice",
                 "rejectReasonLabel": "Alasan Penolakan",
@@ -569,13 +649,13 @@
         },
         "pools": {
             "status": {
-                "open": "Open",
+                "open": "Terbuka",
                 "filled": "Terisi",
                 "disbursed": "Dicairkan",
                 "closed": "Ditutup"
             },
             "list": {
-                "heroTitle": "Funding Pools",
+                "heroTitle": "Pool Pendanaan",
                 "heroSubtitle": "Kelola pool pendanaan untuk investor",
                 "createCta": "Buat Pool Baru",
                 "table": {
