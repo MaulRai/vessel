@@ -244,24 +244,41 @@ function CreatePoolContent() {
                   </div>
 
                   <div className="pt-4 border-t border-slate-700/50 space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">{t('admin.pools.create.labels.priorityTarget')}</span>
-                      <span className="text-white font-medium">
-                        {formatCurrency((selectedInvoice.idr_amount || selectedInvoice.amount) * (selectedInvoice.priority_ratio || 0.8), 'IDR')}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">{t('admin.pools.create.labels.catalystTarget')}</span>
-                      <span className="text-white font-medium">
-                        {formatCurrency((selectedInvoice.idr_amount || selectedInvoice.amount) * (selectedInvoice.catalyst_ratio || 0.2), 'IDR')}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm pt-3 border-t border-slate-700/50">
-                      <span className="text-slate-300 font-medium">{t('admin.pools.create.labels.totalTarget')}</span>
-                      <span className="text-purple-400 font-bold">
-                        {formatCurrency(selectedInvoice.idr_amount || selectedInvoice.amount, 'IDR')}
-                      </span>
-                    </div>
+                    {(() => {
+                      const amount = selectedInvoice.idr_amount || selectedInvoice.amount;
+                      const targetAmount = selectedInvoice.advance_amount ||
+                        (amount * ((selectedInvoice.funding_limit_percentage || selectedInvoice.advance_percentage || 80) / 100));
+                      const priRatio = selectedInvoice.priority_ratio || 0.8;
+                      const catRatio = selectedInvoice.catalyst_ratio || 0.2;
+
+                      return (
+                        <>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-slate-400">{t('admin.pools.create.labels.priorityTarget')}</span>
+                            <span className="text-white font-medium">
+                              {formatCurrency(targetAmount * priRatio, 'IDR')}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-slate-400">{t('admin.pools.create.labels.catalystTarget')}</span>
+                            <span className="text-white font-medium">
+                              {formatCurrency(targetAmount * catRatio, 'IDR')}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm pt-3 border-t border-slate-700/50">
+                            <div className="flex flex-col">
+                              <span className="text-slate-300 font-medium">{t('admin.pools.create.labels.totalTarget')}</span>
+                              <span className="text-[10px] text-slate-500 uppercase">
+                                {selectedInvoice.funding_limit_percentage || selectedInvoice.advance_percentage || 80}% of Original Invoice
+                              </span>
+                            </div>
+                            <span className="text-purple-400 font-bold">
+                              {formatCurrency(targetAmount, 'IDR')}
+                            </span>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
 
                   <button
