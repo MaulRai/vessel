@@ -323,6 +323,18 @@ export interface FundingPool {
 }
 
 class AdminAPIExtended extends AdminAPI {
+    private mapBackendPoolToFrontend(item: any): FundingPool {
+        if (!item) return item;
+        // The backend returns FundingPoolResponse which has a nested 'pool' and 'invoice'
+        if (item.pool) {
+            return {
+                ...item.pool,
+                invoice: item.invoice || item.pool.invoice,
+            };
+        }
+        return item;
+    }
+
     async getPendingInvoices(
         page: number = 1,
         perPage: number = 10
@@ -438,7 +450,7 @@ class AdminAPIExtended extends AdminAPI {
                 return {
                     success: true,
                     data: {
-                        pools: rawRes.data as FundingPool[],
+                        pools: rawRes.data.map((item: any) => this.mapBackendPoolToFrontend(item)),
                         total: pagination?.total ?? 0,
                         page: pagination?.page ?? page,
                         per_page: pagination?.per_page ?? perPage,
@@ -529,7 +541,7 @@ class AdminAPIExtended extends AdminAPI {
                 return {
                     success: true,
                     data: {
-                        pools: rawRes.data as FundingPool[],
+                        pools: rawRes.data.map((item: any) => this.mapBackendPoolToFrontend(item)),
                         total: pagination?.total ?? 0,
                         page: pagination?.page ?? page,
                         per_page: pagination?.per_page ?? perPage,
