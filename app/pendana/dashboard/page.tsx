@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { investmentAPI, InvestorPortfolio, ActiveInvestment } from '@/lib/api/user';
@@ -94,14 +95,30 @@ function InvestorDashboardContent() {
 
   return (
     <DashboardLayout role="investor">
-      <div className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
+      <div className="min-h-screen bg-slate-950 px-4 text-slate-100">
         <div className="mx-auto flex max-w-6xl flex-col gap-8">
-          <header className="space-y-2">
-            <p className="text-sm font-semibold tracking-wide text-cyan-300/80">Pendana &bull; Dashboard</p>
-            <h1 className="text-3xl font-bold text-slate-50">Ringkasan Aset</h1>
-            <p className="max-w-3xl text-sm text-slate-400">
-              Pantau Nilai Pembiayaan Berjalan, realisasi imbal hasil, dan distribusi aset lintas prioritas.
-            </p>
+          <header className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-900/50 via-sky-800/40 to-transparent p-6 sm:p-8">
+            <div className="absolute inset-0">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_20%,rgba(56,189,248,0.18),rgba(8,47,73,0))]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,rgba(14,165,233,0.12),rgba(8,47,73,0))]" />
+            </div>
+            <div className="relative flex items-center gap-4">
+              <div className="relative h-24 w-24 rounded-2xl overflow-hidden shadow-lg shadow-sky-900/40">
+                <Image
+                  src="/assets/general/investor.png"
+                  alt="Investor illustration"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">Ringkasan Aset</h1>
+                <p className="mt-1 max-w-3xl text-sm text-slate-200/80">
+                  Pantau nilai pembiayaan berjalan, realisasi imbal hasil, dan distribusi aset lintas prioritas.
+                </p>
+              </div>
+            </div>
           </header>
 
           <section className="grid gap-4 md:grid-cols-3">
