@@ -6,8 +6,11 @@ import Link from 'next/link';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { adminAPI, InvoiceReviewData, GradeSuggestion } from '@/lib/api/admin';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 function InvoiceReviewDetailContent() {
+  const { t, language } = useLanguage();
+  const locale = language === 'en' ? 'en-US' : 'id-ID';
   const params = useParams();
   const router = useRouter();
   const invoiceId = params.id as string;
@@ -49,7 +52,7 @@ function InvoiceReviewDetailContent() {
   }, [invoiceId]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
+    return new Date(dateString).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -58,9 +61,9 @@ function InvoiceReviewDetailContent() {
 
   const formatCurrency = (amount: number, currency: string = 'IDR') => {
     if (currency === 'IDR') {
-      return `Rp ${amount.toLocaleString('id-ID')}`;
+      return `Rp ${amount.toLocaleString(locale)}`;
     }
-    return `${currency} ${amount.toLocaleString('en-US')}`;
+    return `${currency} ${amount.toLocaleString(locale)}`;
   };
 
   const getGradeColor = (grade: string) => {

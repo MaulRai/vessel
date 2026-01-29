@@ -174,7 +174,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const isOnBase = chainId === base.id || chainId === baseSepolia.id;
 
   const navItems = role === 'investor' ? getInvestorNavItems(t) : role === 'admin' ? getAdminNavItems(t) : getMitraNavItems(t);
-  const roleLabel = role === 'investor' ? t('roles.investor') : role === 'admin' ? t('roles.admin') : t('roles.exporter');
+  const roleLabel = role === 'investor' ? t('roles.investor') : role === 'admin' ? t('admin.dashboard.roles.admin') : t('roles.exporter');
   const roleColor = role === 'investor' ? 'cyan' : role === 'admin' ? 'purple' : 'teal';
   const dashboardHref = role === 'investor' ? '/pendana/dashboard' : role === 'admin' ? '/admin/dashboard' : '/eksportir/dashboard';
   const isOnDashboard = pathname === dashboardHref;

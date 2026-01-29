@@ -7,9 +7,12 @@ import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { adminAPI, UserListItem } from '@/lib/api/admin';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 function AdminDashboardContent() {
   const { user } = useAuth();
+  const { t, language } = useLanguage();
+  const locale = language === 'en' ? 'en-US' : 'id-ID';
   const [stats, setStats] = useState({
     totalUsers: 0,
     investors: 0,
@@ -51,8 +54,8 @@ function AdminDashboardContent() {
   const quickActions = [
     {
       href: '/admin/dashboard/invoices',
-      label: 'Invoice Review',
-      description: 'Review permohonan invoice',
+      label: t('admin.dashboard.quickActions.invoices.label'),
+      description: t('admin.dashboard.quickActions.invoices.description'),
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -62,8 +65,8 @@ function AdminDashboardContent() {
     },
     {
       href: '/admin/dashboard/pools',
-      label: 'Funding Pools',
-      description: 'Kelola pool pendanaan',
+      label: t('admin.dashboard.quickActions.pools.label'),
+      description: t('admin.dashboard.quickActions.pools.description'),
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -73,8 +76,8 @@ function AdminDashboardContent() {
     },
     {
       href: '/admin/dashboard/mitra',
-      label: 'Mitra Review',
-      description: 'Review aplikasi mitra',
+      label: t('admin.dashboard.quickActions.mitra.label'),
+      description: t('admin.dashboard.quickActions.mitra.description'),
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -86,9 +89,9 @@ function AdminDashboardContent() {
 
   const getRoleBadge = (role: string) => {
     const config: Record<string, { label: string; className: string }> = {
-      investor: { label: 'Investor', className: 'bg-blue-500/10 text-blue-400 border border-blue-500/30' },
-      mitra: { label: 'Mitra', className: 'bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/30' },
-      admin: { label: 'Admin', className: 'bg-violet-500/10 text-violet-400 border border-violet-500/30' },
+      investor: { label: t('admin.dashboard.roles.investor'), className: 'bg-blue-500/10 text-blue-400 border border-blue-500/30' },
+      mitra: { label: t('admin.dashboard.roles.mitra'), className: 'bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/30' },
+      admin: { label: t('admin.dashboard.roles.admin'), className: 'bg-violet-500/10 text-violet-400 border border-violet-500/30' },
     };
     const c = config[role] || { label: role, className: 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/30' };
     return <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${c.className}`}>{c.label}</span>;
@@ -115,9 +118,9 @@ function AdminDashboardContent() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">
-                {'Welcome back, '}{user?.username || 'Admin'}
+                {`${t('admin.dashboard.hero.welcome')} ${user?.username || t('admin.dashboard.hero.defaultName')}`}
               </h1>
-              <p className="text-violet-200/70 mt-1 text-base">VESSEL Admin Control Panel</p>
+              <p className="text-violet-200/70 mt-1 text-base">{t('admin.dashboard.hero.subtitle')}</p>
             </div>
           </div>
         </div>
@@ -133,10 +136,10 @@ function AdminDashboardContent() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
-                <span className="text-xs font-medium text-violet-400 bg-violet-500/10 px-2 py-1 rounded-full">Live</span>
+                <span className="text-xs font-medium text-violet-400 bg-violet-500/10 px-2 py-1 rounded-full">{t('admin.dashboard.stats.totalUsers.badge')}</span>
               </div>
-              <p className="text-sm font-medium text-zinc-400 mb-1">Total Users</p>
-              <p className="text-3xl font-bold text-white">{loading ? '...' : (stats.totalUsers ?? 0).toLocaleString()}</p>
+              <p className="text-sm font-medium text-zinc-400 mb-1">{t('admin.dashboard.stats.totalUsers.label')}</p>
+              <p className="text-3xl font-bold text-white">{loading ? '...' : (stats.totalUsers ?? 0).toLocaleString(locale)}</p>
             </div>
           </div>
 
@@ -151,8 +154,8 @@ function AdminDashboardContent() {
                 </div>
                 <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full">+12%</span>
               </div>
-              <p className="text-sm font-medium text-zinc-400 mb-1">Investors</p>
-              <p className="text-3xl font-bold text-white">{loading ? '...' : (stats.investors ?? 0).toLocaleString()}</p>
+              <p className="text-sm font-medium text-zinc-400 mb-1">{t('admin.dashboard.stats.investors.label')}</p>
+              <p className="text-3xl font-bold text-white">{loading ? '...' : (stats.investors ?? 0).toLocaleString(locale)}</p>
             </div>
           </div>
 
@@ -167,8 +170,8 @@ function AdminDashboardContent() {
                 </div>
                 <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full">+8%</span>
               </div>
-              <p className="text-sm font-medium text-zinc-400 mb-1">Mitra Partners</p>
-              <p className="text-3xl font-bold text-white">{loading ? '...' : (stats.mitras ?? 0).toLocaleString()}</p>
+              <p className="text-sm font-medium text-zinc-400 mb-1">{t('admin.dashboard.stats.mitras.label')}</p>
+              <p className="text-3xl font-bold text-white">{loading ? '...' : (stats.mitras ?? 0).toLocaleString(locale)}</p>
             </div>
           </div>
 
@@ -185,15 +188,15 @@ function AdminDashboardContent() {
                   <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse" />
                 </div>
               </div>
-              <p className="text-sm font-medium text-zinc-400 mb-1">System Status</p>
-              <p className="text-3xl font-bold text-emerald-400">Operational</p>
+              <p className="text-sm font-medium text-zinc-400 mb-1">{t('admin.dashboard.stats.system.label')}</p>
+              <p className="text-3xl font-bold text-emerald-400">{t('admin.dashboard.stats.system.value')}</p>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
+          <h2 className="text-xl font-bold text-white mb-4">{t('admin.dashboard.quickActions.title')}</h2>
           <div className="grid md:grid-cols-4 gap-4">
             <Link
               href="/admin/dashboard/invoices"
@@ -206,10 +209,10 @@ function AdminDashboardContent() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-white text-lg mb-2">Invoice Review</h3>
-                <p className="text-sm text-zinc-400">Review permohonan invoice</p>
+                <h3 className="font-semibold text-white text-lg mb-2">{t('admin.dashboard.quickActions.invoices.label')}</h3>
+                <p className="text-sm text-zinc-400">{t('admin.dashboard.quickActions.invoices.description')}</p>
                 <div className="mt-4 flex items-center text-violet-400 text-sm font-medium">
-                  <span>Manage</span>
+                  <span>{t('admin.dashboard.quickActions.invoices.cta')}</span>
                   <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -228,10 +231,10 @@ function AdminDashboardContent() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-white text-lg mb-2">Funding Pools</h3>
-                <p className="text-sm text-zinc-400">Kelola pool pendanaan</p>
+                <h3 className="font-semibold text-white text-lg mb-2">{t('admin.dashboard.quickActions.pools.label')}</h3>
+                <p className="text-sm text-zinc-400">{t('admin.dashboard.quickActions.pools.description')}</p>
                 <div className="mt-4 flex items-center text-blue-400 text-sm font-medium">
-                  <span>Manage</span>
+                  <span>{t('admin.dashboard.quickActions.pools.cta')}</span>
                   <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -250,10 +253,10 @@ function AdminDashboardContent() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-white text-lg mb-2">Mitra Review</h3>
-                <p className="text-sm text-zinc-400">Review aplikasi mitra</p>
+                <h3 className="font-semibold text-white text-lg mb-2">{t('admin.dashboard.quickActions.mitra.label')}</h3>
+                <p className="text-sm text-zinc-400">{t('admin.dashboard.quickActions.mitra.description')}</p>
                 <div className="mt-4 flex items-center text-fuchsia-400 text-sm font-medium">
-                  <span>Start Review</span>
+                  <span>{t('admin.dashboard.quickActions.mitra.cta')}</span>
                   <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -272,10 +275,10 @@ function AdminDashboardContent() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-white text-lg mb-2">Mitra List</h3>
-                <p className="text-sm text-zinc-400">Daftar mitra terverifikasi</p>
+                <h3 className="font-semibold text-white text-lg mb-2">{t('admin.dashboard.quickActions.mitraList.label')}</h3>
+                <p className="text-sm text-zinc-400">{t('admin.dashboard.quickActions.mitraList.description')}</p>
                 <div className="mt-4 flex items-center text-teal-400 text-sm font-medium">
-                  <span>View List</span>
+                  <span>{t('admin.dashboard.quickActions.mitraList.cta')}</span>
                   <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -289,14 +292,14 @@ function AdminDashboardContent() {
         <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 overflow-hidden">
           <div className="flex items-center justify-between p-6 border-b border-white/10">
             <div>
-              <h2 className="text-xl font-bold text-white">Recent Users</h2>
-              <p className="text-sm text-zinc-400 mt-1">Latest registered users on the platform</p>
+              <h2 className="text-xl font-bold text-white">{t('admin.dashboard.recent.title')}</h2>
+              <p className="text-sm text-zinc-400 mt-1">{t('admin.dashboard.recent.subtitle')}</p>
             </div>
             <Link
               href="/admin/dashboard/balance"
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 text-sm font-medium transition-all border border-violet-500/20"
             >
-              <span>View All</span>
+              <span>{t('admin.dashboard.recent.viewAll')}</span>
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
@@ -316,16 +319,16 @@ function AdminDashboardContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <p className="text-zinc-400">No users yet</p>
+              <p className="text-zinc-400">{t('admin.dashboard.recent.empty')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-zinc-400 text-xs font-semibold uppercase tracking-wider border-b border-white/5">
-                    <th className="px-6 py-4">User</th>
-                    <th className="px-6 py-4">Role</th>
-                    <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4">{t('admin.dashboard.recent.columns.user')}</th>
+                    <th className="px-6 py-4">{t('admin.dashboard.recent.columns.role')}</th>
+                    <th className="px-6 py-4">{t('admin.dashboard.recent.columns.status')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -353,7 +356,7 @@ function AdminDashboardContent() {
                             }`}
                         >
                           <div className={`h-1.5 w-1.5 rounded-full ${u.is_verified ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                          {u.is_verified ? 'Verified' : 'Pending'}
+                          {u.is_verified ? t('admin.dashboard.recent.status.verified') : t('admin.dashboard.recent.status.pending')}
                         </span>
                       </td>
                     </tr>

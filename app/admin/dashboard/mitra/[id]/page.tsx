@@ -5,10 +5,14 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { adminAPI, MitraApplicationDetail, PendingInvoice, FundingPool } from '@/lib/api/admin';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 type Tab = 'profile' | 'invoices' | 'pools';
 
 export default function MitraDetailPage() {
+  const { t, language } = useLanguage();
+  const locale = language === 'en' ? 'en-US' : 'id-ID';
+
   const params = useParams();
   const id = params.id as string;
   const [activeTab, setActiveTab] = useState<Tab>('profile');
@@ -66,7 +70,7 @@ export default function MitraDetailPage() {
   }, [application?.user_id, activeTab]);
 
   const handleApprove = async () => {
-    if (!confirm('Apakah anda yakin ingin menyetujui aplikasi mitra ini?')) return;
+    if (!confirm(t('admin.mitraDetail.alerts.confirmApprove'))) return;
 
     setActionLoading(true);
     try {
@@ -77,13 +81,13 @@ export default function MitraDetailPage() {
         if (freshData.success && freshData.data) {
           setApplication(freshData.data);
         }
-        alert('Aplikasi mitra berhasil disetujui');
+        alert(t('admin.mitraDetail.alerts.approveSuccess'));
       } else {
-        alert('Gagal menyetujui aplikasi: ' + (typeof res.error === 'string' ? res.error : res.error?.message));
+        alert(t('admin.mitraDetail.alerts.approveFail') + ': ' + (typeof res.error === 'string' ? res.error : res.error?.message));
       }
     } catch (err) {
       console.error('Approve error', err);
-      alert('Terjadi kesalahan saat menyetujui aplikasi');
+      alert(t('common.errorOccurred'));
     } finally {
       setActionLoading(false);
     }
@@ -91,7 +95,7 @@ export default function MitraDetailPage() {
 
   const handleReject = async () => {
     if (!rejectReason.trim()) {
-      alert('Harap isi alasan penolakan');
+      alert(t('admin.mitraDetail.alerts.rejectReasonRequired'));
       return;
     }
 
@@ -106,13 +110,13 @@ export default function MitraDetailPage() {
         }
         setRejectModalOpen(false);
         setRejectReason('');
-        alert('Aplikasi mitra berhasil ditolak');
+        alert(t('admin.mitraDetail.alerts.rejectSuccess'));
       } else {
-        alert('Gagal menolak aplikasi: ' + (typeof res.error === 'string' ? res.error : res.error?.message));
+        alert(t('admin.mitraDetail.alerts.rejectFail') + ': ' + (typeof res.error === 'string' ? res.error : res.error?.message));
       }
     } catch (err) {
       console.error('Reject error', err);
-      alert('Terjadi kesalahan saat menolak aplikasi');
+      alert(t('common.errorOccurred'));
     } finally {
       setActionLoading(false);
     }
@@ -132,9 +136,9 @@ export default function MitraDetailPage() {
     return (
       <DashboardLayout role="admin">
         <div className="text-center py-20">
-          <h2 className="text-xl text-slate-300">Mitra tidak ditemukan</h2>
+          <h2 className="text-xl text-slate-300">{t('admin.mitraDetail.notFound')}</h2>
           <Link href="/admin/dashboard/mitra" className="text-cyan-400 hover:text-cyan-300 mt-4 inline-block">
-            Kembali ke Daftar
+            {t('admin.mitraDetail.backToList')}
           </Link>
         </div>
       </DashboardLayout>
@@ -150,11 +154,11 @@ export default function MitraDetailPage() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Kembali ke Laman Verifikasi Mitra
+              {t('admin.mitraDetail.backToVerification')}
             </Link>
             <h1 className="text-3xl font-bold text-slate-50">{application.company_name}</h1>
             <p className="text-slate-400 text-sm mt-1">
-              Bergabung sejak {new Date(application.created_at).toLocaleDateString('id-ID')}
+              {t('admin.mitraDetail.joinedSince')} {new Date(application.created_at).toLocaleDateString(locale)}
             </p>
           </div>
 
@@ -163,7 +167,11 @@ export default function MitraDetailPage() {
               application.status === 'rejected' ? 'bg-rose-500/10 text-rose-400 border-rose-500/30' :
                 'bg-amber-500/10 text-amber-400 border-amber-500/30'
               }`}>
-              {application.status === 'approved' ? 'Disetujui' : application.status === 'rejected' ? 'Ditolak' : 'Menunggu Verifikasi'}
+              {application.status === 'approved'
+                ? t('admin.common.status.approved')
+                : application.status === 'rejected'
+                  ? t('admin.common.status.rejected')
+                  : t('admin.common.status.pending')}
             </div>
 
             {application.status === 'pending' && (
@@ -173,14 +181,14 @@ export default function MitraDetailPage() {
                   disabled={actionLoading}
                   className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:border-rose-500 text-sm font-medium rounded-lg transition-all"
                 >
-                  Tolak
+                  {t('admin.mitraDetail.actions.reject')}
                 </button>
                 <button
                   onClick={handleApprove}
                   disabled={actionLoading}
                   className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-medium rounded-lg shadow-lg shadow-emerald-900/20 transition-all"
                 >
-                  {actionLoading ? 'Memproses...' : 'Setujui Aplikasi'}
+                  {actionLoading ? t('admin.common.processing') : t('admin.mitraDetail.actions.approve')}
                 </button>
               </div>
             )}
@@ -191,9 +199,9 @@ export default function MitraDetailPage() {
         <div className="border-b border-slate-800">
           <nav className="-mb-px flex space-x-8" aria-label="Tabs">
             {[
-              { id: 'profile', name: 'Profil Perusahaan' },
-              { id: 'invoices', name: 'Invoice' },
-              { id: 'pools', name: 'Funding Pools' },
+              { id: 'profile', name: t('admin.mitraDetail.tabs.profile') },
+              { id: 'invoices', name: t('admin.mitraDetail.tabs.invoices') },
+              { id: 'pools', name: t('admin.mitraDetail.tabs.pools') },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -217,39 +225,39 @@ export default function MitraDetailPage() {
             <div className="bg-slate-900/50 rounded-2xl border border-slate-800 p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">Informasi Umum</h3>
+                  <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">{t('admin.mitraDetail.profile.general')}</h3>
                   <dl className="space-y-4">
                     <div>
-                      <dt className="text-xs text-slate-500">NPWP</dt>
+                      <dt className="text-xs text-slate-500">{t('admin.mitraDetail.profile.npwp')}</dt>
                       <dd className="text-slate-200 font-mono">{application.npwp}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-slate-500">Tipe Perusahaan</dt>
+                      <dt className="text-xs text-slate-500">{t('admin.mitraDetail.profile.companyType')}</dt>
                       <dd className="text-slate-200">{application.company_type}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-slate-500">Pendapatan Tahunan</dt>
+                      <dt className="text-xs text-slate-500">{t('admin.mitraDetail.profile.annualRevenue')}</dt>
                       <dd className="text-slate-200">{application.annual_revenue}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-slate-500">Tahun Berdiri</dt>
+                      <dt className="text-xs text-slate-500">{t('admin.mitraDetail.profile.yearFounded')}</dt>
                       <dd className="text-slate-200">{application.year_founded || '-'}</dd>
                     </div>
                   </dl>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">Kontak & Alamat</h3>
+                  <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">{t('admin.mitraDetail.profile.contact')}</h3>
                   <dl className="space-y-4">
                     <div>
-                      <dt className="text-xs text-slate-500">Email Akun</dt>
+                      <dt className="text-xs text-slate-500">{t('admin.mitraDetail.profile.accountEmail')}</dt>
                       <dd className="text-slate-200">{application.user?.email || '-'}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-slate-500">Alamat</dt>
+                      <dt className="text-xs text-slate-500">{t('admin.mitraDetail.profile.address')}</dt>
                       <dd className="text-slate-200 whitespace-pre-wrap">{application.address}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-slate-500">Website</dt>
+                      <dt className="text-xs text-slate-500">{t('admin.mitraDetail.profile.website')}</dt>
                       <dd className="text-cyan-400">
                         {application.website_url ? (
                           <a href={application.website_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
@@ -263,25 +271,25 @@ export default function MitraDetailPage() {
               </div>
 
               <div className="border-t border-slate-800 pt-6">
-                <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">Deskripsi Bisnis</h3>
+                <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">{t('admin.mitraDetail.profile.description')}</h3>
                 <p className="text-slate-300 leading-relaxed bg-slate-950/30 p-4 rounded-xl border border-slate-800/50">
-                  {application.business_description || 'Tidak ada deskripsi'}
+                  {application.business_description || t('admin.mitraDetail.profile.noDescription')}
                 </p>
               </div>
 
               <div className="border-t border-slate-800 pt-6">
-                <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">Dokumen Legalitas</h3>
+                <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-3">{t('admin.mitraDetail.profile.documents')}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {[
-                    { label: 'NIB', url: application.nib_document_url },
-                    { label: 'Akta Pendirian', url: application.akta_pendirian_url },
-                    { label: 'KTP Direktur', url: application.ktp_direktur_url },
+                    { label: t('completeProfile.documents.nib'), url: application.nib_document_url },
+                    { label: t('completeProfile.documents.akta_pendirian'), url: application.akta_pendirian_url },
+                    { label: t('completeProfile.documents.ktp_direktur'), url: application.ktp_direktur_url },
                   ].map((doc) => (
                     <div key={doc.label} className="p-4 bg-slate-950/50 rounded-xl border border-slate-800 flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-slate-300">{doc.label}</p>
                         <p className={`text-xs mt-1 ${doc.url ? 'text-emerald-400' : 'text-rose-400'}`}>
-                          {doc.url ? 'Terupload' : 'Belum Upload'}
+                          {doc.url ? t('admin.mitraDetail.profile.uploaded') : t('admin.mitraDetail.profile.notUploaded')}
                         </p>
                       </div>
                       {doc.url && (
@@ -309,19 +317,19 @@ export default function MitraDetailPage() {
               <table className="min-w-full divide-y divide-slate-800">
                 <thead className="bg-slate-950/50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Invoice #</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Buyer</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Jatuh Tempo</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Action</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">{t('admin.mitraDetail.invoices.headerInvoice')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">{t('admin.mitraDetail.invoices.buyer')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">{t('admin.mitraDetail.invoices.amount')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">{t('admin.mitraDetail.invoices.dueDate')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">{t('admin.mitraDetail.invoices.status')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">{t('admin.mitraDetail.invoices.action')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800">
                   {invoices.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
-                        Belum ada invoice yang diajukan
+                        {t('admin.mitraDetail.invoices.empty')}
                       </td>
                     </tr>
                   ) : (
@@ -330,10 +338,10 @@ export default function MitraDetailPage() {
                         <td className="px-6 py-4 text-sm font-medium text-slate-200">{inv.invoice_number}</td>
                         <td className="px-6 py-4 text-sm text-slate-300">{inv.buyer_name}</td>
                         <td className="px-6 py-4 text-sm font-mono text-cyan-300">
-                          {inv.currency} {inv.amount.toLocaleString()}
+                          {inv.currency} {inv.amount.toLocaleString(locale)}
                         </td>
                         <td className="px-6 py-4 text-sm text-slate-400">
-                          {new Date(inv.due_date).toLocaleDateString('id-ID')}
+                          {new Date(inv.due_date).toLocaleDateString(locale)}
                         </td>
                         <td className="px-6 py-4">
                           <span className={`px-2 py-1 rounded text-xs font-medium border ${inv.status === 'funded' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
@@ -345,7 +353,7 @@ export default function MitraDetailPage() {
                         </td>
                         <td className="px-6 py-4">
                           <Link href={`/admin/dashboard/invoices/${inv.id}`} className="text-cyan-400 hover:text-cyan-300 text-sm font-medium">
-                            Review
+                            {t('admin.mitraDetail.invoices.review')}
                           </Link>
                         </td>
                       </tr>
@@ -361,7 +369,7 @@ export default function MitraDetailPage() {
               <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3">
                 {pools.length === 0 ? (
                   <div className="col-span-full text-center py-12 text-slate-500">
-                    Belum ada funding pool yang dibuat
+                    {t('admin.mitraDetail.pools.empty')}
                   </div>
                 ) : (
                   pools.map(pool => (
@@ -376,12 +384,12 @@ export default function MitraDetailPage() {
                       </div>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-slate-500">Target</span>
-                          <span className="text-slate-200 text-right">{pool.pool_currency} {pool.target_amount.toLocaleString()}</span>
+                          <span className="text-slate-500">{t('admin.mitraDetail.pools.target')}</span>
+                          <span className="text-slate-200 text-right">{pool.pool_currency} {pool.target_amount.toLocaleString(locale)}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-500">Funded</span>
-                          <span className="text-emerald-400 text-right">{pool.pool_currency} {pool.funded_amount.toLocaleString()}</span>
+                          <span className="text-slate-500">{t('admin.mitraDetail.pools.funded')}</span>
+                          <span className="text-emerald-400 text-right">{pool.pool_currency} {pool.funded_amount.toLocaleString(locale)}</span>
                         </div>
                         <div className="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
                           <div
@@ -394,7 +402,7 @@ export default function MitraDetailPage() {
                         href={`/admin/dashboard/pools/${pool.id}`}
                         className="mt-4 block w-full text-center py-2 rounded-lg border border-slate-700 hover:bg-slate-800 text-slate-300 text-sm transition-colors"
                       >
-                        Lihat Detail Pool
+                        {t('admin.mitraDetail.pools.view')}
                       </Link>
                     </div>
                   ))
@@ -409,17 +417,17 @@ export default function MitraDetailPage() {
       {rejectModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-4">Tolak Aplikasi Mitra</h3>
+            <h3 className="text-lg font-bold text-white mb-4">{t('admin.mitraDetail.modal.rejectTitle')}</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-1">
-                  Alasan Penolakan
+                  {t('admin.mitraDetail.modal.reasonLabel')}
                 </label>
                 <textarea
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-cyan-500 min-h-[100px]"
-                  placeholder="Jelaskan alasan penolakan..."
+                  placeholder={t('admin.mitraDetail.modal.reasonPlaceholder')}
                 />
               </div>
               <div className="flex justify-end gap-3 pt-2">
@@ -427,14 +435,14 @@ export default function MitraDetailPage() {
                   onClick={() => setRejectModalOpen(false)}
                   className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
                 >
-                  Batal
+                  {t('admin.mitraDetail.modal.cancel')}
                 </button>
                 <button
                   onClick={handleReject}
                   disabled={actionLoading || !rejectReason.trim()}
                   className="px-4 py-2 bg-rose-500 hover:bg-rose-600 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg transition-colors font-medium"
                 >
-                  {actionLoading ? 'Memproses...' : 'Tolak Aplikasi'}
+                  {actionLoading ? t('admin.common.processing') : t('admin.mitraDetail.modal.submit')}
                 </button>
               </div>
             </div>
