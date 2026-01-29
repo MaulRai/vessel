@@ -164,15 +164,12 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
                 setWalletAddress(null);
                 localStorage.removeItem(INVESTOR_WALLET_KEY);
             } else if (accountList[0].toLowerCase() !== walletAddress?.toLowerCase()) {
-                // Account changed
-                const newInvestor: InvestorUser = {
-                    walletAddress: accountList[0],
-                    role: 'investor',
-                    connectedAt: new Date().toISOString(),
-                };
-                setInvestor(newInvestor);
+                // Account changed - Clear existing session and force re-login
+                // We keep walletAddress updated so UI knows which wallet is active,
+                // but we clear 'investor' state to require re-authentication.
+                setInvestor(null);
                 setWalletAddress(accountList[0]);
-                localStorage.setItem(INVESTOR_WALLET_KEY, JSON.stringify(newInvestor));
+                localStorage.removeItem(INVESTOR_WALLET_KEY);
             }
         };
 
