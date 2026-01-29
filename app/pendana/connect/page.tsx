@@ -67,9 +67,10 @@ export default function InvestorConnectPage() {
 
             // Redirect to dashboard
             router.push('/pendana/dashboard');
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Backend authentication failed:', error);
-            setAuthError(error.message || 'Authentication failed. Please try again.');
+            const message = error instanceof Error ? error.message : 'Authentication failed. Please try again.';
+            setAuthError(message);
             setIsAuthenticating(false);
         }
     }, [isAuthenticating, hasAuthenticated, signMessageAsync, router]);

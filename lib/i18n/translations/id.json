@@ -21,138 +21,20 @@
         "or": "atau",
         "sending": "Mengirim...",
         "verifying": "Memverifikasi...",
-        "pools": {
-            "status": {
-                "open": "Open",
-                "filled": "Terisi",
-                "disbursed": "Dicairkan",
-                "closed": "Ditutup"
-            },
-            "list": {
-                "heroTitle": "Funding Pools",
-                "heroSubtitle": "Kelola pool pendanaan untuk investor",
-                "createCta": "Buat Pool Baru",
-                "table": {
-                    "invoice": "Invoice",
-                    "target": "Target Dana",
-                    "progress": "Progress",
-                    "investors": "Investor",
-                    "status": "Status",
-                    "deadline": "Batas Waktu",
-                    "actions": "Aksi",
-                    "funded": "Terdanai"
-                },
-                "empty": {
-                    "title": "Belum ada funding pool",
-                    "subtitle": "Buat pool pertama untuk memulai pendanaan",
-                    "cta": "Buat Pool Pertama"
-                },
-                "pagination": {
-                    "label": "Halaman",
-                    "of": "dari",
-                    "prev": "Sebelumnya",
-                    "next": "Selanjutnya"
-                },
-                "buttons": {
-                    "viewDetails": "Lihat Detail",
-                    "disburse": "Cairkan Dana",
-                    "close": "Tutup Pool",
-                    "confirmDisburse": "Yakin ingin mencairkan dana ke mitra?",
-                    "confirmClose": "Yakin ingin menutup pool ini?"
-                },
-                "labels": {
-                    "progress": "Progress",
-                    "investor": "investor",
-                    "investors": "investor"
-                }
-            },
-            "detail": {
-                "back": "Kembali",
-                "notFound": "Pool tidak ditemukan",
-                "viewList": "Kembali ke Daftar",
-                "statusLabel": "Status",
-                "buttons": {
-                    "disburse": "Cairkan Dana",
-                    "close": "Tutup Pool"
-                },
-                "confirm": {
-                    "close": "Yakin ingin menutup pool ini?",
-                    "disburse": "Cairkan dana ke mitra?"
-                },
-                "progress": {
-                    "title": "Progress Pendanaan",
-                    "totalFunded": "Total Terdanai",
-                    "of": "dari",
-                    "priority": "Priority Tranche (Senior)",
-                    "catalyst": "Catalyst Tranche (Junior)",
-                    "interest": "Bunga"
-                },
-                "details": {
-                    "title": "Detail Pool",
-                    "createdAt": "Dibuat",
-                    "openedAt": "Dibuka",
-                    "deadline": "Batas Waktu",
-                    "investorCount": "Jumlah Investor"
-                },
-                "invoice": {
-                    "title": "Invoice Dasar",
-                    "view": "Lihat Invoice",
-                    "due": "Jatuh Tempo"
-                }
-            },
-            "create": {
-                "back": "Kembali",
-                "title": "Buat Funding Pool",
-                "subtitle": "Pilih invoice yang telah disetujui untuk membuat pool",
-                "pickInvoice": "Pilih Invoice",
-                "noApproved": {
-                    "title": "Tidak ada invoice disetujui",
-                    "cta": "Review invoice terlebih dahulu"
-                },
-                "selectInstruction": "Pilih invoice dari daftar di sebelah kiri",
-                "detailTitle": "Detail Pool",
-                "labels": {
-                    "invoice": "Invoice",
-                    "buyer": "Buyer",
-                    "amount": "Jumlah Total",
-                    "dueDate": "Jatuh Tempo",
-                    "trancheConfig": "Konfigurasi Tranche",
-                    "priority": "Priority",
-                    "catalyst": "Catalyst",
-                    "yield": "yield",
-                    "priorityTarget": "Target Priority",
-                    "catalystTarget": "Target Catalyst",
-                    "totalTarget": "Total Target"
-                },
-                "actions": {
-                    "create": "Buat Funding Pool",
-                    "creating": "Membuat Pool...",
-                    "createAnother": "Buat Pool Lain",
-                    "viewList": "Lihat Daftar Pool"
-                },
-                "success": {
-                    "title": "Funding Pool Berhasil Dibuat",
-                    "body": "Pool pendanaan telah dibuat dan siap untuk investor."
-                },
-                "alerts": {
-                    "selectInvoice": "Pilih invoice terlebih dahulu",
-                    "createFail": "Gagal membuat funding pool"
-                }
-            }
         "days": "Hari",
+        "refreshToRetry": "Muat ulang halaman untuk mencoba lagi",
+        "prev": "Sebelumnya",
+        "next": "Selanjutnya",
+        "submitAnswer": "Kirim Jawaban",
+        "saving": "Menyimpan...",
+        "errorOccurred": "Terjadi kesalahan",
+        "pagination": "Halaman {{current}} dari {{total}}",
         "submit": "Kirim",
         "cancel": "Batal",
         "save": "Simpan",
         "edit": "Ubah",
         "delete": "Hapus",
         "back": "Kembali",
-        "prev": "Sebelumnya",
-        "next": "Selanjutnya",
-        "refreshToRetry": "Muat ulang halaman untuk mencoba lagi",
-        "submitAnswer": "Kirim Jawaban",
-        "saving": "Menyimpan...",
-        "errorOccurred": "Terjadi kesalahan",
-        "pagination": "Halaman {{current}} dari {{total}}",
         "search": "Cari",
         "filter": "Filter",
         "all": "Semua",

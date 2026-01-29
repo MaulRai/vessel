@@ -1,11 +1,11 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import en from './translations/en.json';
-import id from './translations/id.json';
+import enTranslations from './translations/en.json';
+import idTranslations from './translations/id.json';
 
 type Language = 'en' | 'id';
-type TranslationKeys = typeof en;
+type TranslationKeys = Record<string, unknown>;
 
 interface LanguageContextType {
     language: Language;
@@ -13,7 +13,10 @@ interface LanguageContextType {
     t: (key: string) => string;
 }
 
-const translations: Record<Language, TranslationKeys> = { en, id };
+const translations: Record<Language, TranslationKeys> = {
+    en: enTranslations,
+    id: idTranslations
+};
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 

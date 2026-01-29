@@ -43,9 +43,10 @@ export function ExporterConnectWallet({ currentWallet, onSuccess }: ExporterConn
             if (!linkRes.success) throw new Error(linkRes.error?.message);
 
             onSuccess(address);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Wallet link error:', err);
-            setError(err.message || 'Gagal menghubungkan wallet');
+            const message = err instanceof Error ? err.message : 'Gagal menghubungkan wallet';
+            setError(message);
         } finally {
             setIsLinking(false);
         }
