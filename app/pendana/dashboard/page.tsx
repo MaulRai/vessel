@@ -41,32 +41,37 @@ function InvestorDashboardContent() {
     return (portfolio.available_balance || 0) + (portfolio.total_funding || 0);
   }, [portfolio]);
 
+  const trancheTotal = useMemo(
+    () => (portfolio?.priority_allocation || 0) + (portfolio?.catalyst_allocation || 0),
+    [portfolio]
+  );
+
+  const hasTrancheData = trancheTotal > 0;
+
   const priorityPct = useMemo(() => {
-    if (!portfolio) return 50;
-    const total = (portfolio.priority_allocation || 0) + (portfolio.catalyst_allocation || 0) + (portfolio.available_balance || 0);
-    if (total === 0) return 33;
-    return Math.round((portfolio.priority_allocation / total) * 100);
-  }, [portfolio]);
+    if (!portfolio) return 0;
+    if (!hasTrancheData) return 0;
+    return Math.round(((portfolio.priority_allocation || 0) / trancheTotal) * 100);
+  }, [portfolio, hasTrancheData, trancheTotal]);
 
-  const catalystPct = useMemo(() => {
-    if (!portfolio) return 25;
-    const total = (portfolio.priority_allocation || 0) + (portfolio.catalyst_allocation || 0) + (portfolio.available_balance || 0);
-    if (total === 0) return 33;
-    return Math.round((portfolio.catalyst_allocation / total) * 100);
-  }, [portfolio]);
-
-  const cashPct = 100 - priorityPct - catalystPct;
+  const catalystPct = hasTrancheData ? 100 - priorityPct : 0;
 
   const donutSegments = useMemo(
-    () => [
-      { label: 'Saldo Tunai', value: cashPct / 100, color: '#16a34a' },
-      { label: 'Prioritas', value: priorityPct / 100, color: '#2563eb' },
-      { label: 'Katalis', value: catalystPct / 100, color: '#ea580c' },
-    ],
-    [cashPct, priorityPct, catalystPct]
+    () =>
+      hasTrancheData
+        ? [
+            { label: 'Prioritas', value: priorityPct / 100, color: '#2563eb' },
+            { label: 'Katalis', value: catalystPct / 100, color: '#ea580c' },
+          ]
+        : [],
+    [hasTrancheData, priorityPct, catalystPct]
   );
 
   const conicGradient = useMemo(() => {
+    if (!hasTrancheData) {
+      return 'conic-gradient(#0f172a 0deg 360deg)';
+    }
+
     const parts: string[] = [];
     let start = 0;
     donutSegments.forEach(({ value, color }) => {
@@ -75,7 +80,7 @@ function InvestorDashboardContent() {
       start += value;
     });
     return `conic-gradient(${parts.join(', ')})`;
-  }, [donutSegments]);
+  }, [donutSegments, hasTrancheData]);
 
   if (loading) {
     return (
@@ -111,22 +116,26 @@ function InvestorDashboardContent() {
               subtitle={`Estimasi: Rp ${numberId.format(portfolio?.total_expected_gain || 0)}`}
             />
             <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
-              <p className="text-sm font-semibold text-slate-200">Sebaran Aset</p>
-              <p className="text-xs text-slate-500">Tunai, Prioritas (Senior), Katalis (Junior)</p>
+              <p className="text-sm font-semibold text-slate-200">Sebaran Tranche</p>
+              <p className="text-xs text-slate-500">Prioritas (Senior) vs Katalis (Junior)</p>
               <div className="mt-4 flex items-center gap-6">
                 <div
                   className="h-32 w-32 rounded-full border border-slate-800 bg-slate-900 shadow-inner shadow-black/30"
                   style={{ background: conicGradient }}
-                  aria-label="Sebaran aset"
+                  aria-label="Sebaran tranche"
                 />
                 <div className="space-y-2 text-sm text-slate-300">
-                  {donutSegments.map((seg) => (
-                    <div key={seg.label} className="flex items-center gap-3">
-                      <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: seg.color }} />
-                      <span className="flex-1">{seg.label}</span>
-                      <span className="text-slate-400">{Math.round(seg.value * 100)}%</span>
-                    </div>
-                  ))}
+                  {!hasTrancheData ? (
+                    <p className="text-xs font-bold text-white">Belum ada Tranche</p>
+                  ) : (
+                    donutSegments.map((seg) => (
+                      <div key={seg.label} className="flex items-center gap-3">
+                        <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: seg.color }} />
+                        <span className="flex-1">{seg.label}</span>
+                        <span className="text-slate-400">{Math.round(seg.value * 100)}%</span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
