@@ -146,7 +146,9 @@ function InvestorDashboardContent() {
                   />
                   <div className="space-y-2 text-sm text-slate-300">
                     {!hasTrancheData ? (
-                      <p className="text-xs font-bold text-white">Belum ada Tranche</p>
+                      <div className="inline-block py-1 px-3 bg-black/50 rounded-md">
+                        <p className="text-xs font-bold text-white">Belum ada Tranche</p>
+                      </div>
                     ) : (
                       donutSegments.map((seg) => (
                         <div key={seg.label} className="flex items-center gap-3">
