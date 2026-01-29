@@ -104,7 +104,11 @@
         "priority": "Prioritas",
         "catalyst": "Katalis",
         "invest": "Danai Sekarang",
-        "funded": "Terdanai"
+        "funded": "Terdanai",
+        "daysRemaining": "{{days}} hari tersisa",
+        "defaultBuyer": "Buyer",
+        "defaultProject": "Proyek {{invoice}}",
+        "tenorNA": "Tenor tidak tersedia"
     },
     "riskAssessment": {
         "title": "Penilaian Risiko",
