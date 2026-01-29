@@ -10,6 +10,7 @@ import { useAccount, useChainId, useSwitchChain, useSignMessage } from 'wagmi';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ONCHAINKIT_CONFIG } from '@/lib/config/onchainkit';
 import { authAPI } from '@/lib/api/auth';
+import { useAuth } from '@/lib/context/AuthContext';
 
 export default function InvestorConnectPage() {
     const router = useRouter();
@@ -18,6 +19,7 @@ export default function InvestorConnectPage() {
     const { switchChain, isPending: isSwitching, error: switchErrorRaw } = useSwitchChain();
     const { signMessageAsync } = useSignMessage();
     const { t, language, setLanguage } = useLanguage();
+    const { isAuthenticated, user } = useAuth();
     const expectedChainId = ONCHAINKIT_CONFIG.chain.id;
     const switchError = switchErrorRaw instanceof Error ? switchErrorRaw : null;
     const isWrongChain = isConnected && chainId !== expectedChainId;
@@ -27,9 +29,34 @@ export default function InvestorConnectPage() {
     const [authError, setAuthError] = useState<string | null>(null);
     const [hasAuthenticated, setHasAuthenticated] = useState(false);
 
+    // Guard: if already authenticated as investor, redirect away from connect page
+    useEffect(() => {
+        if (isAuthenticated && user?.role === 'investor') {
+            setHasAuthenticated(true);
+            router.replace('/pendana/dashboard');
+            return;
+        }
+
+        if (typeof window !== 'undefined') {
+            const storedToken = localStorage.getItem('vessel_access_token');
+            const storedUser = localStorage.getItem('vessel_user');
+            if (storedToken && storedUser) {
+                try {
+                    const parsed = JSON.parse(storedUser);
+                    if (parsed?.role === 'investor') {
+                        setHasAuthenticated(true);
+                        router.replace('/pendana/dashboard');
+                    }
+                } catch {
+                    // ignore parse errors and fall through
+                }
+            }
+        }
+    }, [isAuthenticated, user, router]);
+
     // Backend authentication after wallet connects
     const authenticateWithBackend = useCallback(async (walletAddress: string) => {
-        if (isAuthenticating || hasAuthenticated) return;
+        if (isAuthenticating || hasAuthenticated || (isAuthenticated && user?.role === 'investor')) return;
 
         setIsAuthenticating(true);
         setAuthError(null);
@@ -58,10 +85,10 @@ export default function InvestorConnectPage() {
                 throw new Error(loginResponse.error?.message || 'Failed to authenticate');
             }
 
-            // Step 4: Store tokens for authenticated API calls
-            localStorage.setItem('access_token', loginResponse.data.access_token);
-            localStorage.setItem('refresh_token', loginResponse.data.refresh_token);
-            localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
+            // Step 4: Store tokens for authenticated API calls (align with AuthContext keys)
+            localStorage.setItem('vessel_access_token', loginResponse.data.access_token);
+            localStorage.setItem('vessel_refresh_token', loginResponse.data.refresh_token);
+            localStorage.setItem('vessel_user', JSON.stringify(loginResponse.data.user));
 
             setHasAuthenticated(true);
 
@@ -73,13 +100,29 @@ export default function InvestorConnectPage() {
             setAuthError(message);
             setIsAuthenticating(false);
         }
-    }, [isAuthenticating, hasAuthenticated, signMessageAsync, router]);
+    }, [isAuthenticating, hasAuthenticated, isAuthenticated, user, signMessageAsync, router]);
 
     useEffect(() => {
-        if (isConnected && !isWrongChain && address && !hasAuthenticated && !isAuthenticating) {
+        if (
+            isConnected &&
+            !isWrongChain &&
+            address &&
+            !hasAuthenticated &&
+            !isAuthenticating &&
+            !(isAuthenticated && user?.role === 'investor')
+        ) {
             authenticateWithBackend(address);
         }
-    }, [isConnected, isWrongChain, address, hasAuthenticated, isAuthenticating, authenticateWithBackend]);
+    }, [
+        isConnected,
+        isWrongChain,
+        address,
+        hasAuthenticated,
+        isAuthenticating,
+        isAuthenticated,
+        user,
+        authenticateWithBackend,
+    ]);
 
     return (
         <div className="min-h-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">
