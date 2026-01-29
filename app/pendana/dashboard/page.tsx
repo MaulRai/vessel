@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
+import { StatRibbonCard } from '@/lib/components/StatRibbonCard';
 import { investmentAPI, InvestorPortfolio, ActiveInvestment } from '@/lib/api/user';
 
 const numberId = new Intl.NumberFormat('id-ID');
@@ -122,37 +123,56 @@ function InvestorDashboardContent() {
           </header>
 
           <section className="grid gap-4 md:grid-cols-3">
-            <StatCard
-              title="Total Simpanan & Pembiayaan"
-              value={`Rp ${numberId.format(totalPembiayaanBerjalan)}`}
-              subtitle={`Saldo Tersedia Rp ${numberId.format(portfolio?.available_balance || 0)} \u2022 Dana Sedang Disalurkan Rp ${numberId.format(portfolio?.total_funding || 0)}`}
-            />
-            <StatCard
-              title="Total Imbal Hasil Diterima"
-              value={`Rp ${numberId.format(portfolio?.total_realized_gain || 0)}`}
-              subtitle={`Estimasi: Rp ${numberId.format(portfolio?.total_expected_gain || 0)}`}
-            />
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
-              <p className="text-sm font-semibold text-slate-200">Sebaran Tranche</p>
-              <p className="text-xs text-slate-500">Prioritas (Senior) vs Katalis (Junior)</p>
-              <div className="mt-4 flex items-center gap-6">
-                <div
-                  className="h-32 w-32 rounded-full border border-slate-800 bg-slate-900 shadow-inner shadow-black/30"
-                  style={{ background: conicGradient }}
-                  aria-label="Sebaran tranche"
-                />
-                <div className="space-y-2 text-sm text-slate-300">
-                  {!hasTrancheData ? (
-                    <p className="text-xs font-bold text-white">Belum ada Tranche</p>
-                  ) : (
-                    donutSegments.map((seg) => (
-                      <div key={seg.label} className="flex items-center gap-3">
-                        <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: seg.color }} />
-                        <span className="flex-1">{seg.label}</span>
-                        <span className="text-slate-400">{Math.round(seg.value * 100)}%</span>
-                      </div>
-                    ))
-                  )}
+            <StatRibbonCard
+              color="#0f4c81"
+              imageSrc="/assets/general/savings.png"
+              imageAlt="Simpanan dan pembiayaan"
+            >
+              <p className="text-sm font-semibold text-slate-200">Total Simpanan & Pembiayaan</p>
+              <p className="text-2xl font-bold text-slate-50">{`Rp ${numberId.format(totalPembiayaanBerjalan)}`}</p>
+              <p className="text-xs font-semibold text-slate-200">Saldo Tersedia</p>
+              <p className="text-xl font-bold text-slate-50">{`Rp ${numberId.format(portfolio?.available_balance || 0)}`}</p>
+              <p className="text-xs font-semibold text-slate-200">Dana Sedang Disalurkan</p>
+              <p className="text-xl font-bold text-slate-50">{`Rp ${numberId.format(portfolio?.total_funding || 0)}`}</p>
+            </StatRibbonCard>
+            <StatRibbonCard
+              color="#1d5fa6"
+              imageSrc="/assets/general/interest.png"
+              imageAlt="Imbal hasil"
+            >
+              <p className="text-sm font-semibold text-slate-200">Total Imbal Hasil Diterima</p>
+              <p className="text-2xl font-bold text-slate-50">{`Rp ${numberId.format(portfolio?.total_realized_gain || 0)}`}</p>
+              <p className="text-xs font-semibold text-slate-200">Estimasi</p>
+              <p className="text-xl font-bold text-slate-50">{`Rp ${numberId.format(portfolio?.total_expected_gain || 0)}`}</p>
+            </StatRibbonCard>
+            <div className="relative rounded-r-2xl rounded-l-none border border-slate-800 bg-slate-900/40 p-5 shadow-inner shadow-black/30 overflow-hidden">
+              <div className="absolute left-0 top-0 h-full w-1.5 bg-[#0f4c81]" />
+              <div className="absolute inset-y-0 left-0 w-28" style={{ background: 'linear-gradient(90deg, rgba(15,76,129,0.2) 0%, rgba(15,23,42,0) 100%)' }} />
+              <div className="absolute right-[-28px] bottom-[-16px] opacity-15" aria-hidden="true">
+                <Image src="/assets/general/tranche.png" alt="Tranche" width={200} height={200} className="object-contain" />
+              </div>
+              <div className="relative">
+                <p className="text-sm font-semibold text-slate-200">Sebaran Tranche</p>
+                <p className="text-xs text-slate-500">Prioritas (Senior) vs Katalis (Junior)</p>
+                <div className="mt-4 flex items-center gap-6">
+                  <div
+                    className="h-32 w-32 rounded-full border border-slate-800 bg-slate-900 shadow-inner shadow-black/30"
+                    style={{ background: conicGradient }}
+                    aria-label="Sebaran tranche"
+                  />
+                  <div className="space-y-2 text-sm text-slate-300">
+                    {!hasTrancheData ? (
+                      <p className="text-xs font-bold text-white">Belum ada Tranche</p>
+                    ) : (
+                      donutSegments.map((seg) => (
+                        <div key={seg.label} className="flex items-center gap-3">
+                          <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: seg.color }} />
+                          <span className="flex-1">{seg.label}</span>
+                          <span className="text-slate-400">{Math.round(seg.value * 100)}%</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -223,16 +243,6 @@ export default function InvestorDashboardPage() {
     <AuthGuard allowedRoles={['investor']}>
       <InvestorDashboardContent />
     </AuthGuard>
-  );
-}
-
-function StatCard({ title, value, subtitle }: { title: string; value: string; subtitle?: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 shadow-inner shadow-black/20">
-      <p className="text-sm font-semibold text-slate-200">{title}</p>
-      <p className="mt-2 text-2xl font-bold text-slate-50">{value}</p>
-      {subtitle && <p className="mt-1 text-xs text-slate-500 leading-relaxed">{subtitle}</p>}
-    </div>
   );
 }
 
