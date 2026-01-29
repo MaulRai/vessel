@@ -941,7 +941,7 @@ function CreateInvoiceContent() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Nilai IDR:</span>
-                      <span className="text-slate-200 font-medium">Rp {new Intl.NumberFormat('id-ID').format(parseFloat(step1Data.idrAmount) || 0)}</span>
+                      <span className="text-slate-200 font-medium">IDRX {new Intl.NumberFormat('id-ID').format(parseFloat(step1Data.idrAmount) || 0)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Jatuh Tempo:</span>
@@ -951,7 +951,7 @@ function CreateInvoiceContent() {
                   <div className="mt-4 pt-4 border-t border-slate-700">
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-300 font-medium">Estimasi Dana Diterima:</span>
-                      <span className="text-teal-400 font-bold">Rp {calculateEstimatedFunds()}</span>
+                      <span className="text-teal-400 font-bold">IDRX {calculateEstimatedFunds()}</span>
                     </div>
                   </div>
                 </div>
