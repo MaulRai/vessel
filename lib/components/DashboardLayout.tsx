@@ -6,11 +6,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import { useAccount, useDisconnect, useChainId, useSwitchChain, useChains } from 'wagmi';
+import { useAccount, useDisconnect, useChainId, useSwitchChain, useChains, useReadContract } from 'wagmi';
+import { formatUnits, erc20Abi } from 'viem';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { UserRole } from '../types/auth';
 import { base, baseSepolia } from 'wagmi/chains';
+import { useInvestorWallet } from '../context/InvestorWalletContext';
+
+const IDRX_ADDRESS = process.env.NEXT_PUBLIC_IDRX_TOKEN_ADDRESS as `0x${string}`;
 
 interface NavItem {
   href: string;
@@ -164,17 +168,43 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const { user, logout } = useAuth();
   const { t } = useLanguage();
   const { address } = useAccount();
-  const { disconnect } = useDisconnect();
+  const { disconnect: wagmiDisconnect } = useDisconnect();
+  const { disconnectWallet } = useInvestorWallet();
   const chainId = useChainId();
   const chains = useChains();
   const { switchChain, isPending: isSwitching } = useSwitchChain();
   const currentChain = chains.find((item) => item.id === chainId);
   const shortAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '';
 
+  const { data: balanceData } = useReadContract({
+    address: IDRX_ADDRESS,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+      refetchInterval: 10000,
+    }
+  });
+
+  const { data: decimals } = useReadContract({
+    address: IDRX_ADDRESS,
+    abi: erc20Abi,
+    functionName: 'decimals',
+  });
+
+  const formattedBalance = React.useMemo(() => {
+    if (balanceData === undefined || decimals === undefined) return null;
+    const balance = Number(formatUnits(balanceData, decimals));
+    return new Intl.NumberFormat('id-ID', {
+      maximumFractionDigits: 2,
+    }).format(balance);
+  }, [balanceData, decimals]);
+
   const isOnBase = chainId === base.id || chainId === baseSepolia.id;
 
   const navItems = role === 'investor' ? getInvestorNavItems(t) : role === 'admin' ? getAdminNavItems(t) : getMitraNavItems(t);
-  const roleLabel = role === 'investor' ? t('roles.investor') : role === 'admin' ? t('roles.admin') : t('roles.exporter');
+  const roleLabel = role === 'investor' ? t('roles.investor') : role === 'admin' ? t('admin.dashboard.roles.admin') : t('roles.exporter');
   const roleColor = role === 'investor' ? 'cyan' : role === 'admin' ? 'purple' : 'teal';
   const dashboardHref = role === 'investor' ? '/pendana/dashboard' : role === 'admin' ? '/admin/dashboard' : '/eksportir/dashboard';
   const isOnDashboard = pathname === dashboardHref;
@@ -185,7 +215,8 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   };
 
   const handleDisconnectWallet = () => {
-    disconnect();
+    wagmiDisconnect();
+    disconnectWallet();
     logout(); // Also clear backend session
     router.push('/pendana/connect');
   };

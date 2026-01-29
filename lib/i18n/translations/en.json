@@ -1,132 +1,4 @@
 {
-    "nav": {
-        "dashboard": "Dashboard",
-        "marketplace": "Marketplace",
-        "portfolio": "Portfolio",
-        "riskAssessment": "Risk Assessment",
-        "profile": "Profile",
-        "invoices": "Invoices",
-        "funding": "Funding",
-        "company": "Company",
-        "logout": "Logout",
-        "disconnectWallet": "Disconnect Wallet",
-        "mitraList": "Mitra List",
-        "mitraReview": "Mitra Review",
-        "invoiceReview": "Invoice Review",
-        "fundingPools": "Funding Pools"
-    },
-    "common": {
-        "loading": "Loading...",
-        "processing": "Processing...",
-        "or": "or",
-        "sending": "Sending...",
-        "verifying": "Verifying...",
-        "days": "Days",
-        "refreshToRetry": "Refresh page to retry",
-        "prev": "Previous",
-        "next": "Next",
-        "submitAnswer": "Submit Answers",
-        "saving": "Saving...",
-        "errorOccurred": "An error occurred",
-        "pagination": "Page {{current}} of {{total}}",
-        "submit": "Submit",
-        "cancel": "Cancel",
-        "save": "Save",
-        "edit": "Edit",
-        "delete": "Delete",
-        "back": "Back",
-        "search": "Search",
-        "filter": "Filter",
-        "all": "All",
-        "yes": "Yes",
-        "no": "No",
-        "error": "Error",
-        "success": "Success",
-        "walletConnected": "Wallet Connected",
-        "walletNotConnected": "Wallet Not Connected",
-        "switchToEnglish": "Switch to English",
-        "switchToIndonesian": "Switch to Bahasa Indonesia",
-        "languageShort": {
-            "en": "EN",
-            "id": "ID"
-        }
-    },
-    "investorConnect": {
-        "title": "Connect Your Wallet",
-        "subtitle": "Start earning up to 15% APY by investing in verified export invoices",
-        "benefits": {
-            "instantAccess": "Instant Access",
-            "keysControl": "Your Keys, Your Control",
-            "onChain": "100% On-Chain"
-        },
-        "wrongNetworkTitle": "Wrong Network Detected",
-        "wrongNetworkBody": "Please switch to",
-        "switchTo": "Switch to",
-        "switching": "Switching...",
-        "noWalletTitle": "Don't have a wallet yet?",
-        "getMetaMask": "Get MetaMask 🦊",
-        "getCoinbase": "Get Coinbase 🟦",
-        "exporterCta": "Are you an exporter?",
-        "registerExporter": "Register as Exporter/Mitra",
-        "nonCustodial": "Non-Custodial",
-        "onChain": "On-Chain"
-    },
-    "roles": {
-        "investor": "Investor",
-        "exporter": "Exporter",
-        "admin": "Admin",
-        "mitra": "Mitra"
-    },
-    "marketplace": {
-        "title": "Marketplace",
-        "subtitle": "Find available funding pools for investment",
-        "yieldRange": "Yield Range",
-        "target": "Target",
-        "tenor": "Tenor",
-        "progress": "Progress",
-        "fundingProgress": "Funding Progress",
-        "invest": "Invest",
-        "fullyFunded": "Fully Funded",
-        "openPools": "Open",
-        "completedPools": "Completed",
-        "priorityTranche": "Priority",
-        "catalystTranche": "Catalyst",
-        "insured": "Insured",
-        "grade": "Grade",
-        "insurance": "Insurance",
-        "sortBy": "Sort by",
-        "highestYield": "Highest Yield",
-        "fastestTenor": "Fastest Tenor",
-        "newest": "Newest",
-        "daysRemaining": "days remaining",
-        "searchPlaceholder": "Search project, buyer, or grade"
-    },
-    "riskAssessment": {
-        "title": "Risk Assessment",
-        "subtitle": "Answer the following questions to determine your investment risk profile",
-        "question": "Question",
-        "of": "of",
-        "sendAnswers": "Submit Answers",
-        "saving": "Saving...",
-        "catalystUnlocked": "Catalyst Tranche Unlocked!",
-        "assessmentComplete": "Assessment Complete",
-        "yourTrancheAccess": "Your Tranche Access:",
-        "retakeAssessment": "Retake Assessment",
-        "startInvesting": "Start Investing",
-        "priorityDescription": "Lower return, lower risk",
-        "catalystDescription": "Higher return, higher risk",
-        "locked": "Locked",
-        "aboutTranches": "About Tranches",
-        "priorityInfo": "Priority Tranche (Senior): Gets paid first with lower return.",
-        "catalystInfo": "Catalyst Tranche (Junior): Gets higher return but paid after Priority."
-    },
-    "dashboard": {
-        "welcome": "Welcome",
-        "totalInvestment": "Total Investment",
-        "activeInvestments": "Active Investments",
-        "totalReturn": "Total Return",
-        "availableBalance": "Available Balance"
-    },
     "auth": {
         "login": "Login",
         "logout": "Logout",
@@ -176,7 +48,126 @@
         "passwordMatchError": "Passwords do not match",
         "passwordLengthError": "Password minimum 8 characters",
         "verificationSent": "Verification code sent to",
-        "resendSuccess": "Code resent successfully"
+        "resendSuccess": "Code resent successfully",
+        "authenticating": "Authenticating..."
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "marketplace": "Marketplace",
+        "portfolio": "Portfolio",
+        "riskAssessment": "Risk Assessment",
+        "profile": "Profile",
+        "invoices": "Invoices",
+        "funding": "Funding",
+        "company": "Company",
+        "logout": "Logout",
+        "disconnectWallet": "Disconnect Wallet",
+        "mitraList": "Mitra List",
+        "mitraReview": "Mitra Review",
+        "invoiceReview": "Invoice Review",
+        "fundingPools": "Funding Pools"
+    },
+    "common": {
+        "loading": "Loading...",
+        "processing": "Processing...",
+        "or": "or",
+        "sending": "Sending...",
+        "verifying": "Verifying...",
+        "days": "Days",
+        "refreshToRetry": "Refresh the page to try again",
+        "prev": "Previous",
+        "next": "Next",
+        "submitAnswer": "Submit Answer",
+        "saving": "Saving...",
+        "errorOccurred": "An error occurred",
+        "pagination": "Page {{current}} of {{total}}",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "save": "Save",
+        "edit": "Edit",
+        "delete": "Delete",
+        "back": "Back",
+        "search": "Search",
+        "filter": "Filter",
+        "all": "All",
+        "yes": "Yes",
+        "no": "No",
+        "error": "Error",
+        "success": "Success",
+        "walletConnected": "Wallet Connected",
+        "walletNotConnected": "Wallet Not Connected",
+        "switchToEnglish": "Switch to English",
+        "switchToIndonesian": "Switch to Indonesian",
+        "languageShort": {
+            "en": "EN",
+            "id": "ID"
+        }
+    },
+    "investorConnect": {
+        "title": "Connect Your Wallet",
+        "subtitle": "Start earning up to 15% APY by investing in verified export invoices",
+        "benefits": {
+            "instantAccess": "Instant Access",
+            "keysControl": "Keys in Your Hands",
+            "onChain": "100% On-Chain"
+        },
+        "wrongNetworkTitle": "Wrong Network",
+        "wrongNetworkBody": "Please switch to",
+        "switchTo": "Switch to",
+        "switching": "Switching...",
+        "noWalletTitle": "Don't have a wallet yet?",
+        "getMetaMask": "Get MetaMask 🦊",
+        "getCoinbase": "Get Coinbase 🟦",
+        "exporterCta": "Are you an exporter?",
+        "registerExporter": "Register as Exporter/Partner",
+        "nonCustodial": "Non-Custodial",
+        "onChain": "On-Chain"
+    },
+    "roles": {
+        "investor": "Investor",
+        "exporter": "Exporter",
+        "admin": "Admin",
+        "mitra": "Mitra"
+    },
+    "marketplace": {
+        "title": "Marketplace",
+        "subtitle": "Find available funding pools for investment",
+        "tabOpen": "Open",
+        "tabDone": "Completed",
+        "yieldRange": "Yield Range",
+        "target": "Target",
+        "tenor": "Tenor",
+        "progress": "Progress",
+        "fundingProgress": "Funding Progress",
+        "yield": "Yield",
+        "invest": "Invest",
+        "fullyFunded": "Fully Funded",
+        "funded": "Funded",
+        "openPools": "Open",
+        "completedPools": "Completed",
+        "priorityTranche": "Priority",
+        "catalystTranche": "Catalyst",
+        "priority": "Priority",
+        "catalyst": "Catalyst",
+        "insured": "Insured",
+        "grade": "Grade",
+        "insurance": "Insurance",
+        "sortBy": "Sort by",
+        "sortYield": "Highest Yield",
+        "sortTenor": "Fastest Tenor",
+        "sortNewest": "Newest",
+        "daysRemaining": "{{days}} days remaining",
+        "searchPlaceholder": "Search project, buyer, or grade",
+        "filterGrade": "Grade",
+        "filterAll": "All",
+        "filterInsurance": "Insurance",
+        "filterInsured": "Insured",
+        "filterNotInsured": "Not Insured",
+        "noPoolsTitle": "No projects",
+        "noPoolsDesc": "No projects match your criteria yet.",
+        "defaultBuyer": "Buyer",
+        "defaultProject": "Project {{invoice}}",
+        "tenorNA": "Tenor n/a"
     },
     "landing": {
         "features": "Features",
@@ -184,7 +175,7 @@
         "security": "Security",
         "getStarted": "Get Started",
         "getStartedMobile": "Register",
-        "poweredBy": "Powered by Lisk Blockchain",
+        "poweredBy": "Powered by Base Blockchain",
         "heroTitle1": "Export Finance",
         "heroTitle2": "Decentralized",
         "heroSubtitle": "The first Web3 platform in Indonesia connecting exporters with global investors. Full on-chain transparency, smart contract security, and competitive returns.",
@@ -221,7 +212,7 @@
         "step1Title": "Verification",
         "step1Desc": "Exporter registers and passes strict identity and document verification.",
         "step2Title": "Tokenization",
-        "step2Desc": "Invoice is validated and tokenized as NFT on Lisk blockchain.",
+        "step2Desc": "Invoice is validated and tokenized as NFT on Base blockchain.",
         "step3Title": "Funding",
         "step3Desc": "Investors select pools and tranches that match their investment goals.",
         "step4Title": "Distribution",
@@ -244,7 +235,6 @@
         "startAsPendana": "Start as Pendana",
         "pendanaDesc": "Connect your wallet and start earning returns by investing in export invoices",
         "startAsExporter": "Start as Exporter",
-        "exporterDesc": "Register your business and get fast financing for your export invoices",
         "footerDesc": "Decentralized export financing platform powered by blockchain.",
         "footerProduct": "Product",
         "footerCompany": "Company",
@@ -257,6 +247,42 @@
         "footerRights": "All rights reserved."
     },
     "completeProfile": {
+        "passwordPlaceholder": "Enter password",
+        "forgotPassword": "Forgot password?",
+        "notRegistered": "Don't have an account?",
+        "register": "Register",
+        "registerTitle": "Register as Partner/Exporter",
+        "registerSubtitle": "This page is for exporters seeking funding. Investors can directly",
+        "registerGoogle": "Register with Google",
+        "email": "Email",
+        "emailPlaceholder": "name@company.com",
+        "otpInfo": "We will send a verification code to your email",
+        "sendOtp": "Send OTP Code",
+        "verifyEmail": "Verify Email",
+        "enterOtp": "Enter the 6-digit code sent to",
+        "otpCode": "OTP Code",
+        "changeEmail": "Change email",
+        "resendCode": "Resend code",
+        "verify": "Verify",
+        "completeDetails": "Complete Your Details",
+        "username": "Username",
+        "usernamePlaceholder": "your_username",
+        "usernameHint": "3-50 chars, lowercase, numbers, and underscore",
+        "exporterRoleInfo": "You are registering as an Exporter/Partner. After registration, you can apply for funding for your export invoices.",
+        "confirmPassword": "Confirm Password",
+        "confirmPasswordPlaceholder": "Repeat password",
+        "terms": "I agree to become a member of VESSEL Cooperative and abide by the applicable AD/ART.",
+        "registerAndContinue": "Register & Continue",
+        "alreadyRegistered": "Already have an account?",
+        "secureConnection": "Secure Connection",
+        "registeredLicensed": "Registered & Licensed",
+        "registrationSuccess": "Registration successful! Please login with your account.",
+        "loginError": "Login failed. Please try again.",
+        "demoError": "Failed to login as demo.",
+        "passwordMatchError": "Passwords do not match",
+        "passwordLengthError": "Password minimum 8 characters",
+        "verificationSent": "Verification code sent to",
+        "resendSuccess": "Code resent successfully",
         "pending": {
             "title": "Application Under Review",
             "company": "Company",
@@ -322,6 +348,568 @@
             "akta_pendirian": "Akta Pendirian",
             "ktp_direktur": "KTP Direktur",
             "fileTypes": "PDF, JPG, PNG (max 10MB)"
+        }
+    },
+    "admin": {
+        "common": {
+            "status": {
+                "pending": "Awaiting Verification",
+                "approved": "Approved",
+                "rejected": "Rejected"
+            },
+            "complete": "Complete",
+            "incomplete": "Incomplete",
+            "yes": "Yes",
+            "no": "No",
+            "view": "View",
+            "review": "Review",
+            "processing": "Processing..."
+        },
+        "dashboard": {
+            "hero": {
+                "welcome": "Welcome back,",
+                "defaultName": "Admin",
+                "subtitle": "VESSEL Admin Control Panel"
+            },
+            "stats": {
+                "totalUsers": {
+                    "label": "Total Users",
+                    "badge": "Live"
+                },
+                "investors": {
+                    "label": "Investors"
+                },
+                "mitras": {
+                    "label": "Mitra Partners"
+                },
+                "system": {
+                    "label": "System Status",
+                    "value": "Operational"
+                }
+            },
+            "quickActions": {
+                "title": "Quick Actions",
+                "invoices": {
+                    "label": "Invoice Review",
+                    "description": "Review invoice requests",
+                    "cta": "Manage"
+                },
+                "pools": {
+                    "label": "Funding Pools",
+                    "description": "Manage funding pools",
+                    "cta": "Manage"
+                },
+                "mitra": {
+                    "label": "Mitra Review",
+                    "description": "Review mitra applications",
+                    "cta": "Start Review"
+                },
+                "mitraList": {
+                    "label": "Mitra List",
+                    "description": "Verified mitra directory",
+                    "cta": "View List"
+                }
+            },
+            "recent": {
+                "title": "Recent Users",
+                "subtitle": "Latest registered users on the platform",
+                "viewAll": "View All",
+                "empty": "No users yet",
+                "columns": {
+                    "user": "User",
+                    "role": "Role",
+                    "status": "Status"
+                },
+                "status": {
+                    "verified": "Verified",
+                    "pending": "Pending"
+                }
+            },
+            "roles": {
+                "investor": "Investor",
+                "mitra": "Mitra",
+                "admin": "Admin"
+            }
+        },
+        "balance": {
+            "back": "Back to Dashboard",
+            "tag": "Admin Panel",
+            "title": "User Balance Management",
+            "subtitle": "Add balance to user accounts for testing (MVP)",
+            "userIdLabel": "User ID",
+            "userIdPlaceholder": "Enter user UUID",
+            "userIdHint": "Format: UUID (e.g., 123e4567-e89b-12d3-a456-426614174000)",
+            "selectUser": "Select User",
+            "selectedUserSubtitle": "User selected for balance top-up",
+            "amountLabel": "Balance Amount (IDR)",
+            "amountPlaceholder": "0",
+            "resultNewBalance": "New balance",
+            "cta": "Add Balance",
+            "notesTitle": "MVP Notes",
+            "note1": "This feature is for testing purposes only in the MVP.",
+            "note2": "The balance added is virtual (not an actual money transfer).",
+            "note3": "A payment gateway integration will be used in the final version.",
+            "messages": {
+                "selectUser": "Select a user and enter an amount",
+                "invalidAmount": "Amount must be a positive number",
+                "successPrefix": "Successfully added",
+                "successSuffix": "to account",
+                "fail": "Failed to add balance",
+                "connection": "Connection failed. Check the server."
+            },
+            "processing": "Processing..."
+        },
+        "mitraList": {
+            "title": "Mitra Verification",
+            "subtitle": "Review business profile submissions, verify documents, and approve or reject applications.",
+            "stats": {
+                "pending": "Awaiting Verification",
+                "total": "Total Applications",
+                "incomplete": "Documents Incomplete"
+            },
+            "table": {
+                "company": "Company",
+                "type": "Type",
+                "revenue": "Annual Revenue",
+                "docs": "Documents",
+                "status": "Status",
+                "action": "Action",
+                "submittedOn": "Submitted on",
+                "complete": "Complete",
+                "incomplete": "Incomplete",
+                "noData": "No applications to verify",
+                "detailCta": "View Detail"
+            },
+            "pagination": {
+                "label": "Page",
+                "of": "of",
+                "total": "total"
+            },
+            "buttons": {
+                "retry": "Try Again",
+                "prev": "Previous",
+                "next": "Next"
+            }
+        },
+        "mitraDetail": {
+            "notFound": "Mitra not found",
+            "backToList": "Back to List",
+            "backToVerification": "Back to Mitra Verification",
+            "joinedSince": "Joined since",
+            "tabs": {
+                "profile": "Company Profile",
+                "invoices": "Invoices",
+                "pools": "Funding Pools"
+            },
+            "profile": {
+                "general": "General Information",
+                "npwp": "NPWP",
+                "companyType": "Company Type",
+                "annualRevenue": "Annual Revenue",
+                "yearFounded": "Year Founded",
+                "contact": "Contact & Address",
+                "accountEmail": "Account Email",
+                "address": "Address",
+                "website": "Website",
+                "description": "Business Description",
+                "noDescription": "No description",
+                "documents": "Legal Documents",
+                "uploaded": "Uploaded",
+                "notUploaded": "Not Uploaded"
+            },
+            "invoices": {
+                "headerInvoice": "Invoice #",
+                "buyer": "Buyer",
+                "amount": "Amount",
+                "dueDate": "Due Date",
+                "status": "Status",
+                "action": "Action",
+                "empty": "No invoices submitted yet",
+                "review": "Review"
+            },
+            "pools": {
+                "empty": "No funding pools created yet",
+                "target": "Target",
+                "funded": "Funded",
+                "view": "View Pool Detail"
+            },
+            "actions": {
+                "reject": "Reject",
+                "approve": "Approve Application",
+                "review": "Review"
+            },
+            "alerts": {
+                "confirmApprove": "Are you sure you want to approve this mitra application?",
+                "approveSuccess": "Mitra application approved",
+                "approveFail": "Failed to approve application",
+                "rejectSuccess": "Mitra application rejected",
+                "rejectFail": "Failed to reject application",
+                "rejectReasonRequired": "Please provide a rejection reason"
+            },
+            "modal": {
+                "rejectTitle": "Reject Mitra Application",
+                "reasonLabel": "Rejection Reason",
+                "reasonPlaceholder": "Describe the rejection reason...",
+                "cancel": "Cancel",
+                "submit": "Reject Application"
+            }
+        },
+        "mitraDirectory": {
+            "title": "Mitra Directory",
+            "subtitle": "All verified partners registered on the platform.",
+            "table": {
+                "company": "Company",
+                "account": "Account",
+                "revenue": "Revenue",
+                "joined": "Joined",
+                "action": "Action"
+            },
+            "empty": "No verified mitra yet.",
+            "viewDetail": "View Detail",
+            "noteApproved": "Showing partners with Approved status"
+        },
+        "invoiceList": {
+            "heroTitle": "Invoice Review",
+            "heroSubtitle": "Review and approve funding requests from partners",
+            "pendingLabel": "Pending",
+            "table": {
+                "invoice": "Invoice",
+                "mitra": "Mitra",
+                "buyer": "Buyer",
+                "amount": "Amount",
+                "documents": "Documents",
+                "repeatBuyer": "Repeat Buyer",
+                "action": "Action",
+                "docComplete": "Complete",
+                "docPartial": "Partial",
+                "docIncomplete": "Incomplete"
+            },
+            "empty": {
+                "title": "No invoices pending review",
+                "subtitle": "All invoices have been processed"
+            },
+            "pagination": {
+                "label": "Page",
+                "of": "of"
+            },
+            "reviewCta": "Review"
+        },
+        "invoiceDetail": {
+            "back": "Back",
+            "title": "Review Invoice",
+            "notFound": "Invoice data not found",
+            "backToList": "Back to list",
+            "success": {
+                "approvedTitle": "Invoice Approved",
+                "approvedBody": "The invoice has been approved. You can create a funding pool for this invoice.",
+                "rejectedTitle": "Invoice Rejected",
+                "rejectedBody": "The invoice has been rejected. The partner will be notified."
+            },
+            "actions": {
+                "createPool": "Create Funding Pool",
+                "approve": "Approve Invoice",
+                "reject": "Reject Invoice"
+            },
+            "info": {
+                "title": "Invoice Information",
+                "number": "Invoice Number",
+                "createdAt": "Created At",
+                "dueDate": "Due Date",
+                "fundingDuration": "Funding Duration",
+                "days": "days",
+                "originalAmount": "Original Amount",
+                "amountIdr": "Amount in IDR",
+                "trancheConfig": "Tranche Configuration",
+                "priority": "Priority Tranche",
+                "catalyst": "Catalyst Tranche",
+                "yield": "Yield"
+            },
+            "buyer": {
+                "title": "Buyer Information",
+                "company": "Company Name",
+                "country": "Country",
+                "repeatBuyer": "Repeat Buyer"
+            },
+            "mitra": {
+                "title": "Partner Information",
+                "email": "Email",
+                "name": "Name",
+                "company": "Company",
+                "phone": "Phone"
+            },
+            "documents": {
+                "title": "Documents",
+                "empty": "No documents",
+                "view": "View"
+            },
+            "gradeSuggestion": {
+                "title": "Grade Suggestion",
+                "score": "Score",
+                "countryRisk": "Country Risk",
+                "countryScore": "Country Score",
+                "historyScore": "History Score",
+                "documentScore": "Document Score",
+                "fundingLimit": "Funding Limit"
+            },
+            "gradePicker": {
+                "title": "Select Grade",
+                "notesLabel": "Notes (Optional)",
+                "notesPlaceholder": "Add notes..."
+            },
+            "alerts": {
+                "selectGrade": "Please select a grade first",
+                "approveFail": "Failed to approve invoice",
+                "rejectReasonRequired": "Rejection reason is required",
+                "rejectFail": "Failed to reject invoice"
+            },
+            "modals": {
+                "approveTitle": "Confirm Approval",
+                "approveQuestion": "Are you sure you want to approve this invoice with Grade",
+                "yesApprove": "Yes, Approve",
+                "cancel": "Cancel",
+                "rejectTitle": "Reject Invoice",
+                "rejectReasonLabel": "Rejection Reason",
+                "rejectReasonPlaceholder": "Enter rejection reason...",
+                "rejectSubmit": "Reject Invoice"
+            },
+            "pools": {
+                "status": {
+                    "open": "Open",
+                    "filled": "Filled",
+                    "disbursed": "Disbursed",
+                    "closed": "Closed"
+                },
+                "list": {
+                    "heroTitle": "Funding Pools",
+                    "heroSubtitle": "Manage investment pools for investors",
+                    "createCta": "Create New Pool",
+                    "table": {
+                        "invoice": "Invoice",
+                        "target": "Target Amount",
+                        "progress": "Progress",
+                        "investors": "Investors",
+                        "status": "Status",
+                        "deadline": "Deadline",
+                        "actions": "Actions",
+                        "funded": "Funded"
+                    },
+                    "empty": {
+                        "title": "No funding pools yet",
+                        "subtitle": "Create your first pool to start funding",
+                        "cta": "Create First Pool"
+                    },
+                    "pagination": {
+                        "label": "Page",
+                        "of": "of",
+                        "prev": "Previous",
+                        "next": "Next"
+                    },
+                    "buttons": {
+                        "viewDetails": "View Details",
+                        "disburse": "Disburse Funds",
+                        "close": "Close Pool",
+                        "confirmDisburse": "Are you sure you want to disburse funds to the partner?",
+                        "confirmClose": "Are you sure you want to close this pool?"
+                    },
+                    "labels": {
+                        "progress": "Progress",
+                        "investor": "investor",
+                        "investors": "investors"
+                    }
+                },
+                "detail": {
+                    "back": "Back",
+                    "notFound": "Pool not found",
+                    "viewList": "Back to List",
+                    "statusLabel": "Status",
+                    "buttons": {
+                        "disburse": "Disburse Funds",
+                        "close": "Close Pool"
+                    },
+                    "confirm": {
+                        "close": "Are you sure you want to close this pool?",
+                        "disburse": "Disburse funds to partner?"
+                    },
+                    "progress": {
+                        "title": "Funding Progress",
+                        "totalFunded": "Total Funded",
+                        "of": "of",
+                        "priority": "Priority Tranche (Senior)",
+                        "catalyst": "Catalyst Tranche (Junior)",
+                        "interest": "Interest"
+                    },
+                    "details": {
+                        "title": "Pool Details",
+                        "createdAt": "Created At",
+                        "openedAt": "Opened At",
+                        "deadline": "Deadline",
+                        "investorCount": "Investor Count"
+                    },
+                    "invoice": {
+                        "title": "Underlying Invoice",
+                        "view": "View Invoice",
+                        "due": "Due"
+                    }
+                },
+                "create": {
+                    "back": "Back",
+                    "title": "Create Funding Pool",
+                    "subtitle": "Select an approved invoice to create a pool",
+                    "pickInvoice": "Select Invoice",
+                    "noApproved": {
+                        "title": "No approved invoices",
+                        "cta": "Review invoices first"
+                    },
+                    "selectInstruction": "Choose an invoice from the list on the left",
+                    "detailTitle": "Pool Details",
+                    "labels": {
+                        "invoice": "Invoice",
+                        "buyer": "Buyer",
+                        "amount": "Total Amount",
+                        "dueDate": "Due Date",
+                        "trancheConfig": "Tranche Configuration",
+                        "priority": "Priority",
+                        "catalyst": "Catalyst",
+                        "yield": "yield",
+                        "priorityTarget": "Priority Target",
+                        "catalystTarget": "Catalyst Target",
+                        "totalTarget": "Total Target"
+                    },
+                    "actions": {
+                        "create": "Create Funding Pool",
+                        "creating": "Creating Pool...",
+                        "createAnother": "Create Another Pool",
+                        "viewList": "View Pool List"
+                    },
+                    "success": {
+                        "title": "Funding Pool Created",
+                        "body": "A funding pool has been created and is ready for investors."
+                    },
+                    "alerts": {
+                        "selectInvoice": "Select an invoice first",
+                        "createFail": "Failed to create funding pool"
+                    }
+                }
+            }
+        },
+        "pools": {
+            "status": {
+                "open": "Open",
+                "filled": "Filled",
+                "disbursed": "Disbursed",
+                "closed": "Closed"
+            },
+            "list": {
+                "heroTitle": "Funding Pools",
+                "heroSubtitle": "Manage investment pools for investors",
+                "createCta": "Create New Pool",
+                "table": {
+                    "invoice": "Invoice",
+                    "target": "Target Amount",
+                    "progress": "Progress",
+                    "investors": "Investors",
+                    "status": "Status",
+                    "deadline": "Deadline",
+                    "actions": "Actions",
+                    "funded": "Funded"
+                },
+                "empty": {
+                    "title": "No funding pools yet",
+                    "subtitle": "Create your first pool to start funding",
+                    "cta": "Create First Pool"
+                },
+                "pagination": {
+                    "label": "Page",
+                    "of": "of",
+                    "prev": "Previous",
+                    "next": "Next"
+                },
+                "buttons": {
+                    "viewDetails": "View Details",
+                    "disburse": "Disburse Funds",
+                    "close": "Close Pool",
+                    "confirmDisburse": "Are you sure you want to disburse funds to the partner?",
+                    "confirmClose": "Are you sure you want to close this pool?"
+                },
+                "labels": {
+                    "progress": "Progress",
+                    "investor": "investor",
+                    "investors": "investors"
+                }
+            },
+            "detail": {
+                "back": "Back",
+                "notFound": "Pool not found",
+                "viewList": "Back to List",
+                "statusLabel": "Status",
+                "buttons": {
+                    "disburse": "Disburse Funds",
+                    "close": "Close Pool"
+                },
+                "confirm": {
+                    "close": "Are you sure you want to close this pool?",
+                    "disburse": "Disburse funds to partner?"
+                },
+                "progress": {
+                    "title": "Funding Progress",
+                    "totalFunded": "Total Funded",
+                    "of": "of",
+                    "priority": "Priority Tranche (Senior)",
+                    "catalyst": "Catalyst Tranche (Junior)",
+                    "interest": "Interest"
+                },
+                "details": {
+                    "title": "Pool Details",
+                    "createdAt": "Created At",
+                    "openedAt": "Opened At",
+                    "deadline": "Deadline",
+                    "investorCount": "Investor Count"
+                },
+                "invoice": {
+                    "title": "Underlying Invoice",
+                    "view": "View Invoice",
+                    "due": "Due"
+                }
+            },
+            "create": {
+                "back": "Back",
+                "title": "Create Funding Pool",
+                "subtitle": "Select an approved invoice to create a pool",
+                "pickInvoice": "Select Invoice",
+                "noApproved": {
+                    "title": "No approved invoices",
+                    "cta": "Review invoices first"
+                },
+                "selectInstruction": "Choose an invoice from the list on the left",
+                "detailTitle": "Pool Details",
+                "labels": {
+                    "invoice": "Invoice",
+                    "buyer": "Buyer",
+                    "amount": "Total Amount",
+                    "dueDate": "Due Date",
+                    "trancheConfig": "Tranche Configuration",
+                    "priority": "Priority",
+                    "catalyst": "Catalyst",
+                    "yield": "yield",
+                    "priorityTarget": "Priority Target",
+                    "catalystTarget": "Catalyst Target",
+                    "totalTarget": "Total Target"
+                },
+                "actions": {
+                    "create": "Create Funding Pool",
+                    "creating": "Creating Pool...",
+                    "createAnother": "Create Another Pool",
+                    "viewList": "View Pool List"
+                },
+                "success": {
+                    "title": "Funding Pool Created",
+                    "body": "A funding pool has been created and is ready for investors."
+                },
+                "alerts": {
+                    "selectInvoice": "Select an invoice first",
+                    "createFail": "Failed to create funding pool"
+                }
+            }
         }
     }
 }

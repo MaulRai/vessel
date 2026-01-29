@@ -856,7 +856,7 @@ export default function LandingPage() {
             <p>&copy; 2026 VESSEL Finance. All rights reserved.</p>
             <div className="flex items-center space-x-6 mt-4 md:mt-0">
               <span>Kepatuhan Utama</span>
-              <span>Powered by Lisk</span>
+              <span>Powered by Base</span>
             </div>
           </div>
         </div>

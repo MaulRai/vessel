@@ -1,4 +1,4 @@
-// Auth Types - sesuai dengan backend lisk-builders
+// Auth Types - sesuai dengan backend Base-builders
 
 export type UserRole = 'investor' | 'mitra' | 'admin';
 

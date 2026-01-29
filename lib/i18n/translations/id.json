@@ -22,19 +22,19 @@
         "sending": "Mengirim...",
         "verifying": "Memverifikasi...",
         "days": "Hari",
+        "refreshToRetry": "Muat ulang halaman untuk mencoba lagi",
+        "prev": "Sebelumnya",
+        "next": "Selanjutnya",
+        "submitAnswer": "Kirim Jawaban",
+        "saving": "Menyimpan...",
+        "errorOccurred": "Terjadi kesalahan",
+        "pagination": "Halaman {{current}} dari {{total}}",
         "submit": "Kirim",
         "cancel": "Batal",
         "save": "Simpan",
         "edit": "Ubah",
         "delete": "Hapus",
         "back": "Kembali",
-        "prev": "Sebelumnya",
-        "next": "Selanjutnya",
-        "refreshToRetry": "Muat ulang halaman untuk mencoba lagi",
-        "submitAnswer": "Kirim Jawaban",
-        "saving": "Menyimpan...",
-        "errorOccurred": "Terjadi kesalahan",
-        "pagination": "Halaman {{current}} dari {{total}}",
         "search": "Cari",
         "filter": "Filter",
         "all": "Semua",
@@ -69,7 +69,8 @@
         "exporterCta": "Anda seorang eksportir?",
         "registerExporter": "Daftar sebagai Eksportir/Mitra",
         "nonCustodial": "Non-Kustodial",
-        "onChain": "On-Chain"
+        "onChain": "On-Chain",
+        "authenticating": "Mengautentikasikan..."
     },
     "roles": {
         "investor": "Pendana",
@@ -79,27 +80,35 @@
     },
     "marketplace": {
         "title": "Marketplace",
-        "subtitle": "Temukan pool pendanaan yang tersedia untuk investasi",
-        "yieldRange": "Imbal Hasil",
+        "subtitle": "Temukan faktur ekspor untuk investasi",
+        "tabOpen": "Terbuka",
+        "tabDone": "Selesai",
+        "searchPlaceholder": "Cari proyek, buyer, atau grade...",
+        "sortBy": "Urutkan",
+        "sortYield": "Yield Tertinggi",
+        "sortTenor": "Tenor Tercepat",
+        "sortNewest": "Terbaru",
+        "filterGrade": "Grade",
+        "filterAll": "Semua",
+        "filterInsurance": "Asuransi",
+        "filterInsured": "Diasuransikan",
+        "filterNotInsured": "Tanpa Asuransi",
+        "noPoolsTitle": "Tidak ada proyek",
+        "noPoolsDesc": "Belum ada proyek yang sesuai dengan kriteria Anda.",
+        "fullyFunded": "Terdanai Penuh",
+        "yield": "Yield",
         "target": "Target",
         "tenor": "Tenor",
         "progress": "Progress",
         "fundingProgress": "Progress Pendanaan",
-        "invest": "Investasi",
-        "fullyFunded": "Terdanai",
-        "openPools": "Terbuka",
-        "completedPools": "Selesai",
-        "priorityTranche": "Priority",
-        "catalystTranche": "Catalyst",
-        "insured": "Diasuransikan",
-        "grade": "Grade",
-        "insurance": "Asuransi",
-        "sortBy": "Urutkan",
-        "highestYield": "Yield Tertinggi",
-        "fastestTenor": "Tenor Tercepat",
-        "newest": "Paling Baru",
-        "daysRemaining": "hari tersisa",
-        "searchPlaceholder": "Cari proyek, buyer, atau grade"
+        "priority": "Prioritas",
+        "catalyst": "Katalis",
+        "invest": "Danai Sekarang",
+        "funded": "Terdanai",
+        "daysRemaining": "{{days}} hari tersisa",
+        "defaultBuyer": "Buyer",
+        "defaultProject": "Proyek {{invoice}}",
+        "tenorNA": "Tenor tidak tersedia"
     },
     "riskAssessment": {
         "title": "Penilaian Risiko",
@@ -184,7 +193,7 @@
         "security": "Keamanan",
         "getStarted": "Mulai Sekarang",
         "getStartedMobile": "Mulai",
-        "poweredBy": "Didukung oleh Lisk Blockchain",
+        "poweredBy": "Didukung oleh Base Blockchain",
         "heroTitle1": "Pembiayaan Ekspor",
         "heroTitle2": "Terdesentralisasi",
         "heroSubtitle": "Platform Web3 pertama di Indonesia yang menghubungkan eksportir dengan investor global. Transparansi on-chain penuh, keamanan smart contract, dan imbal hasil kompetitif.",
@@ -221,7 +230,7 @@
         "step1Title": "Verifikasi",
         "step1Desc": "Eksportir mendaftar dan melewati verifikasi identitas serta dokumen yang ketat.",
         "step2Title": "Tokenisasi",
-        "step2Desc": "Invoice divalidasi dan ditokenisasi sebagai NFT di blockchain Lisk.",
+        "step2Desc": "Invoice divalidasi dan ditokenisasi sebagai NFT di blockchain Base.",
         "step3Title": "Pendanaan",
         "step3Desc": "Investor memilih pool dan tranche yang sesuai dengan tujuan investasi.",
         "step4Title": "Distribusi",
@@ -244,7 +253,7 @@
         "startAsPendana": "Mulai sebagai Pendana",
         "pendanaDesc": "Hubungkan wallet Anda dan mulai mendapatkan keuntungan dengan berinvestasi di faktur ekspor",
         "startAsExporter": "Mulai sebagai Eksportir",
-        "exporterDesc": "Daftarkan bisnis Anda dan dapatkan pembiayaan cepat untuk faktur ekspor Anda",
+        "exporterActionDesc": "Daftarkan bisnis Anda dan dapatkan pembiayaan cepat untuk faktur ekspor Anda",
         "footerDesc": "Platform pembiayaan ekspor terdesentralisasi berbasis blockchain.",
         "footerProduct": "Produk",
         "footerCompany": "Perusahaan",
@@ -322,6 +331,449 @@
             "akta_pendirian": "Akta Pendirian",
             "ktp_direktur": "KTP Direktur",
             "fileTypes": "PDF, JPG, PNG (maks 10MB)"
+        }
+    },
+    "admin": {
+        "common": {
+            "status": {
+                "pending": "Menunggu Verifikasi",
+                "approved": "Disetujui",
+                "rejected": "Ditolak"
+            },
+            "complete": "Lengkap",
+            "incomplete": "Belum Lengkap",
+            "yes": "Ya",
+            "no": "Tidak",
+            "view": "Lihat",
+            "review": "Review",
+            "processing": "Memproses..."
+        },
+        "dashboard": {
+            "hero": {
+                "welcome": "Selamat datang kembali,",
+                "defaultName": "Admin",
+                "subtitle": "Panel Kontrol Admin VESSEL"
+            },
+            "stats": {
+                "totalUsers": {
+                    "label": "Total Pengguna",
+                    "badge": "Aktif"
+                },
+                "investors": {
+                    "label": "Investor"
+                },
+                "mitras": {
+                    "label": "Mitra"
+                },
+                "system": {
+                    "label": "Status Sistem",
+                    "value": "Operasional"
+                }
+            },
+            "quickActions": {
+                "title": "Aksi Cepat",
+                "invoices": {
+                    "label": "Review Invoice",
+                    "description": "Tinjau permohonan invoice",
+                    "cta": "Kelola"
+                },
+                "pools": {
+                    "label": "Pool Pendanaan",
+                    "description": "Kelola pool pendanaan",
+                    "cta": "Kelola"
+                },
+                "mitra": {
+                    "label": "Review Mitra",
+                    "description": "Tinjau aplikasi mitra",
+                    "cta": "Mulai Review"
+                },
+                "mitraList": {
+                    "label": "Daftar Mitra",
+                    "description": "Daftar mitra terverifikasi",
+                    "cta": "Lihat Daftar"
+                }
+            },
+            "recent": {
+                "title": "Pengguna Terbaru",
+                "subtitle": "Pengguna terbaru yang mendaftar",
+                "viewAll": "Lihat Semua",
+                "empty": "Belum ada pengguna",
+                "columns": {
+                    "user": "Pengguna",
+                    "role": "Peran",
+                    "status": "Status"
+                },
+                "status": {
+                    "verified": "Terverifikasi",
+                    "pending": "Menunggu"
+                }
+            },
+            "roles": {
+                "investor": "Investor",
+                "mitra": "Mitra",
+                "admin": "Admin"
+            }
+        },
+        "balance": {
+            "back": "Kembali ke Dashboard",
+            "tag": "Admin Panel",
+            "title": "Manajemen Balance User",
+            "subtitle": "Tambahkan balance ke akun user untuk keperluan testing (MVP)",
+            "userIdLabel": "User ID",
+            "userIdPlaceholder": "Masukkan UUID user",
+            "userIdHint": "Format: UUID (contoh: 123e4567-e89b-12d3-a456-426614174000)",
+            "selectUser": "Pilih User",
+            "selectedUserSubtitle": "User terpilih untuk penambahan balance",
+            "amountLabel": "Jumlah Balance (IDR)",
+            "amountPlaceholder": "0",
+            "resultNewBalance": "Balance baru",
+            "cta": "Tambah Balance",
+            "notesTitle": "Catatan MVP",
+            "note1": "Fitur ini hanya untuk keperluan testing pada MVP.",
+            "note2": "Balance yang ditambahkan bersifat virtual (bukan transfer uang nyata).",
+            "note3": "Pada versi final akan digunakan integrasi payment gateway.",
+            "messages": {
+                "selectUser": "Pilih user dan masukkan jumlah",
+                "invalidAmount": "Jumlah harus berupa angka positif",
+                "successPrefix": "Berhasil menambahkan",
+                "successSuffix": "ke akun",
+                "fail": "Gagal menambahkan balance",
+                "connection": "Koneksi gagal. Periksa server."
+            },
+            "processing": "Memproses..."
+        },
+        "mitraList": {
+            "title": "Verifikasi Mitra",
+            "subtitle": "Tinjau pengajuan profil bisnis mitra, verifikasi dokumen, dan setujui atau tolak aplikasi.",
+            "stats": {
+                "pending": "Menunggu Verifikasi",
+                "total": "Total Pengajuan",
+                "incomplete": "Dokumen Belum Lengkap"
+            },
+            "table": {
+                "company": "Perusahaan",
+                "type": "Tipe",
+                "revenue": "Pendapatan Tahunan",
+                "docs": "Dokumen",
+                "status": "Status",
+                "action": "Aksi",
+                "submittedOn": "Masuk pada",
+                "complete": "Lengkap",
+                "incomplete": "Belum Lengkap",
+                "noData": "Tidak ada pengajuan yang perlu diverifikasi",
+                "detailCta": "Lihat Detail"
+            },
+            "pagination": {
+                "label": "Halaman",
+                "of": "dari",
+                "total": "total"
+            },
+            "buttons": {
+                "retry": "Coba Lagi",
+                "prev": "Sebelumnya",
+                "next": "Selanjutnya"
+            }
+        },
+        "mitraDetail": {
+            "notFound": "Mitra tidak ditemukan",
+            "backToList": "Kembali ke Daftar",
+            "backToVerification": "Kembali ke Laman Verifikasi Mitra",
+            "joinedSince": "Bergabung sejak",
+            "tabs": {
+                "profile": "Profil Perusahaan",
+                "invoices": "Invoice",
+                "pools": "Funding Pools"
+            },
+            "profile": {
+                "general": "Informasi Umum",
+                "npwp": "NPWP",
+                "companyType": "Tipe Perusahaan",
+                "annualRevenue": "Pendapatan Tahunan",
+                "yearFounded": "Tahun Berdiri",
+                "contact": "Kontak & Alamat",
+                "accountEmail": "Email Akun",
+                "address": "Alamat",
+                "website": "Website",
+                "description": "Deskripsi Bisnis",
+                "noDescription": "Tidak ada deskripsi",
+                "documents": "Dokumen Legalitas",
+                "uploaded": "Terunggah",
+                "notUploaded": "Belum Upload"
+            },
+            "invoices": {
+                "headerInvoice": "Invoice #",
+                "buyer": "Buyer",
+                "amount": "Jumlah",
+                "dueDate": "Jatuh Tempo",
+                "status": "Status",
+                "action": "Aksi",
+                "empty": "Belum ada invoice yang diajukan",
+                "review": "Review"
+            },
+            "pools": {
+                "empty": "Belum ada funding pool yang dibuat",
+                "target": "Target",
+                "funded": "Terdanai",
+                "view": "Lihat Detail Pool"
+            },
+            "actions": {
+                "reject": "Tolak",
+                "approve": "Setujui Aplikasi",
+                "review": "Review"
+            },
+            "alerts": {
+                "confirmApprove": "Apakah anda yakin ingin menyetujui aplikasi mitra ini?",
+                "approveSuccess": "Aplikasi mitra berhasil disetujui",
+                "approveFail": "Gagal menyetujui aplikasi",
+                "rejectSuccess": "Aplikasi mitra berhasil ditolak",
+                "rejectFail": "Gagal menolak aplikasi",
+                "rejectReasonRequired": "Harap isi alasan penolakan"
+            },
+            "modal": {
+                "rejectTitle": "Tolak Aplikasi Mitra",
+                "reasonLabel": "Alasan Penolakan",
+                "reasonPlaceholder": "Jelaskan alasan penolakan...",
+                "cancel": "Batal",
+                "submit": "Tolak Aplikasi"
+            }
+        },
+        "mitraDirectory": {
+            "title": "Daftar Mitra",
+            "subtitle": "Seluruh mitra terverifikasi yang terdaftar dalam platform.",
+            "table": {
+                "company": "Perusahaan",
+                "account": "Akun",
+                "revenue": "Pendapatan",
+                "joined": "Tanggal Bergabung",
+                "action": "Aksi"
+            },
+            "empty": "Belum ada mitra terverifikasi.",
+            "viewDetail": "Lihat Detail",
+            "noteApproved": "Menampilkan mitra dengan status Approved"
+        },
+        "invoiceList": {
+            "heroTitle": "Review Invoice",
+            "heroSubtitle": "Review dan setujui permintaan pendanaan dari mitra",
+            "pendingLabel": "Pending",
+            "table": {
+                "invoice": "Invoice",
+                "mitra": "Mitra",
+                "buyer": "Buyer",
+                "amount": "Jumlah",
+                "documents": "Dokumen",
+                "repeatBuyer": "Repeat Buyer",
+                "action": "Aksi",
+                "docComplete": "Lengkap",
+                "docPartial": "Sebagian",
+                "docIncomplete": "Kurang"
+            },
+            "empty": {
+                "title": "Tidak ada invoice yang menunggu review",
+                "subtitle": "Semua invoice telah diproses"
+            },
+            "pagination": {
+                "label": "Halaman",
+                "of": "dari"
+            },
+            "reviewCta": "Review"
+        },
+        "invoiceDetail": {
+            "back": "Kembali",
+            "title": "Review Invoice",
+            "notFound": "Data invoice tidak ditemukan",
+            "backToList": "Kembali ke daftar",
+            "success": {
+                "approvedTitle": "Invoice Disetujui",
+                "approvedBody": "Invoice berhasil disetujui. Anda dapat membuat funding pool untuk invoice ini.",
+                "rejectedTitle": "Invoice Ditolak",
+                "rejectedBody": "Invoice telah ditolak. Mitra akan mendapat notifikasi."
+            },
+            "actions": {
+                "createPool": "Buat Funding Pool",
+                "approve": "Setujui Invoice",
+                "reject": "Tolak Invoice"
+            },
+            "info": {
+                "title": "Informasi Invoice",
+                "number": "Nomor Invoice",
+                "createdAt": "Tanggal Dibuat",
+                "dueDate": "Jatuh Tempo",
+                "fundingDuration": "Durasi Pendanaan",
+                "days": "hari",
+                "originalAmount": "Jumlah Original",
+                "amountIdr": "Jumlah IDR",
+                "trancheConfig": "Konfigurasi Tranche",
+                "priority": "Priority Tranche",
+                "catalyst": "Catalyst Tranche",
+                "yield": "Yield"
+            },
+            "buyer": {
+                "title": "Informasi Buyer",
+                "company": "Nama Perusahaan",
+                "country": "Negara",
+                "repeatBuyer": "Repeat Buyer"
+            },
+            "mitra": {
+                "title": "Informasi Mitra",
+                "email": "Email",
+                "name": "Nama",
+                "company": "Perusahaan",
+                "phone": "Telepon"
+            },
+            "documents": {
+                "title": "Dokumen",
+                "empty": "Tidak ada dokumen",
+                "view": "Lihat"
+            },
+            "gradeSuggestion": {
+                "title": "Rekomendasi Grade",
+                "score": "Skor",
+                "countryRisk": "Risiko Negara",
+                "countryScore": "Skor Negara",
+                "historyScore": "Skor Riwayat",
+                "documentScore": "Skor Dokumen",
+                "fundingLimit": "Batas Pendanaan"
+            },
+            "gradePicker": {
+                "title": "Pilih Grade",
+                "notesLabel": "Catatan (Opsional)",
+                "notesPlaceholder": "Tambahkan catatan..."
+            },
+            "alerts": {
+                "selectGrade": "Pilih grade terlebih dahulu",
+                "approveFail": "Gagal menyetujui invoice",
+                "rejectReasonRequired": "Alasan penolakan harus diisi",
+                "rejectFail": "Gagal menolak invoice"
+            },
+            "modals": {
+                "approveTitle": "Konfirmasi Persetujuan",
+                "approveQuestion": "Apakah Anda yakin ingin menyetujui invoice ini dengan Grade",
+                "yesApprove": "Ya, Setujui",
+                "cancel": "Batal",
+                "rejectTitle": "Tolak Invoice",
+                "rejectReasonLabel": "Alasan Penolakan",
+                "rejectReasonPlaceholder": "Masukkan alasan penolakan...",
+                "rejectSubmit": "Tolak Invoice"
+            }
+        },
+        "pools": {
+            "status": {
+                "open": "Terbuka",
+                "filled": "Terisi",
+                "disbursed": "Dicairkan",
+                "closed": "Ditutup"
+            },
+            "list": {
+                "heroTitle": "Pool Pendanaan",
+                "heroSubtitle": "Kelola pool pendanaan untuk investor",
+                "createCta": "Buat Pool Baru",
+                "table": {
+                    "invoice": "Invoice",
+                    "target": "Target Dana",
+                    "progress": "Progress",
+                    "investors": "Investor",
+                    "status": "Status",
+                    "deadline": "Batas Waktu",
+                    "actions": "Aksi",
+                    "funded": "Terdanai"
+                },
+                "empty": {
+                    "title": "Belum ada funding pool",
+                    "subtitle": "Buat pool pertama untuk memulai pendanaan",
+                    "cta": "Buat Pool Pertama"
+                },
+                "pagination": {
+                    "label": "Halaman",
+                    "of": "dari",
+                    "prev": "Sebelumnya",
+                    "next": "Selanjutnya"
+                },
+                "buttons": {
+                    "viewDetails": "Lihat Detail",
+                    "disburse": "Cairkan Dana",
+                    "close": "Tutup Pool",
+                    "confirmDisburse": "Yakin ingin mencairkan dana ke mitra?",
+                    "confirmClose": "Yakin ingin menutup pool ini?"
+                },
+                "labels": {
+                    "progress": "Progress",
+                    "investor": "investor",
+                    "investors": "investor"
+                }
+            },
+            "detail": {
+                "back": "Kembali",
+                "notFound": "Pool tidak ditemukan",
+                "viewList": "Kembali ke Daftar",
+                "statusLabel": "Status",
+                "buttons": {
+                    "disburse": "Cairkan Dana",
+                    "close": "Tutup Pool"
+                },
+                "confirm": {
+                    "close": "Yakin ingin menutup pool ini?",
+                    "disburse": "Cairkan dana ke mitra?"
+                },
+                "progress": {
+                    "title": "Progress Pendanaan",
+                    "totalFunded": "Total Terdanai",
+                    "of": "dari",
+                    "priority": "Priority Tranche (Senior)",
+                    "catalyst": "Catalyst Tranche (Junior)",
+                    "interest": "Bunga"
+                },
+                "details": {
+                    "title": "Detail Pool",
+                    "createdAt": "Dibuat",
+                    "openedAt": "Dibuka",
+                    "deadline": "Batas Waktu",
+                    "investorCount": "Jumlah Investor"
+                },
+                "invoice": {
+                    "title": "Invoice Dasar",
+                    "view": "Lihat Invoice",
+                    "due": "Jatuh Tempo"
+                }
+            },
+            "create": {
+                "back": "Kembali",
+                "title": "Buat Funding Pool",
+                "subtitle": "Pilih invoice yang telah disetujui untuk membuat pool",
+                "pickInvoice": "Pilih Invoice",
+                "noApproved": {
+                    "title": "Tidak ada invoice disetujui",
+                    "cta": "Review invoice terlebih dahulu"
+                },
+                "selectInstruction": "Pilih invoice dari daftar di sebelah kiri",
+                "detailTitle": "Detail Pool",
+                "labels": {
+                    "invoice": "Invoice",
+                    "buyer": "Buyer",
+                    "amount": "Jumlah Total",
+                    "dueDate": "Jatuh Tempo",
+                    "trancheConfig": "Konfigurasi Tranche",
+                    "priority": "Priority",
+                    "catalyst": "Catalyst",
+                    "yield": "yield",
+                    "priorityTarget": "Target Priority",
+                    "catalystTarget": "Target Catalyst",
+                    "totalTarget": "Total Target"
+                },
+                "actions": {
+                    "create": "Buat Funding Pool",
+                    "creating": "Membuat Pool...",
+                    "createAnother": "Buat Pool Lain",
+                    "viewList": "Lihat Daftar Pool"
+                },
+                "success": {
+                    "title": "Funding Pool Berhasil Dibuat",
+                    "body": "Pool pendanaan telah dibuat dan siap untuk investor."
+                },
+                "alerts": {
+                    "selectInvoice": "Pilih invoice terlebih dahulu",
+                    "createFail": "Gagal membuat funding pool"
+                }
+            }
         }
     }
 }

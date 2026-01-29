@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { adminAPI, MitraApplicationItem } from '@/lib/api/admin';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface MitraRow {
     id: string;
@@ -17,6 +18,8 @@ interface MitraRow {
 }
 
 export default function MitraListPage() {
+    const { t, language } = useLanguage();
+    const locale = language === 'en' ? 'en-US' : 'id-ID';
     const [mitras, setMitras] = useState<MitraRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -48,7 +51,7 @@ export default function MitraListPage() {
                             email: app.user?.email || '-',
                             username: app.user?.username || '-',
                             annualRevenue: app.annual_revenue,
-                            joinedAt: new Date(app.created_at).toLocaleDateString('id-ID', {
+                            joinedAt: new Date(app.created_at).toLocaleDateString(locale, {
                                 day: 'numeric',
                                 month: 'short',
                                 year: 'numeric'
@@ -80,7 +83,7 @@ export default function MitraListPage() {
                         email: app.user?.email || '-',
                         username: app.user?.username || '-',
                         annualRevenue: app.annual_revenue,
-                        joinedAt: new Date(app.created_at).toLocaleDateString('id-ID', {
+                        joinedAt: new Date(app.created_at).toLocaleDateString(locale, {
                             day: 'numeric',
                             month: 'short',
                             year: 'numeric'
@@ -98,14 +101,14 @@ export default function MitraListPage() {
                 }
             } catch (err) {
                 console.error('Error fetching mitras:', err);
-                setError('Gagal memuat data mitra');
+                setError(t('common.errorOccurred'));
             } finally {
                 setLoading(false);
             }
         };
 
         fetchMitras();
-    }, [page]);
+    }, [page, t, language]);
 
     if (loading) {
         return (
@@ -121,9 +124,9 @@ export default function MitraListPage() {
         <DashboardLayout role="admin">
             <div className="space-y-8">
                 <header className="space-y-2">
-                    <h1 className="text-3xl font-bold text-slate-50">Daftar Mitra</h1>
+                    <h1 className="text-3xl font-bold text-slate-50">{t('admin.mitraDirectory.title')}</h1>
                     <p className="text-slate-400 max-w-2xl">
-                        Seluruh mitra terverifikasi yang terdaftar dalam platform.
+                        {t('admin.mitraDirectory.subtitle')}
                     </p>
                 </header>
 
@@ -132,18 +135,18 @@ export default function MitraListPage() {
                         <table className="min-w-full divide-y divide-slate-800">
                             <thead className="bg-slate-900/70">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Perusahaan</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Akun</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Pendapatan</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Tanggal Bergabung</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">Aksi</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">{t('admin.mitraDirectory.table.company')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">{t('admin.mitraDirectory.table.account')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">{t('admin.mitraDirectory.table.revenue')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">{t('admin.mitraDirectory.table.joined')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold tracking-wider text-slate-400 uppercase">{t('admin.mitraDirectory.table.action')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-800">
                                 {mitras.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
-                                            Belum ada mitra terdaftar (Approved).
+                                            {t('admin.mitraDirectory.empty')}
                                         </td>
                                     </tr>
                                 ) : (
@@ -170,7 +173,7 @@ export default function MitraListPage() {
                                                     href={`/admin/dashboard/mitra/${mitra.id}`}
                                                     className="inline-flex items-center px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 text-sm hover:bg-slate-700 hover:text-white transition-colors"
                                                 >
-                                                    Lihat Detail
+                                                    {t('admin.mitraDirectory.viewDetail')}
                                                 </Link>
                                             </td>
                                         </tr>
@@ -181,7 +184,7 @@ export default function MitraListPage() {
                     </div>
 
                     <div className="px-6 py-4 border-t border-slate-800 flex justify-center">
-                        <p className="text-xs text-slate-500">Menampilkan mitra dengan status Approved</p>
+                        <p className="text-xs text-slate-500">{t('admin.mitraDirectory.noteApproved')}</p>
                     </div>
                 </section>
             </div>

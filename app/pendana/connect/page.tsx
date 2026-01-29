@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @next/next/no-img-element */
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,8 +8,10 @@ import Link from 'next/link';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
 import { authAPI } from '@/lib/api/auth';
-import { createBaseAccountSDK } from '@base-org/account';
 import { SignInWithBaseButton } from '@base-org/account-ui/react';
+import { createBaseAccountSDK } from '@base-org/account';
+
+import { baseSepolia } from 'wagmi/chains';
 
 export default function InvestorConnectPage() {
     const router = useRouter();
@@ -21,96 +24,47 @@ export default function InvestorConnectPage() {
         setError('');
         setIsLoading(true);
         try {
-            // Initialize Base SDK
+            // Initialize Base Account SDK
             const sdk = createBaseAccountSDK({
                 appName: 'Vessel Finance',
+                appChainIds: [baseSepolia.id] // Base Sepolia Testnet
             });
+
             const provider = sdk.getProvider();
 
-            // 1. Get nonce from backend
-            // We use a temporary address or just request a nonce generically?
-            // AuthAPI expects basic request, but usually nonce is generated for a specific address.
-            // Documentation says: "get a fresh nonce (generate locally or prefetch from backend)"
-            // BUT backend expects nonce to be stored associated with wallet if we use `get_wallet_nonce`.
-            // Wait, backend `get_wallet_nonce` stores it keyed by wallet address. 
-            // So we need the address FIRST?
-            // The Base Auth flow (SIWE cap) sends nonce IN the connection request. 
-            // This implies we need the nonce BEFORE we know the address (or at least we send it blindly).
-            // IF we use SIWE capability, the wallet signs it.
+            // 1. Connect
+            const accounts = await provider.request({ method: 'eth_requestAccounts' });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (!accounts || (accounts as any).length === 0) {
+                throw new Error('No accounts found');
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const address = (accounts as any)[0];
 
-            // Backend `get_wallet_nonce` requires `wallet_address`.
-            // This creates a chicken-and-egg problem if we strictly follow the backend's current flow
-            // which assumes: Connect Wallet -> Get Address -> Request Nonce -> Sign Message.
-
-            // The Base "Sign In with Base" (SIWE capability) flow is: 
-            //   Connect(with SIWE params including nonce) -> Returns Address + Signature.
-
-            // If we generate a nonce locally (random UUID), the backend won't know about it 
-            // UNLESS we send it during verification and the backend validates it stateless (checking format/time) 
-            // OR we registered it somehow.
-
-            // Looking at backend `verify_wallet_signature`:
-            // It expects `wallet_nonces` to have the nonce stored for that wallet.
-
-            // HACK/ADJUSTMENT: 
-            // We cannot use `authAPI.walletNonce` (which requires address) BEFORE connecting.
-            // So we must use the standard Connect -> Sign flow if we want to use existing backend logic perfectly,
-            // OR we change the backend to accept any nonce (stateless SIWE) which it doesn't seem to do.
-
-            // However, `createBaseAccountSDK` documentation says:
-            // "const nonce = window.crypto.randomUUID().replace(/-/g, "");"
-            // This nonce is client-side generated? 
-            // If backend validates it, it must be stored or stateless (replay protection).
-            // Backend `wallet_login` checks: `if stored_nonce != &req.nonce`.
-            // So backend MUST have stored it.
-
-            // STRATEGY:
-            // 1. Connect first (without SIWE capability or just basic connect) to get Address.
-            // 2. Request Nonce from Backend for that Address.
-            // 3. Request Signature (using `personal_sign` or SIWE).
-
-            // BUT Base Account SDK emphasizes "Sign In with Ethereum" capability in `wallet_connect`.
-
-            // Let's try to do it in two steps if possible, or use a "Pre-request" to backend to get a "session nonce"?
-            // Current backend: `get_wallet_nonce` takes `wallet_address`.
-
-            // Workaround: 
-            // 1. `eth_requestAccounts` to get address.
-            // 2. `authAPI.walletNonce` to get key.
-            // 3. `personal_sign` (or SIWE) to sign.
-
-            // Let's use the provider from SDK but do standard flow to ensure backend compatibility.
-
-            const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
-            const address = accounts[0];
-
-            if (!address) throw new Error("No account found");
-
-            // 2. Get Nonce from Backend
+            // 2. Get Nonce
             const nonceRes = await authAPI.walletNonce({ wallet_address: address });
             if (!nonceRes.success || !nonceRes.data) {
                 throw new Error(nonceRes.error?.message || "Failed to generate nonce");
             }
             const { nonce, message } = nonceRes.data;
 
-            // 3. Sign Message
+            // 3. Sign message
             const signature = await provider.request({
                 method: 'personal_sign',
-                params: [message, address],
-            }) as string;
+                params: [message, address]
+            });
 
-            // 4. Verify & Login
+            // 4. Login
             const loginRes = await walletLogin({
                 wallet_address: address,
-                signature,
+                signature: signature as string,
                 message,
                 nonce
             });
-
-            if (loginRes.success) {
+            if (loginRes?.success) {
                 router.push('/pendana/dashboard');
             } else {
-                setError(loginRes.error?.message || "Login failed");
+                throw new Error(loginRes?.error?.message || "Login failed");
             }
 
         } catch (err: unknown) {
@@ -203,8 +157,6 @@ export default function InvestorConnectPage() {
 
                             <div className="flex items-center gap-3">
                                 <div className="flex-1" aria-hidden />
-                                {/* Use Base UI Button but override click to handle flow manually to ensure backend compat */}
-                                {/* Or acts as a trigger */}
                                 <div className="w-full">
                                     <SignInWithBaseButton
                                         colorScheme="dark"
@@ -212,6 +164,31 @@ export default function InvestorConnectPage() {
                                     />
                                 </div>
                                 <div className="flex-1" aria-hidden />
+                            </div>
+
+                            {/* Don't have a wallet? */}
+                            <div className="mt-4 p-3 bg-slate-900/50 border border-slate-700/50 rounded-lg">
+                                <p className="text-slate-400 text-xs text-center mb-2">
+                                    {t('investorConnect.noWalletTitle')}
+                                </p>
+                                <div className="flex flex-wrap gap-2 justify-center">
+                                    <a
+                                        href="https://metamask.io/download/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
+                                    >
+                                        {t('investorConnect.getMetaMask')}
+                                    </a>
+                                    <a
+                                        href="https://www.coinbase.com/wallet"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
+                                    >
+                                        {t('investorConnect.getCoinbase')}
+                                    </a>
+                                </div>
                             </div>
 
                             <div className="relative my-6">
