@@ -252,7 +252,7 @@ export default function AdminPoolDetailPage() {
                                     </div>
                                     <div>
                                         <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Advance Percentage</p>
-                                        <p className="text-sm font-semibold text-cyan-400">{(pool.invoice as any).advance_percentage || 80}%</p>
+                                        <p className="text-sm font-semibold text-cyan-400">{(pool.invoice as FundingPool['invoice'] & { advance_percentage?: number })?.advance_percentage || 80}%</p>
                                     </div>
                                 </div>
 

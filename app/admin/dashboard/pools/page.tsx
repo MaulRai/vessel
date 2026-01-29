@@ -125,6 +125,29 @@ function PoolListContent() {
     }
   };
 
+  const handleClosePool = async (poolId: string, hasFunds: boolean) => {
+    const confirmMsg = hasFunds
+      ? 'This will close the pool and disburse funds to the exporter. Continue?'
+      : 'This will close the pool without any disbursement. Continue?';
+    if (!confirm(confirmMsg)) return;
+
+    setActionLoading(poolId);
+    try {
+      const res = await adminAPI.closePool(poolId);
+      if (res.success) {
+        alert(hasFunds ? 'Pool closed and funds disbursed!' : 'Pool closed successfully!');
+        loadPools();
+      } else {
+        alert(res.error?.message || t('common.errorOccurred'));
+      }
+    } catch (err) {
+      console.error('Failed to close pool', err);
+      alert(t('common.errorOccurred'));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const getProgress = (pool: FundingPool) => {
     if (pool.target_amount === 0) return 0;
     return (pool.funded_amount / pool.target_amount) * 100;
@@ -253,6 +276,15 @@ function PoolListContent() {
                           </td>
                           <td className="px-6 py-5">
                             <div className="flex items-center gap-2">
+                              {(pool.status === 'open' || pool.status === 'filled') && (
+                                <button
+                                  onClick={() => handleClosePool(pool.id, pool.funded_amount > 0)}
+                                  disabled={actionLoading === pool.id}
+                                  className="px-3 py-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded-lg text-xs font-semibold text-orange-400 transition-all disabled:opacity-50"
+                                >
+                                  {actionLoading === pool.id ? t('admin.common.processing') : (pool.funded_amount > 0 ? 'Close & Disburse' : 'Close Pool')}
+                                </button>
+                              )}
                               {pool.status === 'filled' && (
                                 <button
                                   onClick={() => handleDisburse(pool.id)}

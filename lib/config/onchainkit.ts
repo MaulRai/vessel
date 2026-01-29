@@ -1,7 +1,8 @@
 import { base, baseSepolia, type Chain } from 'wagmi/chains';
 
-// OnchainKit uses Base Sepolia as requested by user
-const chain: Chain = baseSepolia;
+// OnchainKit uses Base Mainnet for identity/basename resolution
+// Transactions are handled by Wagmi which uses the configured chain (baseSepolia for dev)
+const chain: Chain = base;
 
 export const ONCHAINKIT_CONFIG = {
   apiKey: process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY ?? '',

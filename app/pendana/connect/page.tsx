@@ -75,6 +75,61 @@ export default function InvestorConnectPage() {
         }
     };
 
+    const handleMetaMaskSignIn = async () => {
+        setError('');
+        setIsLoading(true);
+        try {
+            if (!window.ethereum?.isMetaMask) {
+                window.open('https://metamask.io/download/', '_blank');
+                return;
+            }
+
+            // 1. Connect
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }) as string[];
+            if (!accounts || accounts.length === 0) {
+                throw new Error('No accounts found');
+            }
+            const address = accounts[0];
+
+            // 2. Get Nonce
+            const nonceRes = await authAPI.walletNonce({ wallet_address: address });
+            if (!nonceRes.success || !nonceRes.data) {
+                throw new Error(nonceRes.error?.message || "Failed to generate nonce");
+            }
+            const { nonce, message } = nonceRes.data;
+
+            // 3. Sign message
+            const signature = await window.ethereum.request({
+                method: 'personal_sign',
+                params: [message, address]
+            }) as string;
+
+            // 4. Login
+            const loginRes = await walletLogin({
+                wallet_address: address,
+                signature,
+                message,
+                nonce
+            });
+
+            if (loginRes?.success) {
+                router.push('/pendana/dashboard');
+            } else {
+                throw new Error(loginRes?.error?.message || "Login failed");
+            }
+        } catch (err: unknown) {
+            console.error("MetaMask Sign In Error:", err);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((err as any).code === 4001) {
+                setError('Connection rejected');
+            } else {
+                setError(err instanceof Error ? err.message : "Failed to sign in with MetaMask");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden relative">
             <div className="w-full max-w-5xl h-[calc(100vh-2rem)] max-h-[700px] bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
@@ -155,40 +210,38 @@ export default function InvestorConnectPage() {
                                 </div>
                             )}
 
-                            <div className="flex items-center gap-3">
-                                <div className="flex-1" aria-hidden />
-                                <div className="w-full">
-                                    <SignInWithBaseButton
-                                        colorScheme="dark"
-                                        onClick={isLoading ? undefined : handleSignIn}
-                                    />
+                            <div className="flex flex-col gap-3">
+                                <div className="w-full relative group">
+                                    <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 to-cyan-600 rounded-lg opacity-20 group-hover:opacity-40 transition duration-200"></div>
+                                    <div className="relative">
+                                        <SignInWithBaseButton
+                                            colorScheme="dark"
+                                            onClick={isLoading ? undefined : handleSignIn}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="flex-1" aria-hidden />
-                            </div>
 
-                            {/* Don't have a wallet? */}
-                            <div className="mt-4 p-3 bg-slate-900/50 border border-slate-700/50 rounded-lg">
-                                <p className="text-slate-400 text-xs text-center mb-2">
-                                    {t('investorConnect.noWalletTitle')}
-                                </p>
-                                <div className="flex flex-wrap gap-2 justify-center">
-                                    <a
-                                        href="https://metamask.io/download/"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
-                                    >
-                                        {t('investorConnect.getMetaMask')}
-                                    </a>
-                                    <a
-                                        href="https://www.coinbase.com/wallet"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
-                                    >
-                                        {t('investorConnect.getCoinbase')}
-                                    </a>
+                                <div className="relative flex items-center py-2">
+                                    <div className="grow border-t border-slate-700"></div>
+                                    <span className="shrink-0 px-2 text-xs text-slate-500 uppercase">Or</span>
+                                    <div className="grow border-t border-slate-700"></div>
                                 </div>
+
+                                <button
+                                    onClick={isLoading ? undefined : handleMetaMaskSignIn}
+                                    disabled={isLoading}
+                                    className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 rounded-lg text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-linear-to-r from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <Image
+                                        src="/assets/auth/metamask.svg" // Make sure this asset exists or use a generic one
+                                        alt="MetaMask"
+                                        width={24}
+                                        height={24}
+                                        className="w-6 h-6 object-contain"
+                                    />
+                                    <span className="font-medium text-sm">Connect with MetaMask</span>
+                                </button>
                             </div>
 
                             <div className="relative my-6">

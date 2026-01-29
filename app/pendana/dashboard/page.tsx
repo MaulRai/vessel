@@ -128,20 +128,15 @@ function InvestorDashboardContent() {
               {user?.wallet_address && (
                 <Identity
                   address={user.wallet_address as `0x${string}`}
-                  schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
+                  chain={base}
                 >
-                  <Avatar className="h-10 w-10" />
+                  <Avatar address={user.wallet_address as `0x${string}`} chain={base} className="h-10 w-10" />
                   <div className="flex flex-col">
-                    <Name className="text-sm font-semibold text-slate-100" />
-                    <Address className="text-xs text-slate-400" />
+                    <Name address={user.wallet_address as `0x${string}`} chain={base} className="text-sm font-semibold text-slate-100" />
+                    <Address address={user.wallet_address as `0x${string}`} className="text-xs text-slate-400" />
                   </div>
                 </Identity>
               )}
-              <div className="h-8 w-[1px] bg-slate-700 mx-2 hidden md:block" />
-              <div className="flex flex-col">
-                <span className="text-xs text-slate-400">Akun Vessel</span>
-                <span className="text-sm font-medium text-slate-200">{user?.profile?.full_name || user?.username}</span>
-              </div>
             </div>
           </header>
 
