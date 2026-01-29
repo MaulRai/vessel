@@ -5,8 +5,11 @@ import Link from 'next/link';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { adminAPI, FundingPool } from '@/lib/api/admin';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 function PoolListContent() {
+  const { t, language } = useLanguage();
+  const locale = language === 'en' ? 'en-US' : 'id-ID';
   const [pools, setPools] = useState<FundingPool[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -34,7 +37,7 @@ function PoolListContent() {
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('id-ID', {
+    return new Date(dateString).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -43,13 +46,13 @@ function PoolListContent() {
 
   const formatCurrency = (amount?: number) => {
     if (amount === undefined || amount === null) return 'Rp 0';
-    return `Rp ${amount.toLocaleString('id-ID')}`;
+    return `Rp ${amount.toLocaleString(locale)}`;
   };
 
   const getStatusBadge = (status: string) => {
     const config: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
       open: {
-        label: 'Open',
+        label: t('admin.pools.status.open'),
         className: 'bg-blue-500/10 text-blue-400 border border-blue-500/30',
         icon: (
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -58,7 +61,7 @@ function PoolListContent() {
         ),
       },
       filled: {
-        label: 'Filled',
+        label: t('admin.pools.status.filled'),
         className: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
         icon: (
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,7 +70,7 @@ function PoolListContent() {
         ),
       },
       disbursed: {
-        label: 'Disbursed',
+        label: t('admin.pools.status.disbursed'),
         className: 'bg-violet-500/10 text-violet-400 border border-violet-500/30',
         icon: (
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,7 +79,7 @@ function PoolListContent() {
         ),
       },
       closed: {
-        label: 'Closed',
+        label: t('admin.pools.status.closed'),
         className: 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/30',
         icon: (
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,20 +106,20 @@ function PoolListContent() {
   };
 
   const handleDisburse = async (poolId: string) => {
-    if (!confirm('Apakah Anda yakin ingin mencairkan dana ke mitra?')) return;
+    if (!confirm(t('admin.pools.list.buttons.confirmDisburse'))) return;
 
     setActionLoading(poolId);
     try {
       const res = await adminAPI.disbursePool(poolId);
       if (res.success) {
-        alert('Dana berhasil dicairkan ke mitra');
+        alert(t('admin.pools.list.buttons.disburse'));
         loadPools();
       } else {
-        alert(res.error?.message || 'Gagal mencairkan dana');
+        alert(res.error?.message || t('common.errorOccurred'));
       }
     } catch (err) {
       console.error('Failed to disburse', err);
-      alert('Terjadi kesalahan');
+      alert(t('common.errorOccurred'));
     } finally {
       setActionLoading(null);
     }
@@ -140,8 +143,8 @@ function PoolListContent() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">Funding Pools</h1>
-                <p className="text-blue-200/70 mt-1">Manage investment pools for investors</p>
+                <h1 className="text-3xl font-bold text-white">{t('admin.pools.list.heroTitle')}</h1>
+                <p className="text-blue-200/70 mt-1">{t('admin.pools.list.heroSubtitle')}</p>
               </div>
             </div>
             <Link
@@ -151,7 +154,7 @@ function PoolListContent() {
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span>Create New Pool</span>
+              <span>{t('admin.pools.list.createCta')}</span>
             </Link>
           </div>
         </div>
@@ -171,8 +174,8 @@ function PoolListContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
               </div>
-              <p className="text-zinc-400 text-lg mb-2">No funding pools yet</p>
-              <p className="text-zinc-500 text-sm mb-6">Create your first pool to start funding</p>
+              <p className="text-zinc-400 text-lg mb-2">{t('admin.pools.list.empty.title')}</p>
+              <p className="text-zinc-500 text-sm mb-6">{t('admin.pools.list.empty.subtitle')}</p>
               <Link
                 href="/admin/dashboard/pools/create"
                 className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-400 hover:to-fuchsia-400 rounded-xl text-sm font-semibold text-white transition-all shadow-lg shadow-violet-500/25"
@@ -180,7 +183,7 @@ function PoolListContent() {
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                <span>Create First Pool</span>
+                <span>{t('admin.pools.list.empty.cta')}</span>
               </Link>
             </div>
           ) : (
@@ -189,13 +192,13 @@ function PoolListContent() {
                 <table className="w-full">
                   <thead>
                     <tr className="text-left text-zinc-200 text-xs font-semibold uppercase tracking-wider border-b border-white/10 bg-white/5 backdrop-blur">
-                      <th className="px-6 py-4">Invoice</th>
-                      <th className="px-6 py-4">Target Amount</th>
-                      <th className="px-6 py-4">Progress</th>
-                      <th className="px-6 py-4">Investors</th>
-                      <th className="px-6 py-4">Status</th>
-                      <th className="px-6 py-4">Deadline</th>
-                      <th className="px-6 py-4">Actions</th>
+                      <th className="px-6 py-4">{t('admin.pools.list.table.invoice')}</th>
+                      <th className="px-6 py-4">{t('admin.pools.list.table.target')}</th>
+                      <th className="px-6 py-4">{t('admin.pools.list.table.progress')}</th>
+                      <th className="px-6 py-4">{t('admin.pools.list.table.investors')}</th>
+                      <th className="px-6 py-4">{t('admin.pools.list.table.status')}</th>
+                      <th className="px-6 py-4">{t('admin.pools.list.table.deadline')}</th>
+                      <th className="px-6 py-4">{t('admin.pools.list.table.actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -212,7 +215,7 @@ function PoolListContent() {
                           <td className="px-6 py-5">
                             <div>
                               <p className="text-white font-semibold">{formatCurrency(pool.target_amount)}</p>
-                              <p className="text-zinc-500 text-xs mt-1">Funded: {formatCurrency(pool.funded_amount)}</p>
+                              <p className="text-zinc-500 text-xs mt-1">{t('admin.pools.list.table.funded')}: {formatCurrency(pool.funded_amount)}</p>
                             </div>
                           </td>
                           <td className="px-6 py-5">
@@ -256,14 +259,14 @@ function PoolListContent() {
                                   disabled={actionLoading === pool.id}
                                   className="px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-xs font-semibold text-emerald-400 transition-all disabled:opacity-50"
                                 >
-                                  {actionLoading === pool.id ? 'Processing...' : 'Disburse'}
+                                  {actionLoading === pool.id ? t('admin.common.processing') : t('admin.pools.list.buttons.disburse')}
                                 </button>
                               )}
                               <Link
                                 href={`/admin/dashboard/pools/${pool.id}`}
                                 className="px-3 py-2 bg-white/5 backdrop-blur hover:bg-white/10 border border-white/15 rounded-lg text-xs font-semibold text-zinc-100 transition-all"
                               >
-                                View Details
+                                {t('admin.pools.list.buttons.viewDetails')}
                               </Link>
                             </div>
                           </td>
@@ -277,7 +280,7 @@ function PoolListContent() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between px-6 py-4 border-t border-white/10">
                   <p className="text-sm text-slate-200">
-                    Halaman {page} dari {totalPages}
+                    {t('admin.pools.list.pagination.label')} {page} {t('admin.pools.list.pagination.of')} {totalPages}
                   </p>
                   <div className="flex items-center space-x-2">
                     <button
@@ -285,14 +288,14 @@ function PoolListContent() {
                       disabled={page === 1}
                       className="px-3 py-1 bg-white/5 backdrop-blur hover:bg-white/10 disabled:bg-white/5 disabled:text-slate-600 rounded text-sm text-slate-100 transition-colors"
                     >
-                      Sebelumnya
+                      {t('admin.pools.list.pagination.prev')}
                     </button>
                     <button
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
                       className="px-3 py-1 bg-white/5 backdrop-blur hover:bg-white/10 disabled:bg-white/5 disabled:text-slate-600 rounded text-sm text-slate-100 transition-colors"
                     >
-                      Selanjutnya
+                      {t('admin.pools.list.pagination.next')}
                     </button>
                   </div>
                 </div>

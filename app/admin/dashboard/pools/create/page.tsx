@@ -7,11 +7,14 @@ import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { adminAPI, PendingInvoice } from '@/lib/api/admin';
 import { Invoice } from '@/lib/api/user';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 function CreatePoolContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preSelectedInvoiceId = searchParams.get('invoice_id');
+  const { t, language } = useLanguage();
+  const locale = language === 'en' ? 'en-US' : 'id-ID';
 
   const [approvedInvoices, setApprovedInvoices] = useState<Invoice[]>([]);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -49,13 +52,13 @@ function CreatePoolContent() {
 
   const formatCurrency = (amount: number, currency: string = 'IDR') => {
     if (currency === 'IDR') {
-      return `Rp ${amount.toLocaleString('id-ID')}`;
+      return `Rp ${amount.toLocaleString(locale)}`;
     }
-    return `${currency} ${amount.toLocaleString('en-US')}`;
+    return `${currency} ${amount.toLocaleString(locale)}`;
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
+    return new Date(dateString).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -73,7 +76,7 @@ function CreatePoolContent() {
 
   const handleCreatePool = async () => {
     if (!selectedInvoice) {
-      alert('Pilih invoice terlebih dahulu');
+      alert(t('admin.pools.create.alerts.selectInvoice'));
       return;
     }
 
@@ -84,11 +87,11 @@ function CreatePoolContent() {
         setCreatedPoolId(res.data.id);
         setSuccess(true);
       } else {
-        alert(res.error?.message || 'Gagal membuat funding pool');
+        alert(res.error?.message || t('admin.pools.create.alerts.createFail'));
       }
     } catch (err) {
       console.error('Failed to create pool', err);
-      alert('Terjadi kesalahan saat membuat pool');
+      alert(t('common.errorOccurred'));
     } finally {
       setCreating(false);
     }
@@ -104,16 +107,16 @@ function CreatePoolContent() {
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-slate-100 mb-3">Funding Pool Berhasil Dibuat</h2>
+            <h2 className="text-2xl font-bold text-slate-100 mb-3">{t('admin.pools.create.success.title')}</h2>
             <p className="text-slate-300 mb-6">
-              Pool pendanaan untuk invoice {selectedInvoice?.invoice_number} telah dibuat dan siap untuk investor.
+              {t('admin.pools.create.success.body')}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/admin/dashboard/pools"
                 className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-medium rounded-lg transition-all shadow-lg"
               >
-                Lihat Daftar Pool
+                {t('admin.pools.create.actions.viewList')}
               </Link>
               <button
                 onClick={() => {
@@ -122,7 +125,7 @@ function CreatePoolContent() {
                 }}
                 className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium rounded-lg transition-all"
               >
-                Buat Pool Lain
+                {t('admin.pools.create.actions.createAnother')}
               </button>
             </div>
           </div>
@@ -142,10 +145,10 @@ function CreatePoolContent() {
             <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
             </svg>
-            Kembali
+            {t('admin.pools.create.back')}
           </Link>
-          <h1 className="text-2xl font-bold text-white">Buat Funding Pool</h1>
-          <p className="text-slate-400 mt-1">Pilih invoice yang sudah disetujui untuk membuat funding pool</p>
+          <h1 className="text-2xl font-bold text-white">{t('admin.pools.create.title')}</h1>
+          <p className="text-slate-400 mt-1">{t('admin.pools.create.subtitle')}</p>
         </div>
 
         {loading ? (
@@ -155,19 +158,19 @@ function CreatePoolContent() {
         ) : (
           <div className="grid lg:grid-cols-2 gap-6">
             <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4">Pilih Invoice</h2>
+              <h2 className="text-lg font-semibold text-white mb-4">{t('admin.pools.create.pickInvoice')}</h2>
 
               {approvedInvoices.length === 0 ? (
                 <div className="text-center py-8">
                   <svg className="w-12 h-12 mx-auto text-slate-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <p className="text-slate-400">Tidak ada invoice yang disetujui</p>
+                  <p className="text-slate-400">{t('admin.pools.create.noApproved.title')}</p>
                   <Link
                     href="/admin/dashboard/invoices"
                     className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block"
                   >
-                    Review invoice terlebih dahulu
+                    {t('admin.pools.create.noApproved.cta')}
                   </Link>
                 </div>
               ) : (
@@ -200,61 +203,61 @@ function CreatePoolContent() {
             </div>
 
             <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-4">Detail Pool</h2>
+              <h2 className="text-lg font-semibold text-white mb-4">{t('admin.pools.create.detailTitle')}</h2>
 
               {selectedInvoice ? (
                 <div className="space-y-6">
                   <div className="space-y-4">
                     <div>
-                      <p className="text-slate-400 text-sm">Invoice</p>
+                      <p className="text-slate-400 text-sm">{t('admin.pools.create.labels.invoice')}</p>
                       <p className="text-white font-medium">{selectedInvoice.invoice_number}</p>
                     </div>
                     <div>
-                      <p className="text-slate-400 text-sm">Buyer</p>
+                      <p className="text-slate-400 text-sm">{t('admin.pools.create.labels.buyer')}</p>
                       <p className="text-white font-medium">{selectedInvoice.buyer_name}</p>
                       <p className="text-slate-500 text-xs">{selectedInvoice.buyer_country}</p>
                     </div>
                     <div>
-                      <p className="text-slate-400 text-sm">Jumlah Total</p>
+                      <p className="text-slate-400 text-sm">{t('admin.pools.create.labels.amount')}</p>
                       <p className="text-white font-medium">{formatCurrency(selectedInvoice.idr_amount || selectedInvoice.amount, 'IDR')}</p>
                     </div>
                     <div>
-                      <p className="text-slate-400 text-sm">Jatuh Tempo</p>
+                      <p className="text-slate-400 text-sm">{t('admin.pools.create.labels.dueDate')}</p>
                       <p className="text-white font-medium">{formatDate(selectedInvoice.due_date)}</p>
                     </div>
                   </div>
 
                   <div className="pt-4 border-t border-slate-700/50">
-                    <h3 className="text-sm font-medium text-slate-300 mb-3">Konfigurasi Tranche</h3>
+                    <h3 className="text-sm font-medium text-slate-300 mb-3">{t('admin.pools.create.labels.trancheConfig')}</h3>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                        <p className="text-blue-400 text-xs font-medium">Priority</p>
+                        <p className="text-blue-400 text-xs font-medium">{t('admin.pools.create.labels.priority')}</p>
                         <p className="text-white font-bold">{((selectedInvoice.priority_ratio || 0.8) * 100).toFixed(0)}%</p>
-                        <p className="text-slate-400 text-xs">{selectedInvoice.priority_interest_rate || 10}% yield</p>
+                        <p className="text-slate-400 text-xs">{selectedInvoice.priority_interest_rate || 10}% {t('admin.pools.create.labels.yield')}</p>
                       </div>
                       <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg">
-                        <p className="text-orange-400 text-xs font-medium">Catalyst</p>
+                        <p className="text-orange-400 text-xs font-medium">{t('admin.pools.create.labels.catalyst')}</p>
                         <p className="text-white font-bold">{((selectedInvoice.catalyst_ratio || 0.2) * 100).toFixed(0)}%</p>
-                        <p className="text-slate-400 text-xs">{selectedInvoice.catalyst_interest_rate || 15}% yield</p>
+                        <p className="text-slate-400 text-xs">{selectedInvoice.catalyst_interest_rate || 15}% {t('admin.pools.create.labels.yield')}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="pt-4 border-t border-slate-700/50 space-y-3">
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">Priority Target</span>
+                      <span className="text-slate-400">{t('admin.pools.create.labels.priorityTarget')}</span>
                       <span className="text-white font-medium">
                         {formatCurrency((selectedInvoice.idr_amount || selectedInvoice.amount) * (selectedInvoice.priority_ratio || 0.8), 'IDR')}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">Catalyst Target</span>
+                      <span className="text-slate-400">{t('admin.pools.create.labels.catalystTarget')}</span>
                       <span className="text-white font-medium">
                         {formatCurrency((selectedInvoice.idr_amount || selectedInvoice.amount) * (selectedInvoice.catalyst_ratio || 0.2), 'IDR')}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm pt-3 border-t border-slate-700/50">
-                      <span className="text-slate-300 font-medium">Total Target</span>
+                      <span className="text-slate-300 font-medium">{t('admin.pools.create.labels.totalTarget')}</span>
                       <span className="text-purple-400 font-bold">
                         {formatCurrency(selectedInvoice.idr_amount || selectedInvoice.amount, 'IDR')}
                       </span>
@@ -269,14 +272,14 @@ function CreatePoolContent() {
                     {creating ? (
                       <>
                         <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-                        <span>Membuat Pool...</span>
+                        <span>{t('admin.pools.create.actions.creating')}</span>
                       </>
                     ) : (
                       <>
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
-                        <span>Buat Funding Pool</span>
+                        <span>{t('admin.pools.create.actions.create')}</span>
                       </>
                     )}
                   </button>
@@ -286,7 +289,7 @@ function CreatePoolContent() {
                   <svg className="w-12 h-12 mx-auto text-slate-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                   </svg>
-                  <p className="text-slate-400">Pilih invoice dari daftar di sebelah kiri</p>
+                  <p className="text-slate-400">{t('admin.pools.create.selectInstruction')}</p>
                 </div>
               )}
             </div>
