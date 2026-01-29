@@ -260,12 +260,12 @@ function InvoiceReviewDetailContent() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                     <p className="text-blue-400 text-sm font-medium">Priority Tranche</p>
-                    <p className="text-white text-lg font-bold">{(invoice.priority_ratio * 100).toFixed(0)}%</p>
+                    <p className="text-white text-lg font-bold">{invoice.priority_ratio}%</p>
                     <p className="text-slate-400 text-xs">Yield: {invoice.priority_interest_rate || 10}% p.a.</p>
                   </div>
                   <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg">
                     <p className="text-orange-400 text-sm font-medium">Catalyst Tranche</p>
-                    <p className="text-white text-lg font-bold">{(invoice.catalyst_ratio * 100).toFixed(0)}%</p>
+                    <p className="text-white text-lg font-bold">{invoice.catalyst_ratio}%</p>
                     <p className="text-slate-400 text-xs">Yield: {invoice.catalyst_interest_rate || 15}% p.a.</p>
                   </div>
                 </div>
@@ -393,11 +393,10 @@ function InvoiceReviewDetailContent() {
                   <button
                     key={grade}
                     onClick={() => setSelectedGrade(grade)}
-                    className={`p-4 rounded-lg border-2 text-2xl font-bold transition-all ${
-                      selectedGrade === grade
+                    className={`p-4 rounded-lg border-2 text-2xl font-bold transition-all ${selectedGrade === grade
                         ? getGradeColor(grade)
                         : 'text-slate-200 bg-white/5 backdrop-blur border-white/15 hover:border-white/30'
-                    }`}
+                      }`}
                   >
                     {grade}
                   </button>
