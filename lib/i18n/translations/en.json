@@ -129,6 +129,34 @@
         "admin": "Admin",
         "mitra": "Mitra"
     },
+    "marketplace": {
+        "title": "Marketplace",
+        "subtitle": "Find export invoices for investment",
+        "tabOpen": "Open",
+        "tabDone": "Completed",
+        "searchPlaceholder": "Search projects, buyers, or grades...",
+        "sortBy": "Sort By",
+        "sortYield": "Highest Yield",
+        "sortTenor": "Fastest Tenor",
+        "sortNewest": "Newest",
+        "filterGrade": "Grade",
+        "filterAll": "All",
+        "filterInsurance": "Insurance",
+        "filterInsured": "Insured",
+        "filterNotInsured": "No Insurance",
+        "noPoolsTitle": "No projects found",
+        "noPoolsDesc": "No projects match your current filters.",
+        "fullyFunded": "Fully Funded",
+        "yield": "Yield",
+        "target": "Target",
+        "tenor": "Tenor",
+        "progress": "Progress",
+        "fundingProgress": "Funding Progress",
+        "priority": "Priority",
+        "catalyst": "Catalyst",
+        "invest": "Invest Now",
+        "funded": "Funded"
+    },
     "landing": {
         "features": "Features",
         "howItWorks": "How It Works",
@@ -450,7 +478,7 @@
                     "description": "Verified mitra directory",
                     "cta": "View List"
                 }
-            }, 
+            },
             "recent": {
                 "title": "Recent Users",
                 "subtitle": "Latest registered users on the platform",
