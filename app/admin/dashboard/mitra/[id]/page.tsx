@@ -17,6 +17,10 @@ export default function MitraDetailPage() {
   const [invoices, setInvoices] = useState<PendingInvoice[]>([]);
   const [pools, setPools] = useState<FundingPool[]>([]);
 
+  const [actionLoading, setActionLoading] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+
   // Load Application Detail
   useEffect(() => {
     const loadDetail = async () => {
@@ -61,6 +65,59 @@ export default function MitraDetailPage() {
     }
   }, [application?.user_id, activeTab]);
 
+  const handleApprove = async () => {
+    if (!confirm('Apakah anda yakin ingin menyetujui aplikasi mitra ini?')) return;
+
+    setActionLoading(true);
+    try {
+      const res = await adminAPI.approveMitraApplication(id);
+      if (res.success) {
+        // Refresh data
+        const freshData = await adminAPI.getMitraApplicationDetail(id);
+        if (freshData.success && freshData.data) {
+          setApplication(freshData.data);
+        }
+        alert('Aplikasi mitra berhasil disetujui');
+      } else {
+        alert('Gagal menyetujui aplikasi: ' + (typeof res.error === 'string' ? res.error : res.error?.message));
+      }
+    } catch (err) {
+      console.error('Approve error', err);
+      alert('Terjadi kesalahan saat menyetujui aplikasi');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!rejectReason.trim()) {
+      alert('Harap isi alasan penolakan');
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const res = await adminAPI.rejectMitraApplication(id, rejectReason);
+      if (res.success) {
+        // Refresh data
+        const freshData = await adminAPI.getMitraApplicationDetail(id);
+        if (freshData.success && freshData.data) {
+          setApplication(freshData.data);
+        }
+        setRejectModalOpen(false);
+        setRejectReason('');
+        alert('Aplikasi mitra berhasil ditolak');
+      } else {
+        alert('Gagal menolak aplikasi: ' + (typeof res.error === 'string' ? res.error : res.error?.message));
+      }
+    } catch (err) {
+      console.error('Reject error', err);
+      alert('Terjadi kesalahan saat menolak aplikasi');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout role="admin">
@@ -100,11 +157,33 @@ export default function MitraDetailPage() {
               Bergabung sejak {new Date(application.created_at).toLocaleDateString('id-ID')}
             </p>
           </div>
-          <div className={`px-4 py-2 rounded-full text-sm font-semibold border ${application.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+
+          <div className="flex items-center gap-4">
+            <div className={`px-4 py-2 rounded-full text-sm font-semibold border ${application.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
               application.status === 'rejected' ? 'bg-rose-500/10 text-rose-400 border-rose-500/30' :
                 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-            }`}>
-            {application.status === 'approved' ? 'Disetujui' : application.status === 'rejected' ? 'Ditolak' : 'Menunggu Verifikasi'}
+              }`}>
+              {application.status === 'approved' ? 'Disetujui' : application.status === 'rejected' ? 'Ditolak' : 'Menunggu Verifikasi'}
+            </div>
+
+            {application.status === 'pending' && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setRejectModalOpen(true)}
+                  disabled={actionLoading}
+                  className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:border-rose-500 text-sm font-medium rounded-lg transition-all"
+                >
+                  Tolak
+                </button>
+                <button
+                  onClick={handleApprove}
+                  disabled={actionLoading}
+                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-medium rounded-lg shadow-lg shadow-emerald-900/20 transition-all"
+                >
+                  {actionLoading ? 'Memproses...' : 'Setujui Aplikasi'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -258,8 +337,8 @@ export default function MitraDetailPage() {
                         </td>
                         <td className="px-6 py-4">
                           <span className={`px-2 py-1 rounded text-xs font-medium border ${inv.status === 'funded' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                              inv.status === 'rejected' ? 'bg-rose-500/10 text-rose-400 border-rose-500/30' :
-                                'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                            inv.status === 'rejected' ? 'bg-rose-500/10 text-rose-400 border-rose-500/30' :
+                              'bg-blue-500/10 text-blue-400 border-blue-500/30'
                             }`}>
                             {inv.status}
                           </span>
@@ -290,7 +369,7 @@ export default function MitraDetailPage() {
                       <div className="flex justify-between items-start mb-3">
                         <h3 className="text-slate-200 font-medium truncate">Pool {pool.invoice?.invoice_number || pool.id.slice(0, 8)}</h3>
                         <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${pool.status === 'open' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                            'bg-slate-700 text-slate-400 border-slate-600'
+                          'bg-slate-700 text-slate-400 border-slate-600'
                           }`}>
                           {pool.status}
                         </span>
@@ -325,6 +404,43 @@ export default function MitraDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Reject Modal */}
+      {rejectModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h3 className="text-lg font-bold text-white mb-4">Tolak Aplikasi Mitra</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">
+                  Alasan Penolakan
+                </label>
+                <textarea
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-cyan-500 min-h-[100px]"
+                  placeholder="Jelaskan alasan penolakan..."
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  onClick={() => setRejectModalOpen(false)}
+                  className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleReject}
+                  disabled={actionLoading || !rejectReason.trim()}
+                  className="px-4 py-2 bg-rose-500 hover:bg-rose-600 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg transition-colors font-medium"
+                >
+                  {actionLoading ? 'Memproses...' : 'Tolak Aplikasi'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }
