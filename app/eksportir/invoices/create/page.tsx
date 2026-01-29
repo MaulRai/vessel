@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { invoiceAPI, CreateInvoiceRequest } from '@/lib/api/user';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface UploadedFile {
   name: string;
@@ -340,6 +341,15 @@ function CreateInvoiceContent() {
   };
 
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const { user } = useAuth();
+  const [showWalletAlert, setShowWalletAlert] = useState(false);
+
+  useEffect(() => {
+    if (user?.wallet_address && !walletAddress && !isSubmitted) {
+      setWalletAddress(user.wallet_address);
+      setShowWalletAlert(true);
+    }
+  }, [user, walletAddress, isSubmitted]);
 
   const connectWallet = async () => {
     if (typeof window.ethereum === 'undefined') {
@@ -488,6 +498,30 @@ function CreateInvoiceContent() {
 
   return (
     <DashboardLayout role="mitra">
+      {showWalletAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="bg-slate-800 border border-teal-500/50 rounded-xl p-6 max-w-md w-full shadow-2xl scale-100 animate-in zoom-in-95">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Wallet Terhubung!</h3>
+              <p className="text-slate-300 text-sm mb-6">
+                Akun Anda telah terhubung dengan wallet:<br />
+                <span className="font-mono text-teal-400">{user?.wallet_address}</span>
+              </p>
+              <button
+                onClick={() => setShowWalletAlert(false)}
+                className="w-full py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-medium rounded-lg transition-colors"
+              >
+                Mengerti
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <Link
