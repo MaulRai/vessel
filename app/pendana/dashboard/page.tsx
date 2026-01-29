@@ -6,6 +6,7 @@ import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { StatRibbonCard } from '@/lib/components/StatRibbonCard';
 import { investmentAPI, InvestorPortfolio, ActiveInvestment } from '@/lib/api/user';
+import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
 
 const numberId = new Intl.NumberFormat('id-ID');
 
@@ -62,9 +63,9 @@ function InvestorDashboardContent() {
     () =>
       hasTrancheData
         ? [
-            { label: 'Prioritas', value: priorityPct / 100, color: '#2563eb' },
-            { label: 'Katalis', value: catalystPct / 100, color: '#ea580c' },
-          ]
+          { label: 'Prioritas', value: priorityPct / 100, color: '#2563eb' },
+          { label: 'Katalis', value: catalystPct / 100, color: '#ea580c' },
+        ]
         : [],
     [hasTrancheData, priorityPct, catalystPct]
   );
@@ -98,29 +99,12 @@ function InvestorDashboardContent() {
     <DashboardLayout role="investor">
       <div className="min-h-screen bg-slate-950 px-4 text-slate-100">
         <div className="mx-auto flex max-w-6xl flex-col gap-8">
-          <header className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-900/50 via-sky-800/40 to-transparent p-6 sm:p-8">
-            <div className="absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_20%,rgba(56,189,248,0.18),rgba(8,47,73,0))]" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,rgba(14,165,233,0.12),rgba(8,47,73,0))]" />
-            </div>
-            <div className="relative flex items-center gap-4">
-              <div className="relative h-24 w-24 rounded-2xl overflow-hidden shadow-lg shadow-sky-900/40">
-                <Image
-                  src="/assets/general/investor.png"
-                  alt="Investor illustration"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">Ringkasan Aset</h1>
-                <p className="mt-1 max-w-3xl text-sm text-slate-200/80">
-                  Pantau nilai pembiayaan berjalan, realisasi imbal hasil, dan distribusi aset lintas prioritas.
-                </p>
-              </div>
-            </div>
-          </header>
+          <MarketplaceHero
+            imageSrc="/assets/general/investor.png"
+            title="Ringkasan Aset"
+            subtitle={"Pantau nilai pembiayaan berjalan, realisasi imbal hasil, dan distribusi aset lintas prioritas."}
+          />
+          
 
           <section className="grid gap-4 md:grid-cols-3">
             <StatRibbonCard
@@ -211,11 +195,10 @@ function InvestorDashboardContent() {
                         </Td>
                         <Td>
                           <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                              row.tranche === 'priority'
-                                ? 'bg-blue-500/15 text-blue-200 border border-blue-500/40'
-                                : 'bg-amber-500/15 text-amber-200 border border-amber-500/40'
-                            }`}
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${row.tranche === 'priority'
+                              ? 'bg-blue-500/15 text-blue-200 border border-blue-500/40'
+                              : 'bg-amber-500/15 text-amber-200 border border-amber-500/40'
+                              }`}
                           >
                             {row.tranche_display}
                           </span>

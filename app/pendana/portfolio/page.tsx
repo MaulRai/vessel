@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
+import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
 import { investmentAPI, InvestorPortfolio, ActiveInvestment } from '@/lib/api/user';
 import Link from 'next/link';
 
@@ -94,18 +95,19 @@ function PortfolioContent() {
   return (
     <DashboardLayout role="investor">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Portfolio</h1>
-            <p className="text-slate-400 mt-1">Ringkasan investasi dan pendanaan aktif Anda</p>
-          </div>
-          <Link
-            href="/pendana/marketplace"
-            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-lg font-medium text-sm text-white transition-all shadow-lg shadow-cyan-500/25"
-          >
-            Investasi Baru
-          </Link>
-        </div>
+        <MarketplaceHero
+          imageSrc="/assets/general/portofolio.png"
+          title="Portfolio"
+          subtitle="Ringkasan investasi dan pendanaan aktif Anda"
+          cta={(
+            <Link
+              href="/pendana/marketplace"
+              className="inline-flex px-4 py-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-lg font-medium text-sm text-white transition-all shadow-lg shadow-cyan-500/25"
+            >
+              Investasi Baru
+            </Link>
+          )}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-5 bg-slate-800/30 border border-slate-700/50 rounded-xl backdrop-blur-sm">

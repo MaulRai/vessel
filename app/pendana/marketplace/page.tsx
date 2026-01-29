@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
+import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
 import { MarketplacePool, MarketplaceFilters } from '@/lib/api/user';
 import { fundingAPI, FundingPool } from '@/lib/api/funding';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -158,14 +159,11 @@ function PoolInvestmentContent() {
   return (
     <DashboardLayout role="investor">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">{t('marketplace.title')}</h1>
-            <p className="text-slate-400 mt-1">
-              {t('marketplace.subtitle')}
-            </p>
-          </div>
-        </div>
+        <MarketplaceHero
+          imageSrc="/assets/general/pool.png"
+          title={t('marketplace.title')}
+          subtitle={t('marketplace.subtitle')}
+        />
 
         <div className="space-y-3 p-4 bg-slate-800/30 border border-slate-700/50 rounded-xl">
           <div className="flex flex-wrap gap-2">
