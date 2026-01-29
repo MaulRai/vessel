@@ -87,7 +87,7 @@ function ProjectDetailContent() {
               <p className="text-sm text-slate-400">Target Pendanaan</p>
               <span className="text-sm text-slate-500">Tenor {pool.tenor_days} hari</span>
             </div>
-            <p className="text-2xl font-bold text-white">Rp {formatCurrency(pool.target_amount)}</p>
+            <p className="text-2xl font-bold text-white">IDRX {formatCurrency(pool.target_amount)}</p>
             <div className="flex items-center gap-2 text-sm text-slate-400">
               <span>P: {pool.priority_interest_rate}%</span>
               <span>•</span>
@@ -130,7 +130,7 @@ function ProjectDetailContent() {
               </div>
               <div className="p-3 bg-slate-900/50 rounded-lg border border-slate-800/70">
                 <p className="text-xs text-slate-500">Estimasi Total Diterima</p>
-                <p className="text-lg font-semibold text-slate-100">Rp {formatCurrency(Math.floor(estimatedReturn))}</p>
+                <p className="text-lg font-semibold text-slate-100">IDRX {formatCurrency(Math.floor(estimatedReturn))}</p>
               </div>
             </div>
           </div>

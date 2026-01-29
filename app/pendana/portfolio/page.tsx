@@ -120,7 +120,7 @@ function PortfolioContent() {
               Total Pendanaan Aktif
             </p>
             <p className="text-2xl font-bold text-slate-50">
-              Rp {(portfolio?.total_funding || 0).toLocaleString('id-ID')}
+              IDRX {(portfolio?.total_funding || 0).toLocaleString('id-ID')}
             </p>
           </StatRibbonCard>
 
@@ -133,7 +133,7 @@ function PortfolioContent() {
               Estimasi Imbal Hasil
             </p>
             <p className="text-2xl font-bold text-slate-50">
-              Rp {(portfolio?.total_expected_gain || 0).toLocaleString('id-ID')}
+              IDRX {(portfolio?.total_expected_gain || 0).toLocaleString('id-ID')}
             </p>
           </StatRibbonCard>
 
@@ -146,7 +146,7 @@ function PortfolioContent() {
               Profit Terealisasi
             </p>
             <p className="text-2xl font-bold text-slate-50">
-              Rp {(portfolio?.total_realized_gain || 0).toLocaleString('id-ID')}
+              IDRX {(portfolio?.total_realized_gain || 0).toLocaleString('id-ID')}
             </p>
           </StatRibbonCard>
 
@@ -159,7 +159,7 @@ function PortfolioContent() {
               Saldo Tersedia
             </p>
             <p className="text-2xl font-bold text-slate-50">
-              Rp {(portfolio?.available_balance || 0).toLocaleString('id-ID')}
+              IDRX {(portfolio?.available_balance || 0).toLocaleString('id-ID')}
             </p>
           </StatRibbonCard>
         </section>
@@ -215,7 +215,7 @@ function PortfolioContent() {
                   <span className="text-sm text-slate-300">Priority</span>
                 </div>
                 <span className="text-sm font-medium text-white">
-                  Rp {(portfolio?.priority_allocation || 0).toLocaleString('id-ID')}
+                  IDRX {(portfolio?.priority_allocation || 0).toLocaleString('id-ID')}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -224,7 +224,7 @@ function PortfolioContent() {
                   <span className="text-sm text-slate-300">Catalyst</span>
                 </div>
                 <span className="text-sm font-medium text-white">
-                  Rp {(portfolio?.catalyst_allocation || 0).toLocaleString('id-ID')}
+                  IDRX {(portfolio?.catalyst_allocation || 0).toLocaleString('id-ID')}
                 </span>
               </div>
             </div>
@@ -256,13 +256,13 @@ function PortfolioContent() {
               <div>
                 <p className="text-sm text-slate-400 mb-1">Total Modal Disalurkan</p>
                 <p className="text-lg font-bold text-white">
-                  Rp {(portfolio?.total_funding || 0).toLocaleString('id-ID')}
+                  IDRX {(portfolio?.total_funding || 0).toLocaleString('id-ID')}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-slate-400 mb-1">Estimasi Total Return</p>
                 <p className="text-lg font-bold text-green-400">
-                  Rp {((portfolio?.total_funding || 0) + (portfolio?.total_expected_gain || 0)).toLocaleString('id-ID')}
+                  IDRX {((portfolio?.total_funding || 0) + (portfolio?.total_expected_gain || 0)).toLocaleString('id-ID')}
                 </p>
               </div>
               <div className="pt-3 border-t border-slate-700/50">
@@ -327,12 +327,12 @@ function PortfolioContent() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <p className="text-white font-medium">Rp {inv.principal.toLocaleString('id-ID')}</p>
+                          <p className="text-white font-medium">IDRX {inv.principal.toLocaleString('id-ID')}</p>
                           <p className="text-xs text-slate-400">{inv.interest_rate}% p.a</p>
                         </td>
                         <td className="px-6 py-4">
-                          <p className="text-green-400 font-medium">+Rp {inv.estimated_return.toLocaleString('id-ID')}</p>
-                          <p className="text-xs text-slate-400">Total: Rp {inv.total_expected.toLocaleString('id-ID')}</p>
+                          <p className="text-green-400 font-medium">+IDRX {inv.estimated_return.toLocaleString('id-ID')}</p>
+                          <p className="text-xs text-slate-400">Total: IDRX {inv.total_expected.toLocaleString('id-ID')}</p>
                         </td>
                         <td className="px-6 py-4">
                           <p className="text-white">{new Date(inv.due_date).toLocaleDateString('id-ID')}</p>

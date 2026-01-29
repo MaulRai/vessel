@@ -631,7 +631,7 @@ export default function BuatPendanaanPage() {
                   </label>
                   <input
                     type="text"
-                    value={`Rp ${new Intl.NumberFormat('id-ID').format(parseFloat(step1Data.agreedExchangeRate))}`}
+                    value={`IDRX ${new Intl.NumberFormat('id-ID').format(parseFloat(step1Data.agreedExchangeRate))}`}
                     readOnly
                     className="w-full px-4 py-3 bg-slate-900/30 border border-slate-700 rounded-lg text-slate-400 cursor-not-allowed"
                   />
@@ -766,7 +766,7 @@ export default function BuatPendanaanPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-slate-300">Estimasi Pencairan Bersih (IDR):</span>
                     <span className="text-lg font-bold text-cyan-400">
-                      Rp {calculateEstimatedFunds()}
+                      IDRX {calculateEstimatedFunds()}
                     </span>
                   </div>
                   {(step3Data.transactionType === 'first' || step3Data.manualAnswer === 'belum') && step1Data.invoiceAmount && (
@@ -969,7 +969,7 @@ export default function BuatPendanaanPage() {
                     <div className="flex justify-between">
                       <span className="text-slate-400">Kurs Pencairan:</span>
                       <span className="text-slate-200 font-medium">
-                        Rp {new Intl.NumberFormat('id-ID').format(parseFloat(step1Data.agreedExchangeRate))}
+                        IDRX {new Intl.NumberFormat('id-ID').format(parseFloat(step1Data.agreedExchangeRate))}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -982,7 +982,7 @@ export default function BuatPendanaanPage() {
                     </div>
                     <div className="flex justify-between pt-3 border-t border-slate-700">
                       <span className="text-slate-300 font-medium">Estimasi Dana Diterima:</span>
-                      <span className="text-cyan-400 font-bold">Rp {calculateEstimatedFunds()}</span>
+                      <span className="text-cyan-400 font-bold">IDRX {calculateEstimatedFunds()}</span>
                     </div>
                   </div>
                 </div>

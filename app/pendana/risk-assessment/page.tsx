@@ -10,6 +10,8 @@ import {
   RiskQuestionnaireStatusResponse,
 } from '@/lib/api/user';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
+import Link from 'next/link';
 
 const buildDemoQuestions = (t: (key: string) => string): RiskQuestion[] => [
   {
@@ -226,16 +228,14 @@ function RiskAssessmentContent() {
   return (
     <DashboardLayout role="investor">
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">{t('riskAssessment.title')}</h1>
-          <p className="text-slate-400">
-            {t('riskAssessment.subtitle')}
-          </p>
-        </div>
+        <MarketplaceHero
+          imageSrc="/assets/general/risk-management.png"
+          title={t('riskAssessment.title')}
+          subtitle={t('riskAssessment.subtitle')}
+        />
 
         {/* Progress */}
-        <div className="mb-8">
+        <div className="my-8">
           <div className="flex items-center justify-between text-sm text-slate-400 mb-2">
             <span>
               {t('riskAssessment.question')} {currentStep + 1} {t('riskAssessment.of')} {questions.length || 1}

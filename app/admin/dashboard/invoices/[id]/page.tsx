@@ -61,7 +61,7 @@ function InvoiceReviewDetailContent() {
 
   const formatCurrency = (amount: number, currency: string = 'IDR') => {
     if (currency === 'IDR') {
-      return `Rp ${amount.toLocaleString(locale)}`;
+      return `IDRX ${amount.toLocaleString(locale)}`;
     }
     return `${currency} ${amount.toLocaleString(locale)}`;
   };

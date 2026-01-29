@@ -45,8 +45,8 @@ function PoolListContent() {
   };
 
   const formatCurrency = (amount?: number) => {
-    if (amount === undefined || amount === null) return 'Rp 0';
-    return `Rp ${amount.toLocaleString(locale)}`;
+    if (amount === undefined || amount === null) return 'IDRX 0';
+    return `IDRX ${amount.toLocaleString(locale)}`;
   };
 
   const getStatusBadge = (status: string) => {

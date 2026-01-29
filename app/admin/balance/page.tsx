@@ -60,7 +60,7 @@ export default function AdminBalancePage() {
             if (response.ok && data.success) {
                 setResult({
                     success: true,
-                    message: `${t('admin.balance.messages.successPrefix')} Rp ${amountNum.toLocaleString(locale)} ${t('admin.balance.messages.successSuffix')} ${selectedUser.email}`,
+                    message: `${t('admin.balance.messages.successPrefix')} IDRX ${amountNum.toLocaleString(locale)} ${t('admin.balance.messages.successSuffix')} ${selectedUser.email}`,
                     newBalance: data.data?.new_balance,
                 });
                 setAmount('');
@@ -171,7 +171,7 @@ export default function AdminBalancePage() {
                             </div>
                             {amount && (
                                 <p className="mt-1 text-sm text-slate-400">
-                                        Rp {parseInt(amount, 10).toLocaleString(locale)}
+                                        IDRX {parseInt(amount, 10).toLocaleString(locale)}
                                 </p>
                             )}
                         </div>
@@ -188,7 +188,7 @@ export default function AdminBalancePage() {
                                 </p>
                                 {result.newBalance !== undefined && (
                                     <p className="text-green-400 text-sm mt-1">
-                                        {t('admin.balance.resultNewBalance')}: Rp {result.newBalance.toLocaleString(locale)}
+                                        {t('admin.balance.resultNewBalance')}: IDRX {result.newBalance.toLocaleString(locale)}
                                     </p>
                                 )}
                             </div>
