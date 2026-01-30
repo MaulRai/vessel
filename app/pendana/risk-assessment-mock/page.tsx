@@ -43,7 +43,7 @@ const buildDemoQuestions = (t: (key: string) => string): RiskQuestion[] => [
 
 function RiskAssessmentContent() {
     const router = useRouter();
-    const { t, language } = useLanguage();
+    const { t, language, setLanguage } = useLanguage();
     const [questions, setQuestions] = useState<RiskQuestion[]>([]);
     // ... (keep state variables)
     const [answers, setAnswers] = useState<{ [key: number]: number }>({});
@@ -132,7 +132,7 @@ function RiskAssessmentContent() {
         <div className="h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,rgba(6,182,212,0.05)_0%,transparent_51%)] overflow-hidden flex flex-col md:flex-row">
             {/* Left Column: Context & Progress */}
             <div className="w-full md:w-5/12 lg:w-4/12 border-r border-slate-800/50 flex flex-col p-8 lg:p-12 h-full bg-slate-950/20 backdrop-blur-3xl overflow-y-auto custom-scrollbar">
-                <div className="mb-8">
+                <div className="mb-8 flex items-center justify-between">
                     <Image
                         src="/vessel-logo.png"
                         alt="VESSEL Logo"
@@ -140,6 +140,23 @@ function RiskAssessmentContent() {
                         height={32}
                         className="h-8 w-auto opacity-90"
                     />
+                    <button
+                        type="button"
+                        onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+                        className="inline-flex items-center rounded-full border border-cyan-500/50 bg-slate-900/50 p-1 text-[11px] font-semibold uppercase tracking-wide text-cyan-100 shadow-sm hover:border-cyan-400 transition-colors"
+                        aria-label={language === 'en' ? t('common.switchToIndonesian') : t('common.switchToEnglish')}
+                    >
+                        <span
+                            className={`px-2 py-1 rounded-full ${language === 'en' ? 'bg-cyan-400 text-slate-900 shadow' : 'text-cyan-100'}`}
+                        >
+                            {t('common.languageShort.en')}
+                        </span>
+                        <span
+                            className={`px-2 py-1 rounded-full ${language === 'id' ? 'bg-cyan-400 text-slate-900 shadow' : 'text-cyan-100'}`}
+                        >
+                            {t('common.languageShort.id')}
+                        </span>
+                    </button>
                 </div>
 
                 <div className="space-y-4 flex-1">
