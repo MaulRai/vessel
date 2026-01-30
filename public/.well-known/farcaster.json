@@ -1,21 +1,21 @@
 {
     "accountAssociation": {
-        "header": "eyJmaWQiOjkxNTIsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMmVmNzkwRGQ3OTkzQTM1ZkQ4NDdDMDUzRURkQUU5NDBEMDU1NTk2In0",
-        "payload": "eyJkb21haW4iOiJ2ZXNzZWwuZmluYW5jZSJ9",
-        "signature": "placeholder_signature"
+    "header": "eyJmaWQiOjI1NTk4MzksInR5cGUiOiJhdXRoIiwia2V5IjoiMHg2NDY3NEI4Q0M3YTQzZUNkMzM4NzY1NUQ2Y2Q3MTM1ODk5MkY0MDEyIn0",
+    "payload": "eyJkb21haW4iOiJ2ZXNzZWwtdmVydC52ZXJjZWwuYXBwIn0",
+    "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEFCCYOuQp9uK6ndpfXTeChIhUO8HFOeu-aFtD2ca88dW2spqrhAk_EQFyMV5ae_USpFZebcaBxH4LxwA3wKgQsIHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     },
     "miniapp": {
         "version": "1",
         "name": "Vessel Finance",
-        "homeUrl": "https://vessel.finance",
-        "iconUrl": "https://vessel.finance/vessel-icon.png",
-        "splashImageUrl": "https://vessel.finance/vessel-logo.png",
+        "homeUrl": "https://vessel-vert.vercel.app",
+        "iconUrl": "https://vessel-vert.vercel.app/vessel-icon.png",
+        "splashImageUrl": "https://vessel-vert.vercel.app/vessel-logo.png",
         "splashBackgroundColor": "#000000",
-        "webhookUrl": "https://vessel.finance/api/webhook",
+        "webhookUrl": "https://vessel-vert.vercel.app/api/webhook",
         "subtitle": "Export Financing on Base",
         "description": "Fast, transparent export financing for SMEs using Base Network.",
         "screenshotUrls": [
-            "https://vessel.finance/screenshot1.png"
+            "https://vessel-vert.vercel.app/screenshot1.png"
         ],
         "primaryCategory": "finance",
         "tags": [
@@ -24,11 +24,11 @@
             "base",
             "miniapp"
         ],
-        "heroImageUrl": "https://vessel.finance/vessel-logo.png",
+        "heroImageUrl": "https://vessel-vert.vercel.app/vessel-logo.png",
         "tagline": "Finance your exports instantly",
         "ogTitle": "Vessel Finance Mini App",
         "ogDescription": "The future of export financing on Base.",
-        "ogImageUrl": "https://vessel.finance/vessel-logo.png",
+        "ogImageUrl": "https://vessel-vert.vercel.app/vessel-logo.png",
         "noindex": false
     }
 }
