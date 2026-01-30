@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export async function generateMetadata(): Promise<Metadata> {
   const isProduction = process.env.NODE_ENV === 'production';
   const appUrl = isProduction
-    ? (process.env.NEXT_PUBLIC_APP_URL || 'https://vessel.finance')
+    ? (process.env.NEXT_PUBLIC_APP_URL || 'https://vessel-vert.vercel.app')
     : 'http://localhost:3000';
 
   return {
