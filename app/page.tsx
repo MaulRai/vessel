@@ -269,7 +269,7 @@ export default function LandingPage() {
                             className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-800/50 transition-all group border border-transparent hover:border-teal-500/30"
                           >
                             <div className="flex-shrink-0 w-16 h-16 bg-teal-500/10 rounded-xl flex items-center justify-center border border-teal-500/20">
-                              <Image src="/assets/landing/exporter.png" alt="Exporter" width={48} height={48} className="w-12 h-12 object-contain" />
+                              <Image src="/assets/general/exporter.png" alt="Exporter" width={48} height={48} className="w-12 h-12 object-contain" />
                             </div>
                             <div className="flex-1">
                               <h4 className="text-white font-bold mb-1 group-hover:text-teal-400 transition-colors">{t('landing.startAsExporter')}</h4>
