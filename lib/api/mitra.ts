@@ -2,14 +2,33 @@ import { APIResponse, APIPagination } from '../types/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 
+export interface InvoiceDashboard {
+    invoice_id: string;
+    invoice_number: string;
+    buyer_name: string;
+    buyer_country: string;
+    due_date: string;
+    amount: number;
+    status: string;
+    status_color: string;
+    days_remaining: number;
+    funded_amount: number;
+    total_owed: number;
+}
+
+export interface TimelineStatus {
+    fundraising_complete: boolean;
+    disbursement_complete: boolean;
+    repayment_complete: boolean;
+    current_step: string;
+}
+
 export interface MitraDashboard {
-    total_funding: number;
-    active_debt: number;
-    active_invoices: number;
-    nearest_due_days: number;
-    nearest_due_invoice?: string;
-    total_repaid: number;
-    funding_pools: MitraPoolSummary[];
+    total_active_financing: number;
+    total_owed_to_investors: number;
+    average_remaining_tenor: number;
+    active_invoices: InvoiceDashboard[];
+    timeline_status: TimelineStatus;
 }
 
 export interface MitraPoolSummary {
@@ -137,22 +156,74 @@ class MitraAPI {
     }
 
     async getPools(page: number = 1, perPage: number = 10): Promise<APIResponse<{ pools: MitraPoolSummary[]; total: number }>> {
-        const rawRes = await this.request<MitraPoolSummary[] | { pools: MitraPoolSummary[]; total: number }>(`/mitra/pools?page=${page}&per_page=${perPage}`);
+        interface BackendPoolResponse {
+            pool: {
+                id: string;
+                invoice_id: string;
+                target_amount: number;
+                funded_amount: number;
+                investor_count: number;
+                status: string;
+                deadline?: string;
+                created_at: string;
+                priority_target: number;
+                priority_funded: number;
+                catalyst_target: number;
+                catalyst_funded: number;
+                priority_interest_rate: number;
+                catalyst_interest_rate: number;
+            };
+            invoice?: {
+                invoice_number: string;
+                project_title?: string;
+                buyer_company_name: string;
+                buyer_country: string;
+                grade?: string;
+                tenor_days?: number;
+            };
+        }
+
+        const rawRes = await this.request<BackendPoolResponse[]>(`/mitra/pools?page=${page}&per_page=${perPage}`);
 
         if (rawRes.success && rawRes.data) {
             const pagination = rawRes.pagination as APIPagination | undefined;
-            if (Array.isArray(rawRes.data)) {
-                return {
-                    success: true,
-                    data: {
-                        pools: rawRes.data,
-                        total: pagination?.total ?? rawRes.data.length,
-                    },
-                };
-            }
+            const transformedPools: MitraPoolSummary[] = rawRes.data.map((item) => ({
+                pool_id: item.pool.id,
+                invoice_id: item.pool.invoice_id,
+                invoice_number: item.invoice?.invoice_number || '',
+                project_title: item.invoice?.project_title || '',
+                buyer_company_name: item.invoice?.buyer_company_name || '',
+                buyer_country: item.invoice?.buyer_country || '',
+                grade: item.invoice?.grade || '',
+                target_amount: Number(item.pool.target_amount),
+                funded_amount: Number(item.pool.funded_amount),
+                status: item.pool.status,
+                priority_interest_rate: Number(item.pool.priority_interest_rate),
+                catalyst_interest_rate: Number(item.pool.catalyst_interest_rate),
+                tenor_days: item.invoice?.tenor_days || 0,
+                deadline: item.pool.deadline || '',
+                created_at: item.pool.created_at,
+                investor_count: item.pool.investor_count,
+                priority_target: Number(item.pool.priority_target),
+                priority_funded: Number(item.pool.priority_funded),
+                catalyst_target: Number(item.pool.catalyst_target),
+                catalyst_funded: Number(item.pool.catalyst_funded),
+            }));
+
+            return {
+                success: true,
+                data: {
+                    pools: transformedPools,
+                    total: pagination?.total ?? transformedPools.length,
+                },
+            };
         }
 
-        return rawRes as APIResponse<{ pools: MitraPoolSummary[]; total: number }>;
+        return {
+            success: rawRes.success,
+            error: rawRes.error,
+            data: { pools: [], total: 0 },
+        };
     }
 
     async getInvoices(page: number = 1, perPage: number = 10): Promise<APIResponse<{ invoices: MitraInvoice[]; total: number }>> {

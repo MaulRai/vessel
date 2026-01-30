@@ -325,7 +325,6 @@ export interface FundingPool {
 class AdminAPIExtended extends AdminAPI {
     private mapBackendPoolToFrontend(item: any): FundingPool {
         if (!item) return item;
-        // The backend returns FundingPoolResponse which has a nested 'pool' and 'invoice'
         if (item.pool) {
             return {
                 ...item.pool,
@@ -347,8 +346,6 @@ class AdminAPIExtended extends AdminAPI {
             method: 'GET',
         });
 
-        // Backend returns data as array with pagination in separate field
-        // Transform to the expected PendingInvoicesResponse format
         if (rawRes.success && rawRes.data) {
             const pagination = rawRes.pagination as APIPagination | undefined;
             if (Array.isArray(rawRes.data)) {

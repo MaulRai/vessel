@@ -62,7 +62,7 @@ function LoginForm() {
     }
   };
 
-  const handleDemoLogin = async (role: 'investor' | 'mitra') => {
+  const handleDemoLogin = async (role: 'investor' | 'mitra' | 'admin') => {
     setError('');
     setSuccessMessage('');
     setIsLoading(true);
@@ -70,6 +70,8 @@ function LoginForm() {
       await loginAsDemo(role);
       if (role === 'investor') {
         router.push('/pendana/dashboard');
+      } else if (role === 'admin') {
+        router.push('/admin/dashboard');
       } else {
         router.push('/eksportir/dashboard');
       }
@@ -162,15 +164,42 @@ function LoginForm() {
           {t('auth.loginGoogle')}
         </button>
 
-        {/* Demo Account - Eksportir Only */}
-        <button
-          type="button"
-          onClick={() => handleDemoLogin('mitra')}
-          disabled={isLoading}
-          className="w-full px-4 py-2 bg-teal-600/20 border border-teal-500/40 text-teal-100 hover:bg-teal-600/30 rounded-lg text-sm font-medium transition-all"
-        >
-          {t('auth.loginDemoExporter')}
-        </button>
+        {/* Admin Test Login */}
+        <div className="relative group">
+          <button
+            type="button"
+            onClick={async () => {
+              setError('');
+              setSuccessMessage('');
+              setIsLoading(true);
+              try {
+                const response = await login({
+                  email_or_username: 'admin',
+                  password: 'admin123',
+                });
+                if (response.success) {
+                  router.push('/admin/dashboard');
+                } else {
+                  setError(response.error?.message || t('auth.loginError'));
+                }
+              } catch (err) {
+                console.error(err);
+                setError(t('auth.loginError'));
+              } finally {
+                setIsLoading(false);
+              }
+            }}
+            disabled={isLoading}
+            className="w-full px-4 py-2 bg-purple-600/20 border border-purple-500/40 text-purple-100 hover:bg-purple-600/30 rounded-lg text-sm font-medium transition-all"
+          >
+            {t('auth.loginDemoAdmin')}
+          </button>
+          {/* Tooltip */}
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900 text-xs text-slate-300 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-slate-700 shadow-lg z-10">
+            {t('auth.adminTestTooltip')}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+          </div>
+        </div>
 
         {/* Divider */}
         <div className="relative">

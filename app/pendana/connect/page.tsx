@@ -107,50 +107,7 @@ export default function InvestorConnectPage() {
                 return;
             }
 
-            // 1. Connect
-            const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
-            if (!accounts || accounts.length === 0) {
-                throw new Error('No accounts found');
-            }
-            const address = accounts[0];
-
-            // 2. Get Nonce
-            const nonceRes = await authAPI.walletNonce({ wallet_address: address });
-            if (!nonceRes.success || !nonceRes.data) {
-                throw new Error(nonceRes.error?.message || "Failed to generate nonce");
-            }
-            const { nonce, message } = nonceRes.data;
-
-            // 3. Sign message
-            const signature = await provider.request({
-                method: 'personal_sign',
-                params: [message, address]
-            }) as string;
-
-            // 4. Login
-            const loginRes = await walletLogin({
-                wallet_address: address,
-                signature,
-                message,
-                nonce
-            });
-
-            if (loginRes?.success) {
-                // Check risk assessment status
-                try {
-                    const statusRes = await riskQuestionnaireAPI.getStatus();
-                    if (statusRes.success && statusRes.data && statusRes.data.completed) {
-                        router.push('/pendana/dashboard');
-                    } else {
-                        router.push('/pendana/risk-assessment');
-                    }
-                } catch {
-                    // Fallback if status check fails
-                    router.push('/pendana/risk-assessment');
-                }
-            } else {
-                throw new Error(loginRes?.error?.message || "Login failed");
-            }
+            await connectAndSign(provider);
         } catch (err: unknown) {
             console.error("MetaMask Sign In Error:", err);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -163,6 +120,103 @@ export default function InvestorConnectPage() {
             setIsLoading(false);
         }
     };
+
+    const handleCoinbaseSignIn = async () => {
+        setError('');
+        setIsLoading(true);
+        try {
+            if (!window.ethereum) {
+                window.open('https://www.coinbase.com/wallet', '_blank');
+                return;
+            }
+
+            // Handle multiple providers
+            let provider = window.ethereum;
+            if (window.ethereum.providers?.length) {
+                provider = window.ethereum.providers.find((p: any) => p.isCoinbaseWallet) || window.ethereum;
+            }
+
+            // If Coinbase Wallet extension is not detected via isCoinbaseWallet flag, 
+            // but we want to force it or fallback, we might need to rely on the user having it.
+            // However, typically Coinbase Wallet injects itself. 
+            // If strictly not found, we could try to prompt installation.
+
+            // Note: If using SDK, we might need a different approach, but for injected:
+            if (!provider.isCoinbaseWallet) {
+                // Try looking for 'coinbaseWalletExtension' object if present
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                if ((window as any).coinbaseWalletExtension) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    provider = (window as any).coinbaseWalletExtension;
+                } else {
+                    window.open('https://www.coinbase.com/wallet', '_blank');
+                    return;
+                }
+            }
+
+            await connectAndSign(provider);
+
+        } catch (err: unknown) {
+            console.error("Coinbase Wallet Sign In Error:", err);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((err as any).code === 4001) {
+                setError('Connection rejected');
+            } else {
+                setError(err instanceof Error ? err.message : "Failed to sign in with Coinbase Wallet");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Shared connection logic
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const connectAndSign = async (provider: any) => {
+        // 1. Connect
+        const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
+        if (!accounts || accounts.length === 0) {
+            throw new Error('No accounts found');
+        }
+        const address = accounts[0];
+
+        // 2. Get Nonce
+        const nonceRes = await authAPI.walletNonce({ wallet_address: address });
+        if (!nonceRes.success || !nonceRes.data) {
+            throw new Error(nonceRes.error?.message || "Failed to generate nonce");
+        }
+        const { nonce, message } = nonceRes.data;
+
+        // 3. Sign message
+        const signature = await provider.request({
+            method: 'personal_sign',
+            params: [message, address]
+        }) as string;
+
+        // 4. Login
+        const loginRes = await walletLogin({
+            wallet_address: address,
+            signature,
+            message,
+            nonce
+        });
+
+        if (loginRes?.success) {
+            // Check risk assessment status
+            try {
+                const statusRes = await riskQuestionnaireAPI.getStatus();
+                if (statusRes.success && statusRes.data && statusRes.data.completed) {
+                    router.push('/pendana/dashboard');
+                } else {
+                    router.push('/pendana/risk-assessment');
+                }
+            } catch {
+                // Fallback if status check fails
+                router.push('/pendana/risk-assessment');
+            }
+        } else {
+            throw new Error(loginRes?.error?.message || "Login failed");
+        }
+    }
 
     return (
         <div className="min-h-screen h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden relative">
@@ -245,7 +299,30 @@ export default function InvestorConnectPage() {
                             )}
 
                             <div className="flex flex-col gap-3">
-                                <div className="w-full relative group">
+                                {/* Coinbase Wallet - Primary */}
+                                <button
+                                    onClick={handleCoinbaseSignIn}
+                                    disabled={isLoading}
+                                    className="w-full relative group overflow-hidden rounded-xl bg-[#0052FF] p-4 transition-all hover:bg-[#0045D8] disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-900/20"
+                                >
+                                    <div className="relative flex items-center justify-center gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                                            <svg width="16" height="16" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path fillRule="evenodd" clipRule="evenodd" d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32ZM16 25C20.9706 25 25 20.9706 25 16C25 11.0294 20.9706 7 16 7C11.0294 7 7 11.0294 7 16C7 20.9706 11.0294 25 16 25Z" fill="#0052FF" />
+                                                <path d="M16 21C18.7614 21 21 18.7614 21 16C21 13.2386 18.7614 11 16 11C13.2386 11 11 13.2386 11 16C11 18.7614 13.2386 21 16 21Z" fill="white" />
+                                            </svg>
+                                        </div>
+                                        <span className="font-semibold text-white">Connect with Coinbase Wallet</span>
+                                    </div>
+                                    <div className="absolute top-0 right-0 p-1.5">
+                                        <div className="bg-white/20 text-white text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-sm backdrop-blur-sm">
+                                            Primary
+                                        </div>
+                                    </div>
+                                </button>
+
+                                {/* Base Sign In - Commented out temporarily */}
+                                {/* <div className="w-full relative group">
                                     <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 to-cyan-600 rounded-lg opacity-20 group-hover:opacity-40 transition duration-200"></div>
                                     <div className="relative">
                                         <SignInWithBaseButton
@@ -253,11 +330,11 @@ export default function InvestorConnectPage() {
                                             onClick={isLoading ? undefined : handleSignIn}
                                         />
                                     </div>
-                                </div>
+                                </div> */}
 
                                 <div className="relative flex items-center py-2">
                                     <div className="grow border-t border-slate-700"></div>
-                                    <span className="shrink-0 px-2 text-xs text-slate-500 uppercase">Or</span>
+                                    <span className="shrink-0 px-2 text-xs text-slate-500 uppercase">Or use alternative</span>
                                     <div className="grow border-t border-slate-700"></div>
                                 </div>
 
@@ -268,7 +345,7 @@ export default function InvestorConnectPage() {
                                 >
                                     <div className="absolute inset-0 bg-linear-to-r from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                     <Image
-                                        src="/assets/auth/metamask.svg" // Make sure this asset exists or use a generic one
+                                        src="/assets/auth/metamask.svg"
                                         alt="MetaMask"
                                         width={24}
                                         height={24}
