@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 
-export function MarketplaceHero({
+export function HeaderHero({
     imageSrc,
     title,
     subtitle,
@@ -23,13 +23,13 @@ export function MarketplaceHero({
                 />
             </div>
             <div className="relative flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-stretch gap-4">
+                <div className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2 sm:flex sm:items-stretch sm:gap-4">
                     <div className="relative h-24 w-24 flex-shrink-0 rounded-2xl overflow-hidden shadow-lg shadow-sky-900/40">
                         <Image src={imageSrc} alt={title} fill className="object-cover" priority />
                     </div>
-                    <div className="flex flex-col justify-center">
-                        <h1 className="text-3xl font-bold text-white">{title}</h1>
-                        <p className="mt-1 max-w-3xl text-sm text-slate-200/80">{subtitle}</p>
+                    <div className="contents sm:flex sm:flex-col sm:justify-center">
+                        <h1 className="text-2xl md:text-3xl font-bold text-white">{title}</h1>
+                        <p className="col-span-2 mt-1 max-w-3xl text-xs md:text-sm text-slate-200/80">{subtitle}</p>
                     </div>
                 </div>
                 {cta ? <div className="self-start sm:self-center">{cta}</div> : null}
