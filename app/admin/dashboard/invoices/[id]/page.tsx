@@ -170,14 +170,6 @@ function InvoiceReviewDetailContent() {
                 : 'Invoice telah ditolak. Mitra akan mendapat notifikasi.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              {actionCompleted === 'approved' && (
-                <Link
-                  href={`/admin/dashboard/pools/create?invoice_id=${invoiceId}`}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-medium rounded-lg transition-all shadow-lg"
-                >
-                  Buat Funding Pool
-                </Link>
-              )}
               <Link
                 href="/admin/dashboard/invoices"
                 className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium rounded-lg transition-all"
@@ -397,8 +389,8 @@ function InvoiceReviewDetailContent() {
                     key={grade}
                     onClick={() => setSelectedGrade(grade)}
                     className={`p-4 rounded-lg border-2 text-2xl font-bold transition-all ${selectedGrade === grade
-                        ? getGradeColor(grade)
-                        : 'text-slate-200 bg-white/5 backdrop-blur border-white/15 hover:border-white/30'
+                      ? getGradeColor(grade)
+                      : 'text-slate-200 bg-white/5 backdrop-blur border-white/15 hover:border-white/30'
                       }`}
                   >
                     {grade}

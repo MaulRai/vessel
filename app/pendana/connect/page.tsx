@@ -8,11 +8,10 @@ import Link from 'next/link';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
 import { authAPI } from '@/lib/api/auth';
-import { SignInWithBaseButton } from '@base-org/account-ui/react';
 import { createBaseAccountSDK } from '@base-org/account';
-
 import { baseSepolia } from 'wagmi/chains';
 import { riskQuestionnaireAPI } from '@/lib/api/user';
+import { WalletSelectionModal } from '@/lib/components/WalletSelectionModal';
 
 export default function InvestorConnectPage() {
     const router = useRouter();
@@ -20,6 +19,7 @@ export default function InvestorConnectPage() {
     const { t, language, setLanguage } = useLanguage();
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleSignIn = async () => {
         setError('');
@@ -88,6 +88,7 @@ export default function InvestorConnectPage() {
     };
 
     const handleMetaMaskSignIn = async () => {
+        setIsModalOpen(false);
         setError('');
         setIsLoading(true);
         try {
@@ -107,50 +108,7 @@ export default function InvestorConnectPage() {
                 return;
             }
 
-            // 1. Connect
-            const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
-            if (!accounts || accounts.length === 0) {
-                throw new Error('No accounts found');
-            }
-            const address = accounts[0];
-
-            // 2. Get Nonce
-            const nonceRes = await authAPI.walletNonce({ wallet_address: address });
-            if (!nonceRes.success || !nonceRes.data) {
-                throw new Error(nonceRes.error?.message || "Failed to generate nonce");
-            }
-            const { nonce, message } = nonceRes.data;
-
-            // 3. Sign message
-            const signature = await provider.request({
-                method: 'personal_sign',
-                params: [message, address]
-            }) as string;
-
-            // 4. Login
-            const loginRes = await walletLogin({
-                wallet_address: address,
-                signature,
-                message,
-                nonce
-            });
-
-            if (loginRes?.success) {
-                // Check risk assessment status
-                try {
-                    const statusRes = await riskQuestionnaireAPI.getStatus();
-                    if (statusRes.success && statusRes.data && statusRes.data.completed) {
-                        router.push('/pendana/dashboard');
-                    } else {
-                        router.push('/pendana/risk-assessment');
-                    }
-                } catch {
-                    // Fallback if status check fails
-                    router.push('/pendana/risk-assessment');
-                }
-            } else {
-                throw new Error(loginRes?.error?.message || "Login failed");
-            }
+            await connectAndSign(provider);
         } catch (err: unknown) {
             console.error("MetaMask Sign In Error:", err);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -164,8 +122,113 @@ export default function InvestorConnectPage() {
         }
     };
 
+    const handleCoinbaseSignIn = async () => {
+        setIsModalOpen(false);
+        setError('');
+        setIsLoading(true);
+        try {
+            if (!window.ethereum) {
+                window.open('https://www.coinbase.com/wallet', '_blank');
+                return;
+            }
+
+            // Handle multiple providers
+            let provider = window.ethereum;
+            if (window.ethereum.providers?.length) {
+                provider = window.ethereum.providers.find((p: { isCoinbaseWallet?: boolean }) => p.isCoinbaseWallet) || window.ethereum;
+            }
+
+            // If Coinbase Wallet extension is not detected via isCoinbaseWallet flag, 
+            // but we want to force it or fallback, we might need to rely on the user having it.
+            // However, typically Coinbase Wallet injects itself. 
+            // If strictly not found, we could try to prompt installation.
+
+            // Note: If using SDK, we might need a different approach, but for injected:
+            if (!provider.isCoinbaseWallet) {
+                // Try looking for 'coinbaseWalletExtension' object if present
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                if ((window as any).coinbaseWalletExtension) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    provider = (window as any).coinbaseWalletExtension;
+                } else {
+                    window.open('https://www.coinbase.com/wallet', '_blank');
+                    return;
+                }
+            }
+
+            await connectAndSign(provider);
+
+        } catch (err: unknown) {
+            console.error("Coinbase Wallet Sign In Error:", err);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((err as any).code === 4001) {
+                setError('Connection rejected');
+            } else {
+                setError(err instanceof Error ? err.message : "Failed to sign in with Coinbase Wallet");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Shared connection logic
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const connectAndSign = async (provider: any) => {
+        // 1. Connect
+        const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
+        if (!accounts || accounts.length === 0) {
+            throw new Error('No accounts found');
+        }
+        const address = accounts[0];
+
+        // 2. Get Nonce
+        const nonceRes = await authAPI.walletNonce({ wallet_address: address });
+        if (!nonceRes.success || !nonceRes.data) {
+            throw new Error(nonceRes.error?.message || "Failed to generate nonce");
+        }
+        const { nonce, message } = nonceRes.data;
+
+        // 3. Sign message
+        const signature = await provider.request({
+            method: 'personal_sign',
+            params: [message, address]
+        }) as string;
+
+        // 4. Login
+        const loginRes = await walletLogin({
+            wallet_address: address,
+            signature,
+            message,
+            nonce
+        });
+
+        if (loginRes?.success) {
+            // Check risk assessment status
+            try {
+                const statusRes = await riskQuestionnaireAPI.getStatus();
+                if (statusRes.success && statusRes.data && statusRes.data.completed) {
+                    router.push('/pendana/dashboard');
+                } else {
+                    router.push('/pendana/risk-assessment');
+                }
+            } catch {
+                // Fallback if status check fails
+                router.push('/pendana/risk-assessment');
+            }
+        } else {
+            throw new Error(loginRes?.error?.message || "Login failed");
+        }
+    }
+
     return (
         <div className="min-h-screen h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden relative">
+            <WalletSelectionModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSelectCoinbase={handleCoinbaseSignIn}
+                onSelectMetaMask={handleMetaMaskSignIn}
+                isLoading={isLoading}
+            />
             <div className="w-full max-w-5xl h-[calc(100vh-2rem)] max-h-[700px] bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
                 <div className="grid md:grid-cols-2 h-full">
                     {/* Left Column - Connection Interface */}
@@ -245,29 +308,18 @@ export default function InvestorConnectPage() {
                             )}
 
                             <div className="flex flex-col gap-3">
-                                <div className="w-full relative group">
-                                    <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 to-cyan-600 rounded-lg opacity-20 group-hover:opacity-40 transition duration-200"></div>
-                                    <div className="relative">
-                                        <SignInWithBaseButton
-                                            colorScheme="dark"
-                                            onClick={isLoading ? undefined : handleSignIn}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="relative flex items-center py-2">
-                                    <div className="grow border-t border-slate-700"></div>
-                                    <span className="shrink-0 px-2 text-xs text-slate-500 uppercase">Or</span>
-                                    <div className="grow border-t border-slate-700"></div>
-                                </div>
-
+                                {/* Single Connect Wallet Button */}
                                 <button
-                                    onClick={isLoading ? undefined : handleMetaMaskSignIn}
+                                    onClick={() => setIsModalOpen(true)}
                                     disabled={isLoading}
-                                    className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 rounded-lg text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+                                    className="w-full relative group overflow-hidden rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 p-4 transition-all hover:from-cyan-400 hover:to-teal-400 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-cyan-900/20"
                                 >
-                                    <div className="absolute inset-0 bg-linear-to-r from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    <span className="font-medium text-sm">🦊 Connect with MetaMask</span>
+                                    <div className="relative flex items-center justify-center gap-3">
+                                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        <span className="font-bold text-white text-lg">Connect Wallet</span>
+                                    </div>
                                 </button>
                             </div>
 

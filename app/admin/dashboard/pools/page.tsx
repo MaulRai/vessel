@@ -170,15 +170,6 @@ function PoolListContent() {
                 <p className="text-blue-200/70 mt-1">{t('admin.invoiceList.heroSubtitle')}</p>
               </div>
             </div>
-            <Link
-              href="/admin/dashboard/pools/create"
-              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-400 hover:to-fuchsia-400 rounded-xl font-semibold text-white transition-all shadow-lg shadow-violet-500/25"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <span>{t('admin.invoiceDetail.pools.list.createCta')}</span>
-            </Link>
           </div>
         </div>
 

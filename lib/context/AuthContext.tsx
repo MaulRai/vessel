@@ -114,36 +114,70 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loginAsDemo = useCallback(async (role: UserRole) => {
     const now = new Date().toISOString();
-    const demoUser: User = {
-      id: `demo-${role}`,
-      email: role === 'investor' ? 'demo.pendana@vessel.demo' : 'demo.eksportir@vessel.demo',
-      username: role === 'investor' ? 'demo_pendana' : 'demo_eksportir',
-      role,
-      is_verified: true,
-      is_active: true,
-      cooperative_agreement: true,
-      member_status: role === 'investor' ? 'calon_anggota_pendana' : 'member_mitra',
-      balance_idr: 125_000_000,
-      email_verified: true,
-      profile_completed: true,
-      wallet_address: 'lsq1demoaddress0000000000000000000000',
-      profile: {
-        id: `profile-demo-${role}`,
-        user_id: `demo-${role}`,
-        full_name: role === 'investor' ? 'Demo Pendana' : 'Demo Eksportir',
-        phone: '6280000000000',
-        address: 'Jl. Demo No. 1',
-        city: 'Jakarta',
-        province: 'DKI Jakarta',
-        postal_code: '12950',
-        country: 'Indonesia',
-        profile_picture: undefined,
+
+    let demoUser: User;
+
+    if (role === 'admin') {
+      demoUser = {
+        id: 'demo-admin',
+        email: 'admin@vessel.demo',
+        username: 'demo_admin',
+        role: 'admin',
+        is_verified: true,
+        is_active: true,
+        cooperative_agreement: true,
+        member_status: 'admin',
+        balance_idr: 0,
+        email_verified: true,
+        profile_completed: true,
+        // Admin might not have wallet address or profile in the same way, adapting as needed
+        profile: {
+          id: 'profile-demo-admin',
+          user_id: 'demo-admin',
+          full_name: 'Demo Admin',
+          phone: '6280000000000',
+          address: 'Vessel HQ',
+          city: 'Jakarta',
+          province: 'DKI Jakarta',
+          postal_code: '12950',
+          country: 'Indonesia',
+          created_at: now,
+          updated_at: now,
+        },
         created_at: now,
         updated_at: now,
-      },
-      created_at: now,
-      updated_at: now,
-    };
+      };
+    } else {
+      demoUser = {
+        id: `demo-${role}`,
+        email: role === 'investor' ? 'demo.pendana@vessel.demo' : 'demo.eksportir@vessel.demo',
+        username: role === 'investor' ? 'demo_pendana' : 'demo_eksportir',
+        role,
+        is_verified: true,
+        is_active: true,
+        cooperative_agreement: true,
+        member_status: role === 'investor' ? 'calon_anggota_pendana' : 'member_mitra',
+        balance_idr: 125_000_000,
+        email_verified: true,
+        profile_completed: true,
+        wallet_address: 'lsq1demoaddress0000000000000000000000',
+        profile: {
+          id: `profile-demo-${role}`,
+          user_id: `demo-${role}`,
+          full_name: role === 'investor' ? 'Demo Pendana' : 'Demo Eksportir',
+          phone: '6280000000000',
+          address: 'Jl. Demo No. 1',
+          city: 'Jakarta',
+          province: 'DKI Jakarta',
+          postal_code: '12950',
+          country: 'Indonesia',
+          created_at: now,
+          updated_at: now,
+        },
+        created_at: now,
+        updated_at: now,
+      };
+    }
 
     saveAuthData({
       user: demoUser,

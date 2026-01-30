@@ -40,8 +40,8 @@ function PendanaanEksportirContent() {
 		fetchData();
 	}, []);
 
-	const activePools = pools.filter((p) => p.status === "open" || p.status === "filled" || p.status === "disbursed");
-	const closedPools = pools.filter((p) => p.status === "closed" || p.status === "repaid");
+	const activePools = pools.filter((p) => p.status === "open" || p.status === "filled");
+	const closedPools = pools.filter((p) => p.status === "closed" || p.status === "repaid" || p.status === "disbursed");
 	const totalFunded = pools.reduce((sum, p) => sum + (p.funded_amount || 0), 0);
 	const totalTarget = pools.reduce((sum, p) => sum + (p.target_amount || 0), 0);
 
@@ -93,7 +93,7 @@ function PendanaanEksportirContent() {
 						<StatCard
 							label="Pool Selesai"
 							value={String(closedPools.length)}
-							badge="Closed/Repaid"
+							badge="Disbursed/Repaid"
 							tone="rose"
 						/>
 					</section>
@@ -316,7 +316,10 @@ function PendanaanEksportirContent() {
 														{pool.buyer_company_name} &bull; {pool.buyer_country}
 													</p>
 												</div>
-												<Badge tone="emerald">{pool.status === 'repaid' ? 'Lunas' : 'Selesai'}</Badge>
+												<Badge tone="emerald">
+													{pool.status === 'repaid' ? 'Lunas' :
+														pool.status === 'disbursed' ? 'Cair' : 'Selesai'}
+												</Badge>
 											</div>
 											<div className="mt-3 grid grid-cols-2 gap-3 text-sm text-slate-300">
 												<div>
