@@ -2,15 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { StatRibbonCard } from '@/lib/components/StatRibbonCard';
 import { investmentAPI, InvestorPortfolio, ActiveInvestment } from '@/lib/api/user';
-import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
-
-const numberId = new Intl.NumberFormat('id-ID');
-
 import { useAuth } from '@/lib/context/AuthContext';
+import { useAccount, useReadContract } from 'wagmi';
+import { erc20Abi, formatUnits } from 'viem';
+import { base } from 'wagmi/chains';
 import {
   Identity,
   Name,
@@ -18,17 +18,42 @@ import {
   Avatar,
   EthBalance
 } from '@coinbase/onchainkit/identity';
-import { OnchainKitProvider } from '@coinbase/onchainkit';
-import { base } from 'wagmi/chains';
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// Removed invalid color import
 
-// Re-implementing logic
+const numberId = new Intl.NumberFormat('id-ID');
+const IDRX_ADDRESS = process.env.NEXT_PUBLIC_IDRX_TOKEN_ADDRESS as `0x${string}`;
+
 function InvestorDashboardContent() {
   const { user } = useAuth();
+  const { address } = useAccount();
   const [portfolio, setPortfolio] = useState<InvestorPortfolio | null>(null);
   const [investments, setInvestments] = useState<ActiveInvestment[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { data: balanceData } = useReadContract({
+    address: IDRX_ADDRESS,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+      refetchInterval: 10000,
+    }
+  });
+
+  const { data: decimals } = useReadContract({
+    address: IDRX_ADDRESS,
+    abi: erc20Abi,
+    functionName: 'decimals',
+  });
+
+  const walletBalance = useMemo(() => {
+    if (balanceData === undefined || decimals === undefined) return 0;
+    try {
+      return Number(formatUnits(balanceData, decimals));
+    } catch {
+      return 0;
+    }
+  }, [balanceData, decimals]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -46,7 +71,6 @@ function InvestorDashboardContent() {
           setInvestments(investmentsRes.data.investments || []);
         }
       } catch {
-        // silently handle
       } finally {
         setLoading(false);
       }
@@ -67,8 +91,7 @@ function InvestorDashboardContent() {
   const hasTrancheData = trancheTotal > 0;
 
   const priorityPct = useMemo(() => {
-    if (!portfolio) return 0;
-    if (!hasTrancheData) return 0;
+    if (!portfolio || !hasTrancheData) return 0;
     return Math.round(((portfolio.priority_allocation || 0) / trancheTotal) * 100);
   }, [portfolio, hasTrancheData, trancheTotal]);
 
@@ -124,19 +147,37 @@ function InvestorDashboardContent() {
             </div>
 
             {/* User Profile & Basename Identity */}
-            <div className="flex items-center gap-4 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-              {user?.wallet_address && (
-                <Identity
-                  address={user.wallet_address as `0x${string}`}
-                  chain={base}
-                >
-                  <Avatar address={user.wallet_address as `0x${string}`} chain={base} className="h-10 w-10" />
-                  <div className="flex flex-col">
-                    <Name address={user.wallet_address as `0x${string}`} chain={base} className="text-sm font-semibold text-slate-100" />
-                    <Address address={user.wallet_address as `0x${string}`} className="text-xs text-slate-400" />
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              {/* IDRX Wallet Balance Chip */}
+              <div className="flex items-center gap-3 bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 shadow-lg shadow-cyan-500/5">
+                <div className="flex -space-x-1">
+                  <div className="w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
+                    <span className="text-[10px] font-bold text-cyan-400">ID</span>
                   </div>
-                </Identity>
-              )}
+                  <div className="w-6 h-6 rounded-full bg-teal-500/20 flex items-center justify-center border border-teal-500/30">
+                    <span className="text-[10px] font-bold text-teal-400">RX</span>
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Your Wallet</span>
+                  <span className="text-sm font-bold text-slate-100">{numberId.format(walletBalance)} <span className="text-[10px] text-cyan-400">IDRX</span></span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                {user?.wallet_address && (
+                  <Identity
+                    address={user.wallet_address as `0x${string}`}
+                    chain={base}
+                  >
+                    <Avatar address={user.wallet_address as `0x${string}`} chain={base} className="h-10 w-10" />
+                    <div className="flex flex-col">
+                      <Name address={user.wallet_address as `0x${string}`} chain={base} className="text-sm font-semibold text-slate-100" />
+                      <Address address={user.wallet_address as `0x${string}`} className="text-xs text-slate-400" />
+                    </div>
+                  </Identity>
+                )}
+              </div>
             </div>
           </header>
 
@@ -146,12 +187,51 @@ function InvestorDashboardContent() {
               imageSrc="/assets/general/savings.png"
               imageAlt="Simpanan dan pembiayaan"
             >
-              <p className="text-sm font-semibold text-slate-200">Total Simpanan & Pembiayaan</p>
-              <p className="text-2xl font-bold text-slate-50">{`IDRX ${numberId.format(totalPembiayaanBerjalan)}`}</p>
-              <p className="text-xs font-semibold text-slate-300">Saldo Tersedia</p>
-              <p className="text-xl font-bold text-slate-300">{`IDRX ${numberId.format(portfolio?.available_balance || 0)}`}</p>
-              <p className="text-xs font-semibold text-slate-300">Dana Sedang Disalurkan</p>
-              <p className="text-xl font-bold text-slate-300">{`IDRX ${numberId.format(portfolio?.total_funding || 0)}`}</p>
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm font-semibold text-slate-400">Total Aset Ekosistem</p>
+                  <p className="text-2xl font-bold text-slate-50">{`IDRX ${numberId.format(totalPembiayaanBerjalan + walletBalance)}`}</p>
+                </div>
+                <div className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+                  Live
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-800/50">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                    Platform
+                  </p>
+                  <p className="text-lg font-bold text-slate-200">{`IDRX ${numberId.format(portfolio?.available_balance || 0)}`}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-cyan-500 uppercase flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
+                    Wallet
+                  </p>
+                  <p className="text-lg font-bold text-cyan-400">{`IDRX ${numberId.format(walletBalance)}`}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-slate-950/50 rounded-xl border border-slate-800/50 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase">Sedang Disalurkan</p>
+                  <p className="text-md font-bold text-slate-300">{`IDRX ${numberId.format(portfolio?.total_funding || 0)}`}</p>
+                </div>
+                {walletBalance < 1000000 && (
+                  <Link
+                    href="http://localhost:3001"
+                    target="_blank"
+                    className="text-[10px] font-bold text-amber-500 hover:text-amber-400 flex items-center gap-1 transition-colors"
+                  >
+                    Get more IDRX
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </Link>
+                )}
+              </div>
             </StatRibbonCard>
             <StatRibbonCard
               color="#1d5fa6"

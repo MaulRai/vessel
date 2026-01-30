@@ -1,12 +1,13 @@
 import { createConfig, http } from 'wagmi';
 import { base, baseSepolia } from 'wagmi/chains';
-import { coinbaseWallet, injected, walletConnect } from 'wagmi/connectors';
+import { coinbaseWallet, injected, walletConnect, metaMask } from 'wagmi/connectors';
 import { ONCHAINKIT_CONFIG, WALLET_CONNECT_PROJECT_ID } from './onchainkit';
 
 const createWagmiConfig = () => {
     return createConfig({
         chains: [baseSepolia, base],
         connectors: [
+            metaMask({ dappMetadata: { name: ONCHAINKIT_CONFIG.appName } }),
             injected({ shimDisconnect: true }),
             coinbaseWallet({
                 appName: ONCHAINKIT_CONFIG.appName,

@@ -12,6 +12,7 @@ import { SignInWithBaseButton } from '@base-org/account-ui/react';
 import { createBaseAccountSDK } from '@base-org/account';
 
 import { baseSepolia } from 'wagmi/chains';
+import { riskQuestionnaireAPI } from '@/lib/api/user';
 
 export default function InvestorConnectPage() {
     const router = useRouter();
@@ -62,7 +63,18 @@ export default function InvestorConnectPage() {
                 nonce
             });
             if (loginRes?.success) {
-                router.push('/pendana/risk-assessment');
+                // Check risk assessment status
+                try {
+                    const statusRes = await riskQuestionnaireAPI.getStatus();
+                    if (statusRes.success && statusRes.data && statusRes.data.completed) {
+                        router.push('/pendana/dashboard');
+                    } else {
+                        router.push('/pendana/risk-assessment');
+                    }
+                } catch {
+                    // Fallback if status check fails
+                    router.push('/pendana/risk-assessment');
+                }
             } else {
                 throw new Error(loginRes?.error?.message || "Login failed");
             }
@@ -124,7 +136,18 @@ export default function InvestorConnectPage() {
             });
 
             if (loginRes?.success) {
-                router.push('/pendana/risk-assessment');
+                // Check risk assessment status
+                try {
+                    const statusRes = await riskQuestionnaireAPI.getStatus();
+                    if (statusRes.success && statusRes.data && statusRes.data.completed) {
+                        router.push('/pendana/dashboard');
+                    } else {
+                        router.push('/pendana/risk-assessment');
+                    }
+                } catch {
+                    // Fallback if status check fails
+                    router.push('/pendana/risk-assessment');
+                }
             } else {
                 throw new Error(loginRes?.error?.message || "Login failed");
             }

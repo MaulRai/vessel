@@ -330,71 +330,97 @@ function RiskAssessmentContent() {
               </div>
             </div>
           ) : (
-            /* Tier Selection Step */
-            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
-              <h2 className="text-3xl lg:text-4xl font-black text-white mb-2 tracking-tight uppercase">
-                {language === 'en' ? 'Select Your Strategy' : 'Pilih Strategi Anda'}
-              </h2>
-              <p className="text-slate-400 mb-8 text-base lg:text-lg leading-relaxed max-w-lg">
-                {language === 'en'
-                  ? 'Identify your risk appetite and choose the tranche that fits your portfolio.'
-                  : 'Identifikasi selera risiko Anda dan pilih tranche yang sesuai dengan portofolio Anda.'}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-                {/* Priority Option */}
-                <button
-                  onClick={() => setSelectedTier('priority')}
-                  className={`p-6 lg:p-8 rounded-[2.5rem] border-2 text-left transition-all duration-300 group flex flex-col relative ${selectedTier === 'priority'
-                    ? 'bg-cyan-500/10 border-cyan-500 ring-8 ring-cyan-500/5'
-                    : 'bg-slate-900/40 border-slate-800/80 hover:border-slate-600 active:scale-98'
-                    }`}
-                >
-                  <div className={`p-4 rounded-3xl mb-6 transition-all duration-300 w-fit ${selectedTier === 'priority' ? 'bg-cyan-500 text-slate-950 scale-110 rotate-3' : 'bg-slate-800 text-slate-500'}`}>
-                    <svg className="w-6 h-6 lg:w-8 lg:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                  </div>
-                  <h3 className="text-xl lg:text-2xl font-black text-white mb-3 tracking-tight">PRIORITY</h3>
-                  <div className="space-y-2 text-xs lg:text-sm text-slate-400 flex-1">
-                    <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500" /> Stable Yield</p>
-                    <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500" /> First Out</p>
-                  </div>
-                </button>
-
-                {/* Catalyst Option */}
-                <button
-                  onClick={() => setSelectedTier('catalyst')}
-                  className={`p-6 lg:p-8 rounded-[2.5rem] border-2 text-left transition-all duration-300 group flex flex-col relative ${selectedTier === 'catalyst'
-                    ? 'bg-amber-500/10 border-amber-500 ring-8 ring-amber-500/5'
-                    : 'bg-slate-900/40 border-slate-800/80 hover:border-slate-600 active:scale-98'
-                    }`}
-                >
-                  <div className={`p-4 rounded-3xl mb-6 transition-all duration-300 w-fit ${selectedTier === 'catalyst' ? 'bg-amber-500 text-slate-950 scale-110 -rotate-3' : 'bg-slate-800 text-slate-500'}`}>
-                    <svg className="w-6 h-6 lg:w-8 lg:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                  </div>
-                  <h3 className="text-xl lg:text-2xl font-black text-white mb-3 tracking-tight">CATALYST</h3>
-                  <div className="space-y-2 text-xs lg:text-sm text-slate-400 flex-1">
-                    <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> High Potential</p>
-                    <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> First Loss</p>
-                  </div>
-                </button>
+            /* Educational Summary Step */
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out max-w-2xl mx-auto">
+              <div className="text-center mb-10">
+                <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6 ring-1 ring-emerald-500/30">
+                  <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h2 className="text-3xl lg:text-4xl font-black text-white mb-4 tracking-tight uppercase">
+                  {language === 'en' ? 'Assessment Completed!' : 'Asesmen Selesai!'}
+                </h2>
+                <p className="text-slate-400 text-lg leading-relaxed">
+                  {language === 'en'
+                    ? 'Based on your profile, you are eligible to participate in our funding pools.'
+                    : 'Berdasarkan profil Anda, Anda berhak untuk berpartisipasi dalam funding pool kami.'}
+                </p>
               </div>
 
-              <div className="flex items-center justify-between mt-10 gap-6">
+              <div className="bg-slate-900/40 border border-slate-800/80 rounded-[2rem] p-8 mb-8 backdrop-blur-sm">
+                <h3 className="text-lg font-bold text-white mb-6 uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span>
+                  {language === 'en' ? 'Understanding Tranches' : 'Memahami Tranche'}
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Priority Info */}
+                  <div className="space-y-3 p-5 rounded-2xl bg-slate-800/30 border border-slate-700/30">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-cyan-500/10 rounded-lg">
+                        <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      </div>
+                      <h4 className="font-bold text-white">PRIORITY</h4>
+                    </div>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      {language === 'en'
+                        ? 'Lower risk, stable returns. Priority investors are paid first when repayment occurs.'
+                        : 'Risiko lebih rendah, imbal hasil stabil. Investor Priority dibayar lebih dulu saat pelunasan terjadi.'}
+                    </p>
+                    <div className="flex gap-2 text-[10px] font-bold text-cyan-300 uppercase mt-2">
+                      <span className="px-2 py-1 bg-cyan-950/50 rounded">First Out</span>
+                      <span className="px-2 py-1 bg-cyan-950/50 rounded">Stable Yield</span>
+                    </div>
+                  </div>
+
+                  {/* Catalyst Info */}
+                  <div className="space-y-3 p-5 rounded-2xl bg-slate-800/30 border border-slate-700/30">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-amber-500/10 rounded-lg">
+                        <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      </div>
+                      <h4 className="font-bold text-white">CATALYST</h4>
+                    </div>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      {language === 'en'
+                        ? 'Higher risk, higher potential returns. Acts as a buffer for Priority tranche.'
+                        : 'Risiko lebih tinggi, potensi imbal hasil lebih tinggi. Berfungsi sebagai penyangga untuk tranche Priority.'}
+                    </p>
+                    <div className="flex gap-2 text-[10px] font-bold text-amber-300 uppercase mt-2">
+                      <span className="px-2 py-1 bg-amber-950/50 rounded">First Loss</span>
+                      <span className="px-2 py-1 bg-amber-950/50 rounded">High Yield</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 text-center">
+                  <p className="text-xs text-slate-500 italic">
+                    {language === 'en'
+                      ? 'You can choose your preferred tranche for every funding pool.'
+                      : 'Anda dapat memilih tranche yang diinginkan pada setiap funding pool.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4">
                 <button
-                  onClick={handlePrev}
-                  className="px-8 py-4 rounded-3xl text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white bg-slate-800/40 hover:bg-slate-800 transition-all active:scale-95"
-                >
-                  {t('common.prev')}
-                </button>
-                <button
-                  onClick={() => handleSubmit()}
-                  disabled={!selectedTier || submitting}
-                  className={`flex-1 px-12 py-5 rounded-[2rem] text-sm font-black uppercase tracking-[0.2em] transition-all shadow-2xl ${selectedTier && !submitting
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-500/20 active:scale-95'
+                  onClick={() => handleSubmit('priority')} // Defaulting to priority as requested
+                  disabled={submitting}
+                  className={`w-full py-5 rounded-[1.5rem] text-sm font-black uppercase tracking-[0.2em] transition-all shadow-2xl relative overflow-hidden group ${!submitting
+                    ? 'bg-white text-slate-900 hover:bg-cyan-50 shadow-cyan-500/10 active:scale-98'
                     : 'bg-slate-800 text-slate-600 cursor-not-allowed'
                     }`}
                 >
-                  {submitting ? t('riskAssessment.saving') : (language === 'en' ? 'Start Investing' : 'Mulai Investasi')}
+                  <span className="relative z-10 flex items-center justify-center gap-3">
+                    {submitting ? t('riskAssessment.saving') : (language === 'en' ? 'Go to Dashboard' : 'Lanjut ke Dashboard')}
+                    {!submitting && <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>}
+                  </span>
+                  {!submitting && <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />}
                 </button>
               </div>
             </div>
