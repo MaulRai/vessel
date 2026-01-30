@@ -166,6 +166,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const { switchChain, isPending: isSwitching } = useSwitchChain();
   const currentChain = chains.find((item) => item.id === chainId);
   const shortAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '';
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   const { data: balanceData } = useReadContract({
     address: IDRX_ADDRESS,
@@ -214,8 +215,16 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen bg-slate-950">
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-30 md:hidden transition-opacity duration-300"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900/95 via-slate-900/90 to-slate-950/95 border-r border-slate-700/50 backdrop-blur-2xl z-40 shadow-2xl shadow-black/20">
+      <aside className={`fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900/95 via-slate-900/90 to-slate-950/95 border-r border-slate-700/50 backdrop-blur-2xl z-40 shadow-2xl shadow-black/20 transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {/* Animated gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-teal-500/5 pointer-events-none" />
 
@@ -250,6 +259,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    onClick={() => setIsSidebarOpen(false)}
                     className={`group relative flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${isActive
                       ? `bg-gradient-to-r ${roleColor === 'cyan' ? 'from-cyan-500/20 to-cyan-600/10' : roleColor === 'purple' ? 'from-purple-500/20 to-purple-600/10' : 'from-teal-500/20 to-teal-600/10'} ${roleColor === 'cyan' ? 'text-cyan-300' : roleColor === 'purple' ? 'text-purple-300' : 'text-teal-300'} border ${roleColor === 'cyan' ? 'border-cyan-400/30' : roleColor === 'purple' ? 'border-purple-400/30' : 'border-teal-400/30'} shadow-lg ${roleColor === 'cyan' ? 'shadow-cyan-500/10' : roleColor === 'purple' ? 'shadow-purple-500/10' : 'shadow-teal-500/10'}`
                       : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 border border-transparent hover:border-slate-700/50'
@@ -316,7 +326,10 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                 )}
               </div>
               <button
-                onClick={handleDisconnectWallet}
+                onClick={() => {
+                  handleDisconnectWallet();
+                  setIsSidebarOpen(false);
+                }}
                 className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-slate-300 hover:text-red-300 bg-slate-800/40 hover:bg-red-500/10 border border-slate-700/50 hover:border-red-500/30 rounded-xl transition-all duration-300 font-medium text-sm group"
               >
                 <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -345,7 +358,10 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                 </div>
               </div>
               <button
-                onClick={handleLogout}
+                onClick={() => {
+                  handleLogout();
+                  setIsSidebarOpen(false);
+                }}
                 className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-slate-300 hover:text-red-300 bg-slate-800/40 hover:bg-red-500/10 border border-slate-700/50 hover:border-red-500/30 rounded-xl transition-all duration-300 font-medium text-sm group"
               >
                 <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -359,15 +375,29 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="pl-72">
+      <main className="md:pl-72 pl-0 transition-all duration-300 w-full">
+        {/* Top Bar */}
         {/* Top Bar */}
         <header className="h-20 bg-gradient-to-r from-slate-900/50 via-slate-900/40 to-slate-900/50 border-b border-slate-700/50 backdrop-blur-2xl sticky top-0 z-30 shadow-xl shadow-black/10">
-          <div className="h-full px-8 flex items-center justify-between">
-            <div className="flex items-center gap-5">
+          <div className="h-full px-4 md:px-8 flex items-center justify-between">
+            <div className="flex items-center gap-3 md:gap-5">
+              {/* Mobile Sidebar Toggle */}
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="md:hidden p-2 text-slate-400 hover:text-cyan-400 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {isSidebarOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
               {!isOnDashboard && (
                 <Link
                   href={dashboardHref}
-                  className="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent hover:border-slate-700/50 rounded-xl transition-all duration-300 group"
+                  className="hidden md:block p-2.5 text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent hover:border-slate-700/50 rounded-xl transition-all duration-300 group"
                   title={t('dashboard.backToDashboard')}
                 >
                   <svg className="w-5 h-5 group-hover:-translate-x-1.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">

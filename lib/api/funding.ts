@@ -31,9 +31,9 @@ export interface InvestRequest {
     tranche: 'priority' | 'catalyst';
     tnc_accepted: boolean;
     catalyst_consents?: {
-        risk_acknowledgment: boolean;
-        loss_acceptance: boolean;
-        non_bank_product: boolean;
+        first_loss_consent: boolean;
+        risk_loss_consent: boolean;
+        not_bank_consent: boolean;
     };
     tx_hash: string;
 }
@@ -91,9 +91,9 @@ export interface InvestmentConfirmRequest {
     tx_hash: string;
     tnc_accepted: boolean;
     catalyst_consents?: {
-        risk_acknowledgment: boolean;
-        loss_acceptance: boolean;
-        non_bank_product: boolean;
+        first_loss_consent: boolean;
+        risk_loss_consent: boolean;
+        not_bank_consent: boolean;
     };
 }
 

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAccount, useSignMessage, useConnect, useDisconnect } from 'wagmi';
 import { authAPI } from '@/lib/api/auth';
 import { userAPI } from '@/lib/api/user';
+import { WalletSelectionModal } from '@/lib/components/WalletSelectionModal';
 
 interface ExporterConnectWalletProps {
     currentWallet?: string;
@@ -17,8 +18,10 @@ export function ExporterConnectWallet({ currentWallet, onSuccess }: ExporterConn
     const { disconnect } = useDisconnect();
     const [isLinking, setIsLinking] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleConnectMetaMask = () => {
+        setIsModalOpen(false);
         setError(null);
         // Look for MetaMask specific connectors first
         const connector = connectors.find(c => c.id === 'metaMaskSDK') ||
@@ -29,6 +32,17 @@ export function ExporterConnectWallet({ currentWallet, onSuccess }: ExporterConn
             connect({ connector });
         } else {
             setError('MetaMask tidak ditemukan. Silakan instal MetaMask terlebih dahulu.');
+        }
+    };
+
+    const handleConnectCoinbase = () => {
+        setIsModalOpen(false);
+        setError(null);
+        const connector = connectors.find(c => c.id === 'coinbaseWalletSDK');
+        if (connector) {
+            connect({ connector });
+        } else {
+            window.open('https://www.coinbase.com/wallet', '_blank');
         }
     };
 
@@ -69,6 +83,13 @@ export function ExporterConnectWallet({ currentWallet, onSuccess }: ExporterConn
 
     return (
         <div className="space-y-4">
+            <WalletSelectionModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSelectCoinbase={handleConnectCoinbase}
+                onSelectMetaMask={handleConnectMetaMask}
+                isLoading={false} // Wagmi doesn't expose a simple loading state for 'connect' initiation easily here without checking specific status
+            />
             <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-700">
                 <h3 className="text-sm font-medium text-slate-300 mb-2">Dompet Kripto (Wallet)</h3>
                 {currentWallet ? (
@@ -90,58 +111,18 @@ export function ExporterConnectWallet({ currentWallet, onSuccess }: ExporterConn
 
             <div className="flex flex-col gap-3">
                 {!isConnected ? (
-                    <>
-                        {/* Coinbase Wallet - Primary */}
-                        <button
-                            onClick={() => {
-                                setError(null);
-                                const connector = connectors.find(c => c.id === 'coinbaseWalletSDK');
-                                if (connector) {
-                                    connect({ connector });
-                                } else {
-                                    // Fallback or specific handling if needed,
-                                    // but usually wagmi handles this or we can prompt install
-                                    window.open('https://www.coinbase.com/wallet', '_blank');
-                                }
-                            }}
-                            className="w-full relative group overflow-hidden rounded-xl bg-[#0052FF] p-4 transition-all hover:bg-[#0045D8] shadow-lg shadow-blue-900/20 flex items-center justify-center gap-3"
-                        >
-                            <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-                                <svg width="16" height="16" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path fillRule="evenodd" clipRule="evenodd" d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32ZM16 25C20.9706 25 25 20.9706 25 16C25 11.0294 20.9706 7 16 7C11.0294 7 7 11.0294 7 16C7 20.9706 11.0294 25 16 25Z" fill="#0052FF" />
-                                    <path d="M16 21C18.7614 21 21 18.7614 21 16C21 13.2386 18.7614 11 16 11C13.2386 11 11 13.2386 11 16C11 18.7614 13.2386 21 16 21Z" fill="white" />
-                                </svg>
-                            </div>
-                            <span className="font-semibold text-white">Connect with Coinbase Wallet</span>
-                            <div className="absolute top-0 right-0 p-1.5">
-                                <div className="bg-white/20 text-white text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-sm backdrop-blur-sm">
-                                    Primary
-                                </div>
-                            </div>
-                        </button>
-
-                        <div className="relative flex items-center py-2">
-                            <div className="grow border-t border-slate-700"></div>
-                            <span className="shrink-0 px-2 text-xs text-slate-500 uppercase">Or use alternative</span>
-                            <div className="grow border-t border-slate-700"></div>
-                        </div>
-
-                        <button
-                            onClick={handleConnectMetaMask}
-                            className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 rounded-xl font-semibold flex items-center justify-center gap-3 transition-all group"
-                        >
-                            <svg className="w-6 h-6 transition-transform group-hover:scale-110" viewBox="0 0 32 32" fill="none">
-                                <path d="M28.05 5.5l-2.05 7L16 9l-10 3.5-2.05-7L16 2.5l12.05 3z" fill="#E1712C" />
-                                <path d="M3.95 5.5l2.05 7L16 9V2.5L3.95 5.5z" fill="#E2761B" />
-                                <path d="M28.05 5.5l-2.05 7L16 9V2.5l12.05 3z" fill="#E2761B" />
-                                <path d="M24 22l2 4.5L16 30l-10-3.5 2-4.5 8-2 8 2z" fill="#E1712C" />
-                                <path d="M16 30l10-3.5-2-4.5-8-2v10z" fill="#E2761B" />
-                                <path d="M16 30l-10-3.5 2-4.5 8-2v10z" fill="#E2761B" />
-                                <path d="M26 12.5l2.05 10L16 27l-12.05-4.5 2.05-10L16 16l10-3.5z" fill="#F6851B" />
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="w-full relative group overflow-hidden rounded-xl bg-[#0052FF] p-4 transition-all hover:bg-[#0045D8] shadow-lg shadow-blue-900/20 flex items-center justify-center gap-3"
+                    >
+                        <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                            <svg width="16" height="16" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fillRule="evenodd" clipRule="evenodd" d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32ZM16 25C20.9706 25 25 20.9706 25 16C25 11.0294 20.9706 7 16 7C11.0294 7 7 11.0294 7 16C7 20.9706 11.0294 25 16 25Z" fill="#0052FF" />
+                                <path d="M16 21C18.7614 21 21 18.7614 21 16C21 13.2386 18.7614 11 16 11C13.2386 11 11 13.2386 11 16C11 18.7614 13.2386 21 16 21Z" fill="white" />
                             </svg>
-                            Hubungkan MetaMask
-                        </button>
-                    </>
+                        </div>
+                        <span className="font-semibold text-white">Connect Wallet</span>
+                    </button>
                 ) : (
                     <button
                         onClick={() => disconnect()}
@@ -185,3 +166,4 @@ export function ExporterConnectWallet({ currentWallet, onSuccess }: ExporterConn
         </div>
     );
 }
+

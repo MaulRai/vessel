@@ -8,11 +8,10 @@ import Link from 'next/link';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
 import { authAPI } from '@/lib/api/auth';
-import { SignInWithBaseButton } from '@base-org/account-ui/react';
 import { createBaseAccountSDK } from '@base-org/account';
-
 import { baseSepolia } from 'wagmi/chains';
 import { riskQuestionnaireAPI } from '@/lib/api/user';
+import { WalletSelectionModal } from '@/lib/components/WalletSelectionModal';
 
 export default function InvestorConnectPage() {
     const router = useRouter();
@@ -20,6 +19,7 @@ export default function InvestorConnectPage() {
     const { t, language, setLanguage } = useLanguage();
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleSignIn = async () => {
         setError('');
@@ -88,6 +88,7 @@ export default function InvestorConnectPage() {
     };
 
     const handleMetaMaskSignIn = async () => {
+        setIsModalOpen(false);
         setError('');
         setIsLoading(true);
         try {
@@ -122,6 +123,7 @@ export default function InvestorConnectPage() {
     };
 
     const handleCoinbaseSignIn = async () => {
+        setIsModalOpen(false);
         setError('');
         setIsLoading(true);
         try {
@@ -220,6 +222,13 @@ export default function InvestorConnectPage() {
 
     return (
         <div className="min-h-screen h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden relative">
+            <WalletSelectionModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSelectCoinbase={handleCoinbaseSignIn}
+                onSelectMetaMask={handleMetaMaskSignIn}
+                isLoading={isLoading}
+            />
             <div className="w-full max-w-5xl h-[calc(100vh-2rem)] max-h-[700px] bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
                 <div className="grid md:grid-cols-2 h-full">
                     {/* Left Column - Connection Interface */}
@@ -299,59 +308,18 @@ export default function InvestorConnectPage() {
                             )}
 
                             <div className="flex flex-col gap-3">
-                                {/* Coinbase Wallet - Primary */}
+                                {/* Single Connect Wallet Button */}
                                 <button
-                                    onClick={handleCoinbaseSignIn}
+                                    onClick={() => setIsModalOpen(true)}
                                     disabled={isLoading}
-                                    className="w-full relative group overflow-hidden rounded-xl bg-[#0052FF] p-4 transition-all hover:bg-[#0045D8] disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-900/20"
+                                    className="w-full relative group overflow-hidden rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 p-4 transition-all hover:from-cyan-400 hover:to-teal-400 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-cyan-900/20"
                                 >
                                     <div className="relative flex items-center justify-center gap-3">
-                                        <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-                                            <svg width="16" height="16" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path fillRule="evenodd" clipRule="evenodd" d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32ZM16 25C20.9706 25 25 20.9706 25 16C25 11.0294 20.9706 7 16 7C11.0294 7 7 11.0294 7 16C7 20.9706 11.0294 25 16 25Z" fill="#0052FF" />
-                                                <path d="M16 21C18.7614 21 21 18.7614 21 16C21 13.2386 18.7614 11 16 11C13.2386 11 11 13.2386 11 16C11 18.7614 13.2386 21 16 21Z" fill="white" />
-                                            </svg>
-                                        </div>
-                                        <span className="font-semibold text-white">Connect with Coinbase Wallet</span>
+                                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        <span className="font-bold text-white text-lg">Connect Wallet</span>
                                     </div>
-                                    <div className="absolute top-0 right-0 p-1.5">
-                                        <div className="bg-white/20 text-white text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-sm backdrop-blur-sm">
-                                            Primary
-                                        </div>
-                                    </div>
-                                </button>
-
-                                {/* Base Sign In - Commented out temporarily */}
-                                {/* <div className="w-full relative group">
-                                    <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 to-cyan-600 rounded-lg opacity-20 group-hover:opacity-40 transition duration-200"></div>
-                                    <div className="relative">
-                                        <SignInWithBaseButton
-                                            colorScheme="dark"
-                                            onClick={isLoading ? undefined : handleSignIn}
-                                        />
-                                    </div>
-                                </div> */}
-
-                                <div className="relative flex items-center py-2">
-                                    <div className="grow border-t border-slate-700"></div>
-                                    <span className="shrink-0 px-2 text-xs text-slate-500 uppercase">Or use alternative</span>
-                                    <div className="grow border-t border-slate-700"></div>
-                                </div>
-
-                                <button
-                                    onClick={isLoading ? undefined : handleMetaMaskSignIn}
-                                    disabled={isLoading}
-                                    className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 rounded-lg text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
-                                >
-                                    <div className="absolute inset-0 bg-linear-to-r from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    <Image
-                                        src="/assets/auth/metamask.svg"
-                                        alt="MetaMask"
-                                        width={24}
-                                        height={24}
-                                        className="w-6 h-6 object-contain"
-                                    />
-                                    <span className="font-medium text-sm">Connect with MetaMask</span>
                                 </button>
                             </div>
 

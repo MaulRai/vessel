@@ -167,9 +167,9 @@ export function InvestmentModal({ pool, isOpen, onClose, onSuccess, initialTab =
                 tx_hash: txHash,
                 tnc_accepted: true,
                 catalyst_consents: tab === 'catalyst' ? {
-                    risk_acknowledgment: riskChecks.riskAck,
-                    loss_acceptance: riskChecks.lossAccept,
-                    non_bank_product: riskChecks.nonBank
+                    first_loss_consent: riskChecks.riskAck,
+                    risk_loss_consent: riskChecks.lossAccept,
+                    not_bank_consent: riskChecks.nonBank
                 } : undefined
             });
 
