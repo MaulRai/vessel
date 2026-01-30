@@ -160,7 +160,7 @@ function InvestorDashboardContent() {
             )}
           />
 
-          <section className="grid gap-4 md:grid-cols-3">
+          <section className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <StatRibbonCard
               color="#0f4c81"
               imageSrc="/assets/general/savings.png"
@@ -169,7 +169,7 @@ function InvestorDashboardContent() {
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-sm font-semibold text-slate-400">Total Aset Ekosistem</p>
-                  <p className="text-2xl font-bold text-slate-50">{`IDRX ${numberId.format(totalPembiayaanBerjalan + walletBalance)}`}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-slate-50">{`IDRX ${numberId.format(totalPembiayaanBerjalan + walletBalance)}`}</p>
                 </div>
                 <div className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
                   Live
@@ -222,7 +222,7 @@ function InvestorDashboardContent() {
               <p className="text-xs font-semibold text-slate-300">Estimasi</p>
               <p className="text-xl font-bold text-slate-300">{`IDRX ${numberId.format(portfolio?.total_expected_gain || 0)}`}</p>
             </StatRibbonCard>
-            <div className="relative rounded-r-2xl rounded-l-none border border-slate-800 bg-slate-900/40 p-5 shadow-inner shadow-black/30 overflow-hidden">
+            <div className="relative rounded-r-2xl rounded-l-none border border-slate-800 bg-slate-900/50 p-4 sm:p-5 shadow-inner shadow-black/30 overflow-hidden transition-all duration-300 hover:bg-slate-900/70">
               <div className="absolute left-0 top-0 h-full w-1.5 bg-[#0f4c81]" />
               <div className="absolute inset-y-0 left-0 w-28" style={{ background: 'linear-gradient(90deg, rgba(15,76,129,0.2) 0%, rgba(15,23,42,0) 100%)' }} />
               <div className="absolute right-[-28px] bottom-[-16px] opacity-15" aria-hidden="true">
@@ -231,7 +231,7 @@ function InvestorDashboardContent() {
               <div className="relative">
                 <p className="text-sm font-semibold text-slate-200">Sebaran Tranche</p>
                 <p className="text-xs text-slate-500">Prioritas (Senior) vs Katalis (Junior)</p>
-                <div className="mt-4 flex items-center gap-6">
+                <div className="mt-4 flex flex-col sm:flex-row items-center sm:items-start gap-6">
                   <div
                     className="h-32 w-32 rounded-full border border-slate-800 bg-slate-900 shadow-inner shadow-black/30"
                     style={{ background: conicGradient }}
