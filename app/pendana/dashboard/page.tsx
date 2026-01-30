@@ -18,7 +18,7 @@ import {
   Avatar,
   EthBalance
 } from '@coinbase/onchainkit/identity';
-import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
+import { HeaderHero } from '@/lib/components/MarketplaceHero';
 
 const numberId = new Intl.NumberFormat('id-ID');
 const IDRX_ADDRESS = process.env.NEXT_PUBLIC_IDRX_TOKEN_ADDRESS as `0x${string}`;
@@ -138,7 +138,7 @@ function InvestorDashboardContent() {
     <DashboardLayout role="investor">
       <div className="min-h-screen bg-slate-950 px-4 text-slate-100">
         <div className="mx-auto flex max-w-6xl flex-col gap-8">
-          <MarketplaceHero
+          <HeaderHero
             imageSrc="/assets/general/investor.png"
             title="Ringkasan Aset"
             subtitle="Pantau Nilai Pembiayaan Berjalan, realisasi imbal hasil, dan distribusi aset lintas prioritas."

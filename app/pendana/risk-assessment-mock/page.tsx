@@ -9,7 +9,7 @@ import {
     RiskQuestionnaireStatusResponse,
 } from '@/lib/api/user';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
+import { HeaderHero } from '@/lib/components/MarketplaceHero';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -160,7 +160,7 @@ function RiskAssessmentContent() {
                 </div>
 
                 <div className="space-y-4 flex-1">
-                    <MarketplaceHero
+                    <HeaderHero
                         imageSrc="/assets/general/risk-management.png"
                         title={t('riskAssessment.title')}
                         subtitle={t('riskAssessment.subtitle')}

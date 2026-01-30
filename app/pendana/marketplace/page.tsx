@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
-import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
+import { HeaderHero } from '@/lib/components/MarketplaceHero';
 import { MarketplacePool, MarketplaceFilters } from '@/lib/api/user';
 import { fundingAPI, FundingPool } from '@/lib/api/funding';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
@@ -159,7 +159,7 @@ function PoolInvestmentContent() {
   return (
     <DashboardLayout role="investor">
       <div className="space-y-6">
-        <MarketplaceHero
+        <HeaderHero
           imageSrc="/assets/general/pool.png"
           title={t('marketplace.title')}
           subtitle={t('marketplace.subtitle')}

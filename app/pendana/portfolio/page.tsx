@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
-import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
+import { HeaderHero } from '@/lib/components/MarketplaceHero';
 import { investmentAPI, InvestorPortfolio, ActiveInvestment } from '@/lib/api/user';
 import Link from 'next/link';
 import { StatRibbonCard } from '@/lib/components/StatRibbonCard';
@@ -96,7 +96,7 @@ function PortfolioContent() {
   return (
     <DashboardLayout role="investor">
       <div className="space-y-6">
-        <MarketplaceHero
+        <HeaderHero
           imageSrc="/assets/general/portofolio.png"
           title="Portfolio"
           subtitle="Ringkasan investasi dan pendanaan aktif Anda"
