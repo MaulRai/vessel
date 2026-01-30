@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Vessel Finance",
   description: "Platform pembiayaan ekspor terpercaya",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({

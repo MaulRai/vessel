@@ -1,0 +1,21 @@
+{
+    "name": "Vessel Finance",
+    "short_name": "Vessel",
+    "description": "Premium onchain export financing platform",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#020617",
+    "theme_color": "#0052FF",
+    "icons": [
+        {
+            "src": "/vessel-icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/vessel-icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
