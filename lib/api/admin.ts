@@ -322,16 +322,26 @@ export interface FundingPool {
     invoice?: PendingInvoice;
 }
 
+interface PoolWrapper {
+    pool: FundingPool;
+    invoice?: PendingInvoice;
+}
+
+type BackendPoolItem = FundingPool | PoolWrapper;
+
 class AdminAPIExtended extends AdminAPI {
-    private mapBackendPoolToFrontend(item: any): FundingPool {
-        if (!item) return item;
-        // The backend returns FundingPoolResponse which has a nested 'pool' and 'invoice'
-        if (item.pool) {
+    private mapBackendPoolToFrontend(item: BackendPoolItem): FundingPool {
+        if (!item) return item as FundingPool;
+
+        // Cek apakah item memiliki properti 'pool' (menandakan ini adalah PoolWrapper)
+        if ('pool' in item) {
             return {
                 ...item.pool,
                 invoice: item.invoice || item.pool.invoice,
             };
         }
+
+        // Jika tidak, asumsikan item sudah berbentuk FundingPool
         return item;
     }
 
@@ -450,7 +460,8 @@ class AdminAPIExtended extends AdminAPI {
                 return {
                     success: true,
                     data: {
-                        pools: rawRes.data.map((item: any) => this.mapBackendPoolToFrontend(item)),
+                        // PERUBAHAN DISINI: Ganti 'any' dengan 'BackendPoolItem'
+                        pools: rawRes.data.map((item: BackendPoolItem) => this.mapBackendPoolToFrontend(item)),
                         total: pagination?.total ?? 0,
                         page: pagination?.page ?? page,
                         per_page: pagination?.per_page ?? perPage,
@@ -541,7 +552,8 @@ class AdminAPIExtended extends AdminAPI {
                 return {
                     success: true,
                     data: {
-                        pools: rawRes.data.map((item: any) => this.mapBackendPoolToFrontend(item)),
+                        // PERUBAHAN DISINI: Ganti 'any' dengan 'BackendPoolItem'
+                        pools: rawRes.data.map((item: BackendPoolItem) => this.mapBackendPoolToFrontend(item)),
                         total: pagination?.total ?? 0,
                         page: pagination?.page ?? page,
                         per_page: pagination?.per_page ?? perPage,

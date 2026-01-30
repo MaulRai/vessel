@@ -99,7 +99,7 @@ export default function InvestorConnectPage() {
             // Handle multiple providers (e.g., if Coinbase Wallet is also installed)
             let provider = window.ethereum;
             if (window.ethereum.providers?.length) {
-                provider = window.ethereum.providers.find((p: any) => p.isMetaMask) || window.ethereum;
+                provider = window.ethereum.providers.find((p: { isMetaMask?: boolean }) => p.isMetaMask) || window.ethereum;
             }
 
             if (!provider.isMetaMask) {
