@@ -267,14 +267,7 @@ export default function InvestorConnectPage() {
                                     className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 rounded-lg text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
                                 >
                                     <div className="absolute inset-0 bg-linear-to-r from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    <Image
-                                        src="/assets/auth/metamask.svg" // Make sure this asset exists or use a generic one
-                                        alt="MetaMask"
-                                        width={24}
-                                        height={24}
-                                        className="w-6 h-6 object-contain"
-                                    />
-                                    <span className="font-medium text-sm">Connect with MetaMask</span>
+                                    <span className="font-medium text-sm">🦊 Connect with MetaMask</span>
                                 </button>
                             </div>
 

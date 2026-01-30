@@ -10,7 +10,7 @@ import {
   RiskQuestionnaireStatusResponse,
 } from '@/lib/api/user';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
+import { HeaderHero } from '@/lib/components/HeaderHero';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -44,7 +44,7 @@ const buildDemoQuestions = (t: (key: string) => string): RiskQuestion[] => [
 
 function RiskAssessmentContent() {
   const router = useRouter();
-  const { t, language } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const [questions, setQuestions] = useState<RiskQuestion[]>([]);
   // ... (keep state variables)
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
@@ -106,7 +106,7 @@ function RiskAssessmentContent() {
   const handleSubmit = async (tierOverride?: string) => {
     const tier = tierOverride || selectedTier;
     if (!tier) {
-      setError(language === 'en' ? 'Please select a tier' : 'Harap pilih tier');
+      setError(t('riskAssessment.selectTierError'));
       return;
     }
 
@@ -128,10 +128,10 @@ function RiskAssessmentContent() {
         // After successful submission, redirect to dashboard
         router.push('/pendana/dashboard');
       } else {
-        setError(response.error?.message || t('riskAssessment.saveError') || 'Gagal menyimpan jawaban');
+        setError(response.error?.message || t('riskAssessment.saveError'));
       }
     } catch {
-      setError(t('common.errorOccurred') || 'Terjadi kesalahan');
+      setError(t('common.errorOccurred'));
     } finally {
       setSubmitting(false);
     }
@@ -169,8 +169,8 @@ function RiskAssessmentContent() {
   return (
     <div className="h-screen bg-slate-950 bg-[radial-gradient(circle_at_top,rgba(6,182,212,0.05)_0%,transparent_51%)] overflow-hidden flex flex-col md:flex-row">
       {/* Left Column: Context & Progress */}
-      <div className="w-full md:w-5/12 lg:w-4/12 border-r border-slate-800/50 flex flex-col p-8 lg:p-12 h-full bg-slate-950/20 backdrop-blur-3xl overflow-y-auto custom-scrollbar">
-        <div className="mb-8">
+      <div className="w-full md:w-5/12 lg:w-4/12 border-b md:border-b-0 md:border-r border-slate-800/50 flex flex-col p-6 md:p-8 lg:p-12 h-auto md:h-full bg-slate-950/20 backdrop-blur-3xl overflow-y-auto custom-scrollbar shrink-0">
+        <div className="mb-8 flex items-center justify-between">
           <Image
             src="/vessel-logo.png"
             alt="VESSEL Logo"
@@ -178,38 +178,54 @@ function RiskAssessmentContent() {
             height={32}
             className="h-8 w-auto opacity-90"
           />
+          <button
+            type="button"
+            onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+            className="inline-flex items-center rounded-full border border-cyan-500/50 bg-slate-900/50 p-1 text-[11px] font-semibold uppercase tracking-wide text-cyan-100 shadow-sm hover:border-cyan-400 transition-colors"
+            aria-label={language === 'en' ? t('common.switchToIndonesian') : t('common.switchToEnglish')}
+          >
+            <span
+              className={`px-2 py-1 rounded-full ${language === 'en' ? 'bg-cyan-400 text-slate-900 shadow' : 'text-cyan-100'}`}
+            >
+              {t('common.languageShort.en')}
+            </span>
+            <span
+              className={`px-2 py-1 rounded-full ${language === 'id' ? 'bg-cyan-400 text-slate-900 shadow' : 'text-cyan-100'}`}
+            >
+              {t('common.languageShort.id')}
+            </span>
+          </button>
         </div>
 
-        <div className="space-y-8 flex-1">
-          <div>
-            <h1 className="text-2xl font-black text-white mb-2 leading-tight uppercase tracking-tight">
-              {t('riskAssessment.title')}
-            </h1>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              {t('riskAssessment.subtitle')}
-            </p>
-          </div>
+        <div className="space-y-4 flex-1">
+          <HeaderHero
+            imageSrc="/assets/general/risk-management.png"
+            title={t('riskAssessment.title')}
+            subtitle={t('riskAssessment.subtitle')}
+          />
 
           {/* Progress */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-widest">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-[11px] font-black tracking-widest">
               <span className="text-slate-500">
                 {isTierSelectionStep
-                  ? (language === 'en' ? 'Final Step' : 'Tahap Akhir')
-                  : `${t('riskAssessment.question')} ${currentStep + 1} ${t('riskAssessment.of')} ${questions.length}`}
+                  ? t('riskAssessment.finalStep')
+                  : t('riskAssessment.pagination')
+                    .replace('{{current}}', (currentStep + 1).toString())
+                    .replace('{{total}}', questions.length.toString())}
               </span>
-              <span className="text-cyan-400">{Math.round(((currentStep + 1) / totalSteps) * 100)}%</span>
+              <span className="text-cyan-400">{Math.round((currentStep / questions.length) * 100)}%</span>
             </div>
             <div className="w-full bg-slate-900 rounded-full h-1.5 border border-slate-800">
               <div
                 className={`h-1.5 rounded-full transition-all duration-700 ease-out fill-mode-forwards ${isTierSelectionStep ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-gradient-to-r from-cyan-500 to-teal-500 shadow-[0_0_10px_rgba(6,182,212,0.3)]'}`}
-                style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
+                style={{ width: `${(currentStep / questions.length) * 100}%` }}
               />
             </div>
           </div>
 
           {/* Info Box */}
-          <div className="p-5 bg-slate-900/60 border border-slate-800/50 rounded-2xl backdrop-blur-md">
+          <div className="hidden md:block p-5 bg-slate-900/60 border border-slate-800/50 rounded-2xl backdrop-blur-md">
             <div className="flex items-start space-x-4">
               <div className="mt-0.5 p-2 bg-cyan-500/10 rounded-xl border border-cyan-500/20">
                 <svg className="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -228,22 +244,22 @@ function RiskAssessmentContent() {
 
           {/* Quick Select - Skip Questionnaire */}
           {!isTierSelectionStep && (
-            <div className="p-6 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5 border border-violet-500/10 rounded-2xl text-center">
-              <p className="text-[10px] text-slate-500 font-black mb-4 uppercase tracking-[0.2em] leading-none opacity-60">
-                {language === 'en' ? 'Already Know?' : 'Sudah Tahu?'}
+            <div className="hidden md:block p-6 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5 border border-violet-500/10 rounded-2xl text-center">
+              <p className="text-[10px] text-slate-100 font-bold mb-4 uppercase tracking-[0.2em] leading-none opacity-80">
+                {t('riskAssessment.alreadyKnow')}
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => handleSubmit('priority')}
                   className="py-3 px-4 bg-slate-900/40 hover:bg-cyan-500/10 border border-slate-800 hover:border-cyan-500/50 rounded-xl text-slate-400 hover:text-cyan-400 text-[10px] font-black transition-all uppercase tracking-widest active:scale-95"
                 >
-                  Priority
+                  {t('riskAssessment.priority')}
                 </button>
                 <button
                   onClick={() => handleSubmit('catalyst')}
                   className="py-3 px-4 bg-slate-900/40 hover:bg-amber-500/10 border border-slate-800 hover:border-amber-500/50 rounded-xl text-slate-400 hover:text-amber-400 text-[10px] font-black transition-all uppercase tracking-widest active:scale-95"
                 >
-                  Catalyst
+                  {t('riskAssessment.catalyst')}
                 </button>
               </div>
             </div>
@@ -256,6 +272,24 @@ function RiskAssessmentContent() {
         <div className="absolute inset-0 bg-[url('/assets/grid-pattern.svg')] opacity-[0.03] pointer-events-none" />
 
         <div className="max-w-2xl w-full z-10 transition-all duration-500">
+          {/* Mobile Info Box */}
+          <div className="md:hidden mt-64 mb-6 p-5 bg-slate-900/60 border border-slate-800/50 rounded-2xl backdrop-blur-md">
+            <div className="flex items-start space-x-4">
+              <div className="mt-0.5 p-2 bg-cyan-500/10 rounded-xl border border-cyan-500/20">
+                <svg className="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-slate-100 font-bold mb-2 uppercase tracking-tight">{t('riskAssessment.aboutTranches')}</p>
+                <div className="text-[11px] text-slate-400 space-y-2 leading-relaxed">
+                  <p>• {t('riskAssessment.priorityInfo')}</p>
+                  <p>• {t('riskAssessment.catalystInfo')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {error && (
             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-xs animate-in fade-in zoom-in duration-300">
               <div className="flex items-center gap-2">
@@ -314,7 +348,7 @@ function RiskAssessmentContent() {
                     }`}
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
-                  {t('common.prev')}
+                  prev
                 </button>
                 <button
                   onClick={handleNext}
@@ -324,7 +358,7 @@ function RiskAssessmentContent() {
                     : 'bg-slate-800 text-slate-600 cursor-not-allowed'
                     }`}
                 >
-                  {t('common.next')}
+                  next
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
                 </button>
               </div>
@@ -339,19 +373,17 @@ function RiskAssessmentContent() {
                   </svg>
                 </div>
                 <h2 className="text-3xl lg:text-4xl font-black text-white mb-4 tracking-tight uppercase">
-                  {language === 'en' ? 'Assessment Completed!' : 'Asesmen Selesai!'}
+                  {t('riskAssessment.assessmentCompleted')}
                 </h2>
                 <p className="text-slate-400 text-lg leading-relaxed">
-                  {language === 'en'
-                    ? 'Based on your profile, you are eligible to participate in our funding pools.'
-                    : 'Berdasarkan profil Anda, Anda berhak untuk berpartisipasi dalam funding pool kami.'}
+                  {t('riskAssessment.completionMessage')}
                 </p>
               </div>
 
               <div className="bg-slate-900/40 border border-slate-800/80 rounded-[2rem] p-8 mb-8 backdrop-blur-sm">
                 <h3 className="text-lg font-bold text-white mb-6 uppercase tracking-widest flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span>
-                  {language === 'en' ? 'Understanding Tranches' : 'Memahami Tranche'}
+                  {t('riskAssessment.understandingTranches')}
                 </h3>
 
                 <div className="grid md:grid-cols-2 gap-6">
@@ -363,16 +395,14 @@ function RiskAssessmentContent() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                       </div>
-                      <h4 className="font-bold text-white">PRIORITY</h4>
+                      <h4 className="font-bold text-white">{t('riskAssessment.priorityTitle')}</h4>
                     </div>
                     <p className="text-xs text-slate-400 leading-relaxed">
-                      {language === 'en'
-                        ? 'Lower risk, stable returns. Priority investors are paid first when repayment occurs.'
-                        : 'Risiko lebih rendah, imbal hasil stabil. Investor Priority dibayar lebih dulu saat pelunasan terjadi.'}
+                      {t('riskAssessment.priorityDesc')}
                     </p>
                     <div className="flex gap-2 text-[10px] font-bold text-cyan-300 uppercase mt-2">
-                      <span className="px-2 py-1 bg-cyan-950/50 rounded">First Out</span>
-                      <span className="px-2 py-1 bg-cyan-950/50 rounded">Stable Yield</span>
+                      <span className="px-2 py-1 bg-cyan-950/50 rounded">{t('riskAssessment.tagFirstOut')}</span>
+                      <span className="px-2 py-1 bg-cyan-950/50 rounded">{t('riskAssessment.tagStableYield')}</span>
                     </div>
                   </div>
 
@@ -384,12 +414,10 @@ function RiskAssessmentContent() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                       </div>
-                      <h4 className="font-bold text-white">CATALYST</h4>
+                      <h4 className="font-bold text-white">{t('riskAssessment.catalystTitle')}</h4>
                     </div>
                     <p className="text-xs text-slate-400 leading-relaxed">
-                      {language === 'en'
-                        ? 'Higher risk, higher potential returns. Acts as a buffer for Priority tranche.'
-                        : 'Risiko lebih tinggi, potensi imbal hasil lebih tinggi. Berfungsi sebagai penyangga untuk tranche Priority.'}
+                      {t('riskAssessment.catalystDesc')}
                     </p>
                     <div className="flex gap-2 text-[10px] font-bold text-amber-300 uppercase mt-2">
                       <span className="px-2 py-1 bg-amber-950/50 rounded">First Loss</span>
@@ -400,9 +428,7 @@ function RiskAssessmentContent() {
 
                 <div className="mt-6 text-center">
                   <p className="text-xs text-slate-500 italic">
-                    {language === 'en'
-                      ? 'You can choose your preferred tranche for every funding pool.'
-                      : 'Anda dapat memilih tranche yang diinginkan pada setiap funding pool.'}
+                    {t('riskAssessment.trancheChoiceInfo')}
                   </p>
                 </div>
               </div>
@@ -417,10 +443,33 @@ function RiskAssessmentContent() {
                     }`}
                 >
                   <span className="relative z-10 flex items-center justify-center gap-3">
-                    {submitting ? t('riskAssessment.saving') : (language === 'en' ? 'Go to Dashboard' : 'Lanjut ke Dashboard')}
+                    {submitting ? t('riskAssessment.saving') : t('riskAssessment.goToDashboard')}
                     {!submitting && <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>}
                   </span>
                   {!submitting && <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Select - Mobile Only */}
+          {!isTierSelectionStep && (
+            <div className="md:hidden mt-8 p-6 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5 border border-violet-500/10 rounded-2xl text-center">
+              <p className="text-[10px] text-slate-100 font-bold mb-4 uppercase tracking-[0.2em] leading-none opacity-80">
+                {t('riskAssessment.alreadyKnow')}
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => handleSubmit('priority')}
+                  className="py-3 px-4 bg-slate-900/40 hover:bg-cyan-500/10 border border-slate-800 hover:border-cyan-500/50 rounded-xl text-slate-400 hover:text-cyan-400 text-[10px] font-black transition-all uppercase tracking-widest active:scale-95"
+                >
+                  {t('riskAssessment.priority')}
+                </button>
+                <button
+                  onClick={() => handleSubmit('catalyst')}
+                  className="py-3 px-4 bg-slate-900/40 hover:bg-amber-500/10 border border-slate-800 hover:border-amber-500/50 rounded-xl text-slate-400 hover:text-amber-400 text-[10px] font-black transition-all uppercase tracking-widest active:scale-95"
+                >
+                  {t('riskAssessment.catalyst')}
                 </button>
               </div>
             </div>
