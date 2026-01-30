@@ -135,7 +135,7 @@ export default function InvestorConnectPage() {
             // Handle multiple providers
             let provider = window.ethereum;
             if (window.ethereum.providers?.length) {
-                provider = window.ethereum.providers.find((p: any) => p.isCoinbaseWallet) || window.ethereum;
+                provider = window.ethereum.providers.find((p: { isCoinbaseWallet?: boolean }) => p.isCoinbaseWallet) || window.ethereum;
             }
 
             // If Coinbase Wallet extension is not detected via isCoinbaseWallet flag, 
