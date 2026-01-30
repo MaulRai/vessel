@@ -125,16 +125,18 @@ export function InvestmentModal({ pool, isOpen, onClose, onSuccess, initialTab =
             // 1. Approval
             if (!allowance || allowance < amountBigInt) {
                 setStep('approving');
-                const txApprove = await writeApprove({
+                await writeApprove({
                     address: IDRX_ADDRESS,
                     abi: erc20Abi,
                     functionName: 'approve',
                     args: [PLATFORM_WALLET, amountBigInt],
+                    // @ts-ignore - capabilities is part of wagmi/viem AA support
+                    capabilities: {
+                        paymasterService: {
+                            url: `https://api.developer.coinbase.com/rpc/v1/base-sepolia/${process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}`
+                        }
+                    }
                 });
-                // We'd ideally wait for receipt here, but let's assume UI handling or basic await
-                // wagmi writeContractAsync resolves to hash. 
-                // For simplicity in this modal flow without elaborate toast/waiting components:
-                // In production we should use useWaitForTransactionReceipt on the hash.
             }
 
             // 2. Transfer
@@ -144,6 +146,12 @@ export function InvestmentModal({ pool, isOpen, onClose, onSuccess, initialTab =
                 abi: erc20Abi,
                 functionName: 'transfer',
                 args: [PLATFORM_WALLET, amountBigInt],
+                // @ts-ignore - capabilities is part of wagmi/viem AA support
+                capabilities: {
+                    paymasterService: {
+                        url: `https://api.developer.coinbase.com/rpc/v1/base-sepolia/${process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}`
+                    }
+                }
             });
 
             // 3. Confirm with Backend

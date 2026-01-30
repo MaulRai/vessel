@@ -220,6 +220,7 @@ function InvestorDashboardContent() {
                       <Th>Modal Disalurkan</Th>
                       <Th>Estimasi Hasil</Th>
                       <Th>Status</Th>
+                      <Th>Transaksi</Th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800">
@@ -243,6 +244,23 @@ function InvestorDashboardContent() {
                         <Td className="text-slate-200">IDRX {numberId.format(row.estimated_return)}</Td>
                         <Td>
                           <StatusBadge status={row.status} label={row.status_display} color={row.status_color} />
+                        </Td>
+                        <Td>
+                          {row.tx_hash ? (
+                            <a
+                              href={`https://base-sepolia.blockscout.com/tx/${row.tx_hash}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors"
+                            >
+                              <span className="text-xs font-mono">{row.tx_hash.substring(0, 6)}...{row.tx_hash.substring(row.tx_hash.length - 4)}</span>
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          ) : (
+                            <span className="text-slate-600 text-xs">-</span>
+                          )}
                         </Td>
                       </tr>
                     ))}

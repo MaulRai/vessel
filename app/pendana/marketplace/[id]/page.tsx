@@ -94,6 +94,37 @@ function ProjectDetailContent() {
               <span>K: {pool.catalyst_interest_rate}%</span>
             </div>
           </div>
+
+          <div className="p-4 bg-slate-800/40 border border-slate-700/50 rounded-xl space-y-3">
+            <p className="text-sm text-slate-400">Verifikasi On-Chain</p>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-500">Status Network</span>
+                <span className="text-emerald-400 flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Base Sepolia
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-500">Pembuatan Pool</span>
+                {pool.create_pool_tx_hash ? (
+                  <a
+                    href={`https://base-sepolia.blockscout.com/tx/${pool.create_pool_tx_hash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-cyan-400 hover:text-cyan-300 font-mono flex items-center gap-1 transition-colors"
+                  >
+                    {pool.create_pool_tx_hash.substring(0, 6)}...{pool.create_pool_tx_hash.substring(pool.create_pool_tx_hash.length - 4)}
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                ) : (
+                  <span className="text-slate-600">Pending</span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="bg-slate-900/50 border border-slate-800/60 rounded-2xl p-4 space-y-4">

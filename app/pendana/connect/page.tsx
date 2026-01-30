@@ -62,7 +62,7 @@ export default function InvestorConnectPage() {
                 nonce
             });
             if (loginRes?.success) {
-                router.push('/pendana/dashboard');
+                router.push('/pendana/risk-assessment');
             } else {
                 throw new Error(loginRes?.error?.message || "Login failed");
             }
@@ -79,13 +79,24 @@ export default function InvestorConnectPage() {
         setError('');
         setIsLoading(true);
         try {
-            if (!window.ethereum?.isMetaMask) {
+            if (!window.ethereum) {
+                window.open('https://metamask.io/download/', '_blank');
+                return;
+            }
+
+            // Handle multiple providers (e.g., if Coinbase Wallet is also installed)
+            let provider = window.ethereum;
+            if (window.ethereum.providers?.length) {
+                provider = window.ethereum.providers.find((p: any) => p.isMetaMask) || window.ethereum;
+            }
+
+            if (!provider.isMetaMask) {
                 window.open('https://metamask.io/download/', '_blank');
                 return;
             }
 
             // 1. Connect
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }) as string[];
+            const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
             if (!accounts || accounts.length === 0) {
                 throw new Error('No accounts found');
             }
@@ -99,7 +110,7 @@ export default function InvestorConnectPage() {
             const { nonce, message } = nonceRes.data;
 
             // 3. Sign message
-            const signature = await window.ethereum.request({
+            const signature = await provider.request({
                 method: 'personal_sign',
                 params: [message, address]
             }) as string;
@@ -113,7 +124,7 @@ export default function InvestorConnectPage() {
             });
 
             if (loginRes?.success) {
-                router.push('/pendana/dashboard');
+                router.push('/pendana/risk-assessment');
             } else {
                 throw new Error(loginRes?.error?.message || "Login failed");
             }
