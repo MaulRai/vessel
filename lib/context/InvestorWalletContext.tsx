@@ -29,6 +29,8 @@ interface InvestorWalletContextType {
     disconnectWallet: () => void;
     switchToCorrectChain: () => Promise<boolean>;
     refreshBalance: () => Promise<void>;
+    loginInvestor: (address: string) => void;
+    isLoading: boolean;
 }
 
 const InvestorWalletContext = createContext<InvestorWalletContextType | undefined>(undefined);
@@ -41,6 +43,7 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
     const [investor, setInvestor] = useState<InvestorUser | null>(null);
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [isConnecting, setIsConnecting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [chainId, setChainId] = useState<number | null>(null);
@@ -101,6 +104,7 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
                     localStorage.removeItem(INVESTOR_WALLET_KEY);
                 }
             }
+            setIsLoading(false);
             return;
         }
 
@@ -126,14 +130,23 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
                         }
                     }
                 })
-                .catch(console.error);
+                .catch(console.error)
+                .finally(() => setIsLoading(false));
 
             // Get current chain ID
-            window.ethereum.request({ method: 'eth_chainId' })
-                .then((id: unknown) => {
-                    setChainId(parseInt(id as string, 16));
-                })
-                .catch(console.error);
+            try {
+                window.ethereum.request({ method: 'eth_chainId' })
+                    .then((id: unknown) => {
+                        setChainId(parseInt(id as string, 16));
+                    })
+                    .catch((err: unknown) => {
+                        console.warn("Could not get chain ID:", err);
+                    });
+            } catch (e) {
+                console.warn("Failed to request chain ID", e);
+            }
+        } else {
+            setIsLoading(false);
         }
     }, [isMock]);
 
@@ -157,15 +170,12 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
                 setWalletAddress(null);
                 localStorage.removeItem(INVESTOR_WALLET_KEY);
             } else if (accountList[0].toLowerCase() !== walletAddress?.toLowerCase()) {
-                // Account changed
-                const newInvestor: InvestorUser = {
-                    walletAddress: accountList[0],
-                    role: 'investor',
-                    connectedAt: new Date().toISOString(),
-                };
-                setInvestor(newInvestor);
+                // Account changed - Clear existing session and force re-login
+                // We keep walletAddress updated so UI knows which wallet is active,
+                // but we clear 'investor' state to require re-authentication.
+                setInvestor(null);
                 setWalletAddress(accountList[0]);
-                localStorage.setItem(INVESTOR_WALLET_KEY, JSON.stringify(newInvestor));
+                localStorage.removeItem(INVESTOR_WALLET_KEY);
             }
         };
 
@@ -303,6 +313,18 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
         localStorage.removeItem(INVESTOR_WALLET_KEY);
     }, []);
 
+    // Method for external components (like connect page) to update state after login
+    const loginInvestor = useCallback((address: string) => {
+        const newInvestor: InvestorUser = {
+            walletAddress: address,
+            role: 'investor',
+            connectedAt: new Date().toISOString(),
+        };
+        setInvestor(newInvestor);
+        setWalletAddress(address);
+        localStorage.setItem(INVESTOR_WALLET_KEY, JSON.stringify(newInvestor));
+    }, []);
+
     const value: InvestorWalletContextType = {
         investor,
         walletAddress,
@@ -316,6 +338,8 @@ export function InvestorWalletProvider({ children }: { children: React.ReactNode
         disconnectWallet,
         switchToCorrectChain,
         refreshBalance,
+        loginInvestor,
+        isLoading,
     };
 
     return <InvestorWalletContext.Provider value={value}>{children}</InvestorWalletContext.Provider>;

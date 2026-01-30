@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import { useAccount } from 'wagmi';
+import { useInvestorWallet } from '../context/InvestorWalletContext';
 import { UserRole } from '../types/auth';
 
 interface AuthGuardProps {
@@ -20,15 +20,15 @@ export function AuthGuard({
   redirectTo = '/login',
 }: AuthGuardProps) {
   const { isAuthenticated, isLoading, user } = useAuth();
-  const { isConnected } = useAccount();
+  const { isConnected: isWalletConnected, isConnecting, isLoading: isInvestorLoading } = useInvestorWallet();
   const router = useRouter();
 
   // Determine if user has valid access
   const isInvestorRoute = allowedRoles?.includes('investor') && allowedRoles.length === 1;
   const isMitraRoute = allowedRoles?.includes('mitra') && allowedRoles.length === 1;
 
-  // For investor-only routes, check wallet connection
-  const hasInvestorAccess = isInvestorRoute && isConnected;
+  // For investor-only routes, check wallet connection from InvestorWalletContext
+  const hasInvestorAccess = isInvestorRoute && isWalletConnected;
 
   // For mitra routes or mixed routes, check traditional auth
   const hasTraditionalAccess = isAuthenticated && user;
@@ -37,15 +37,22 @@ export function AuthGuard({
   const hasAccess = hasInvestorAccess || hasTraditionalAccess;
 
   useEffect(() => {
-    if (isLoading) return;
+    // Don't redirect while loading or connecting
+    if (isLoading || isConnecting || isInvestorLoading) return;
 
     // For investor-only routes
     if (isInvestorRoute) {
-      if (!isConnected) {
+      if (!isWalletConnected && !isAuthenticated) {
         router.push('/pendana/connect');
         return;
       }
-      // Investor is connected via wallet, allow access
+      // If authenticating, check role if available
+      if (isAuthenticated && user && user.role !== 'investor') {
+        router.push('/');
+        return;
+      }
+
+      // Investor is connected via wallet OR has valid session
       return;
     }
 
@@ -90,10 +97,10 @@ export function AuthGuard({
         }
       }
     }
-  }, [isAuthenticated, isLoading, user, isConnected, allowedRoles, requireAuth, redirectTo, router, isInvestorRoute, isMitraRoute, hasAccess]);
+  }, [isAuthenticated, isLoading, isConnecting, isInvestorLoading, user, isWalletConnected, allowedRoles, requireAuth, redirectTo, router, isInvestorRoute, isMitraRoute, hasAccess]);
 
-  // Loading state
-  if (isLoading) {
+  // Loading state (including wallet connecting)
+  if (isLoading || isConnecting || isInvestorLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
@@ -104,9 +111,9 @@ export function AuthGuard({
     );
   }
 
-  // For investor routes - check wallet connection
+  // For investor routes - check wallet connection or session
   if (isInvestorRoute) {
-    if (!isConnected) {
+    if (!isWalletConnected && !isAuthenticated) {
       return (
         <div className="min-h-screen bg-slate-950 flex items-center justify-center">
           <div className="flex flex-col items-center space-y-4">
@@ -116,7 +123,7 @@ export function AuthGuard({
         </div>
       );
     }
-    // Wallet connected, render children
+    // Access granted
     return <>{children}</>;
   }
 
@@ -170,7 +177,3 @@ export function AuthGuard({
 
   return <>{children}</>;
 }
-
-// Higher Order Component untuk protected routes
-
-

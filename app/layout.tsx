@@ -14,10 +14,34 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Vessel Finance",
-  description: "Platform pembiayaan ekspor terpercaya",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const appUrl = isProduction
+    ? (process.env.NEXT_PUBLIC_APP_URL || 'https://vessel.finance')
+    : 'http://localhost:3000';
+
+  return {
+    title: "Vessel Finance",
+    description: "Platform pembiayaan ekspor terpercaya",
+    manifest: "/manifest.json",
+    other: {
+      'fc:miniapp': JSON.stringify({
+        version: 'next',
+        imageUrl: `${appUrl}/vessel-icon.png`,
+        button: {
+          title: 'Launch Vessel Finance',
+          action: {
+            type: 'launch_miniapp',
+            name: 'Vessel Finance',
+            url: appUrl,
+            splashImageUrl: `${appUrl}/splash.png`,
+            splashBackgroundColor: '#000000',
+          },
+        },
+      }),
+    },
+  };
+}
 
 export default function RootLayout({
   children,

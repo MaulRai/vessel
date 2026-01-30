@@ -1,0 +1,34 @@
+{
+    "accountAssociation": {
+        "header": "eyJmaWQiOjkxNTIsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMmVmNzkwRGQ3OTkzQTM1ZkQ4NDdDMDUzRURkQUU5NDBEMDU1NTk2In0",
+        "payload": "eyJkb21haW4iOiJ2ZXNzZWwuZmluYW5jZSJ9",
+        "signature": "placeholder_signature"
+    },
+    "miniapp": {
+        "version": "1",
+        "name": "Vessel Finance",
+        "homeUrl": "https://vessel.finance",
+        "iconUrl": "https://vessel.finance/vessel-icon.png",
+        "splashImageUrl": "https://vessel.finance/vessel-logo.png",
+        "splashBackgroundColor": "#000000",
+        "webhookUrl": "https://vessel.finance/api/webhook",
+        "subtitle": "Export Financing on Base",
+        "description": "Fast, transparent export financing for SMEs using Base Network.",
+        "screenshotUrls": [
+            "https://vessel.finance/screenshot1.png"
+        ],
+        "primaryCategory": "finance",
+        "tags": [
+            "finance",
+            "export",
+            "base",
+            "miniapp"
+        ],
+        "heroImageUrl": "https://vessel.finance/vessel-logo.png",
+        "tagline": "Finance your exports instantly",
+        "ogTitle": "Vessel Finance Mini App",
+        "ogDescription": "The future of export financing on Base.",
+        "ogImageUrl": "https://vessel.finance/vessel-logo.png",
+        "noindex": false
+    }
+}

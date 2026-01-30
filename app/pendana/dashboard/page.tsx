@@ -2,16 +2,59 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
+import { StatRibbonCard } from '@/lib/components/StatRibbonCard';
 import { investmentAPI, InvestorPortfolio, ActiveInvestment } from '@/lib/api/user';
+import { useAuth } from '@/lib/context/AuthContext';
+import { useAccount, useReadContract } from 'wagmi';
+import { erc20Abi, formatUnits } from 'viem';
+import { base } from 'wagmi/chains';
+import {
+  Identity,
+  Name,
+  Address,
+  Avatar,
+  EthBalance
+} from '@coinbase/onchainkit/identity';
+import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
 
 const numberId = new Intl.NumberFormat('id-ID');
+const IDRX_ADDRESS = process.env.NEXT_PUBLIC_IDRX_TOKEN_ADDRESS as `0x${string}`;
 
 function InvestorDashboardContent() {
+  const { user } = useAuth();
+  const { address } = useAccount();
   const [portfolio, setPortfolio] = useState<InvestorPortfolio | null>(null);
   const [investments, setInvestments] = useState<ActiveInvestment[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { data: balanceData } = useReadContract({
+    address: IDRX_ADDRESS,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+      refetchInterval: 10000,
+    }
+  });
+
+  const { data: decimals } = useReadContract({
+    address: IDRX_ADDRESS,
+    abi: erc20Abi,
+    functionName: 'decimals',
+  });
+
+  const walletBalance = useMemo(() => {
+    if (balanceData === undefined || decimals === undefined) return 0;
+    try {
+      return Number(formatUnits(balanceData, decimals));
+    } catch {
+      return 0;
+    }
+  }, [balanceData, decimals]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -29,7 +72,6 @@ function InvestorDashboardContent() {
           setInvestments(investmentsRes.data.investments || []);
         }
       } catch {
-        // silently handle
       } finally {
         setLoading(false);
       }
@@ -50,8 +92,7 @@ function InvestorDashboardContent() {
   const hasTrancheData = trancheTotal > 0;
 
   const priorityPct = useMemo(() => {
-    if (!portfolio) return 0;
-    if (!hasTrancheData) return 0;
+    if (!portfolio || !hasTrancheData) return 0;
     return Math.round(((portfolio.priority_allocation || 0) / trancheTotal) * 100);
   }, [portfolio, hasTrancheData, trancheTotal]);
 
@@ -61,9 +102,9 @@ function InvestorDashboardContent() {
     () =>
       hasTrancheData
         ? [
-            { label: 'Prioritas', value: priorityPct / 100, color: '#2563eb' },
-            { label: 'Katalis', value: catalystPct / 100, color: '#ea580c' },
-          ]
+          { label: 'Prioritas', value: priorityPct / 100, color: '#2563eb' },
+          { label: 'Katalis', value: catalystPct / 100, color: '#ea580c' },
+        ]
         : [],
     [hasTrancheData, priorityPct, catalystPct]
   );
@@ -97,62 +138,120 @@ function InvestorDashboardContent() {
     <DashboardLayout role="investor">
       <div className="min-h-screen bg-slate-950 px-4 text-slate-100">
         <div className="mx-auto flex max-w-6xl flex-col gap-8">
-          <header className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-900/50 via-sky-800/40 to-transparent p-6 sm:p-8">
-            <div className="absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_20%,rgba(56,189,248,0.18),rgba(8,47,73,0))]" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,rgba(14,165,233,0.12),rgba(8,47,73,0))]" />
-            </div>
-            <div className="relative flex items-center gap-4">
-              <div className="relative h-24 w-24 rounded-2xl overflow-hidden shadow-lg shadow-sky-900/40">
-                <Image
-                  src="/assets/general/investor.png"
-                  alt="Investor illustration"
-                  fill
-                  className="object-cover"
-                  priority
-                />
+          <MarketplaceHero
+            imageSrc="/assets/general/investor.png"
+            title="Ringkasan Aset"
+            subtitle="Pantau Nilai Pembiayaan Berjalan, realisasi imbal hasil, dan distribusi aset lintas prioritas."
+            cta={(
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                {/* IDRX Wallet Balance Chip */}
+                <div className="flex items-center gap-1 bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 shadow-lg shadow-cyan-500/5">
+                  <div className="flex -space-x-1">
+                    <div className="w-12 h-12 rounded-full bg-transparent flex items-center justify-center border border-transparent">
+                      <Image src="/assets/general/idrx.png" alt="IDRX" width={40} height={40} className="object-contain" />
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Your Wallet</span>
+                    <span className="text-sm font-bold text-slate-100">{numberId.format(walletBalance)} <span className="text-[10px] text-cyan-400">IDRX</span></span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">Ringkasan Aset</h1>
-                <p className="mt-1 max-w-3xl text-sm text-slate-200/80">
-                  Pantau nilai pembiayaan berjalan, realisasi imbal hasil, dan distribusi aset lintas prioritas.
-                </p>
-              </div>
-            </div>
-          </header>
+            )}
+          />
 
           <section className="grid gap-4 md:grid-cols-3">
-            <StatCard
-              title="Total Simpanan & Pembiayaan"
-              value={`Rp ${numberId.format(totalPembiayaanBerjalan)}`}
-              subtitle={`Saldo Tersedia Rp ${numberId.format(portfolio?.available_balance || 0)} \u2022 Dana Sedang Disalurkan Rp ${numberId.format(portfolio?.total_funding || 0)}`}
-            />
-            <StatCard
-              title="Total Imbal Hasil Diterima"
-              value={`Rp ${numberId.format(portfolio?.total_realized_gain || 0)}`}
-              subtitle={`Estimasi: Rp ${numberId.format(portfolio?.total_expected_gain || 0)}`}
-            />
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
-              <p className="text-sm font-semibold text-slate-200">Sebaran Tranche</p>
-              <p className="text-xs text-slate-500">Prioritas (Senior) vs Katalis (Junior)</p>
-              <div className="mt-4 flex items-center gap-6">
-                <div
-                  className="h-32 w-32 rounded-full border border-slate-800 bg-slate-900 shadow-inner shadow-black/30"
-                  style={{ background: conicGradient }}
-                  aria-label="Sebaran tranche"
-                />
-                <div className="space-y-2 text-sm text-slate-300">
-                  {!hasTrancheData ? (
-                    <p className="text-xs font-bold text-white">Belum ada Tranche</p>
-                  ) : (
-                    donutSegments.map((seg) => (
-                      <div key={seg.label} className="flex items-center gap-3">
-                        <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: seg.color }} />
-                        <span className="flex-1">{seg.label}</span>
-                        <span className="text-slate-400">{Math.round(seg.value * 100)}%</span>
+            <StatRibbonCard
+              color="#0f4c81"
+              imageSrc="/assets/general/savings.png"
+              imageAlt="Simpanan dan pembiayaan"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm font-semibold text-slate-400">Total Aset Ekosistem</p>
+                  <p className="text-2xl font-bold text-slate-50">{`IDRX ${numberId.format(totalPembiayaanBerjalan + walletBalance)}`}</p>
+                </div>
+                <div className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+                  Live
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-800/50">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                    Platform
+                  </p>
+                  <p className="text-lg font-bold text-slate-200">{`IDRX ${numberId.format(portfolio?.available_balance || 0)}`}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-cyan-500 uppercase flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
+                    Wallet
+                  </p>
+                  <p className="text-lg font-bold text-cyan-400">{`IDRX ${numberId.format(walletBalance)}`}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-slate-950/50 rounded-xl border border-slate-800/50 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase">Sedang Disalurkan</p>
+                  <p className="text-md font-bold text-slate-300">{`IDRX ${numberId.format(portfolio?.total_funding || 0)}`}</p>
+                </div>
+                {walletBalance < 1000000 && (
+                  <Link
+                    href="http://localhost:3001"
+                    target="_blank"
+                    className="text-[10px] font-bold text-amber-500 hover:text-amber-400 flex items-center gap-1 transition-colors"
+                  >
+                    Get more IDRX
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </Link>
+                )}
+              </div>
+            </StatRibbonCard>
+            <StatRibbonCard
+              color="#1d5fa6"
+              imageSrc="/assets/general/interest.png"
+              imageAlt="Imbal hasil"
+            >
+              <p className="text-sm font-semibold text-slate-200">Total Imbal Hasil Diterima</p>
+              <p className="text-2xl font-bold text-slate-50">{`IDRX ${numberId.format(portfolio?.total_realized_gain || 0)}`}</p>
+              <p className="text-xs font-semibold text-slate-300">Estimasi</p>
+              <p className="text-xl font-bold text-slate-300">{`IDRX ${numberId.format(portfolio?.total_expected_gain || 0)}`}</p>
+            </StatRibbonCard>
+            <div className="relative rounded-r-2xl rounded-l-none border border-slate-800 bg-slate-900/40 p-5 shadow-inner shadow-black/30 overflow-hidden">
+              <div className="absolute left-0 top-0 h-full w-1.5 bg-[#0f4c81]" />
+              <div className="absolute inset-y-0 left-0 w-28" style={{ background: 'linear-gradient(90deg, rgba(15,76,129,0.2) 0%, rgba(15,23,42,0) 100%)' }} />
+              <div className="absolute right-[-28px] bottom-[-16px] opacity-15" aria-hidden="true">
+                <Image src="/assets/general/tranche.png" alt="Tranche" width={200} height={200} className="object-contain" />
+              </div>
+              <div className="relative">
+                <p className="text-sm font-semibold text-slate-200">Sebaran Tranche</p>
+                <p className="text-xs text-slate-500">Prioritas (Senior) vs Katalis (Junior)</p>
+                <div className="mt-4 flex items-center gap-6">
+                  <div
+                    className="h-32 w-32 rounded-full border border-slate-800 bg-slate-900 shadow-inner shadow-black/30"
+                    style={{ background: conicGradient }}
+                    aria-label="Sebaran tranche"
+                  />
+                  <div className="space-y-2 text-sm text-slate-300">
+                    {!hasTrancheData ? (
+                      <div className="inline-block py-1 px-3 bg-black/50 rounded-md">
+                        <p className="text-xs font-bold text-white">Belum ada Tranche</p>
                       </div>
-                    ))
-                  )}
+                    ) : (
+                      donutSegments.map((seg) => (
+                        <div key={seg.label} className="flex items-center gap-3">
+                          <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: seg.color }} />
+                          <span className="flex-1">{seg.label}</span>
+                          <span className="text-slate-400">{Math.round(seg.value * 100)}%</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -180,6 +279,7 @@ function InvestorDashboardContent() {
                       <Th>Modal Disalurkan</Th>
                       <Th>Estimasi Hasil</Th>
                       <Th>Status</Th>
+                      <Th>Transaksi</Th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800">
@@ -191,19 +291,35 @@ function InvestorDashboardContent() {
                         </Td>
                         <Td>
                           <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                              row.tranche === 'priority'
-                                ? 'bg-blue-500/15 text-blue-200 border border-blue-500/40'
-                                : 'bg-amber-500/15 text-amber-200 border border-amber-500/40'
-                            }`}
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${row.tranche === 'priority'
+                              ? 'bg-blue-500/15 text-blue-200 border border-blue-500/40'
+                              : 'bg-amber-500/15 text-amber-200 border border-amber-500/40'
+                              }`}
                           >
                             {row.tranche_display}
                           </span>
                         </Td>
-                        <Td className="text-slate-200">Rp {numberId.format(row.principal)}</Td>
-                        <Td className="text-slate-200">Rp {numberId.format(row.estimated_return)}</Td>
+                        <Td className="text-slate-200">IDRX {numberId.format(row.principal)}</Td>
+                        <Td className="text-slate-200">IDRX {numberId.format(row.estimated_return)}</Td>
                         <Td>
                           <StatusBadge status={row.status} label={row.status_display} color={row.status_color} />
+                        </Td>
+                        <Td>
+                          {row.tx_hash ? (
+                            <a
+                              href={`https://base-sepolia.blockscout.com/tx/${row.tx_hash}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors"
+                            >
+                              <span className="text-xs font-mono">{row.tx_hash.substring(0, 6)}...{row.tx_hash.substring(row.tx_hash.length - 4)}</span>
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          ) : (
+                            <span className="text-slate-600 text-xs">-</span>
+                          )}
                         </Td>
                       </tr>
                     ))}
@@ -223,16 +339,6 @@ export default function InvestorDashboardPage() {
     <AuthGuard allowedRoles={['investor']}>
       <InvestorDashboardContent />
     </AuthGuard>
-  );
-}
-
-function StatCard({ title, value, subtitle }: { title: string; value: string; subtitle?: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 shadow-inner shadow-black/20">
-      <p className="text-sm font-semibold text-slate-200">{title}</p>
-      <p className="mt-2 text-2xl font-bold text-slate-50">{value}</p>
-      {subtitle && <p className="mt-1 text-xs text-slate-500 leading-relaxed">{subtitle}</p>}
-    </div>
   );
 }
 

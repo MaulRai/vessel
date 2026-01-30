@@ -6,11 +6,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import { useAccount, useDisconnect, useChainId, useSwitchChain, useChains } from 'wagmi';
+import { useAccount, useDisconnect, useChainId, useSwitchChain, useChains, useReadContract } from 'wagmi';
+import { formatUnits, erc20Abi } from 'viem';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { UserRole } from '../types/auth';
 import { base, baseSepolia } from 'wagmi/chains';
+import { useInvestorWallet } from '../context/InvestorWalletContext';
+
+const IDRX_ADDRESS = process.env.NEXT_PUBLIC_IDRX_TOKEN_ADDRESS as `0x${string}`;
 
 interface NavItem {
   href: string;
@@ -43,15 +47,6 @@ const getInvestorNavItems = (t: (key: string) => string): NavItem[] => [
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
-    ),
-  },
-  {
-    href: '/pendana/risk-assessment',
-    label: t('nav.riskAssessment'),
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
       </svg>
     ),
   },
@@ -164,12 +159,38 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const { user, logout } = useAuth();
   const { t } = useLanguage();
   const { address } = useAccount();
-  const { disconnect } = useDisconnect();
+  const { disconnect: wagmiDisconnect } = useDisconnect();
+  const { disconnectWallet } = useInvestorWallet();
   const chainId = useChainId();
   const chains = useChains();
   const { switchChain, isPending: isSwitching } = useSwitchChain();
   const currentChain = chains.find((item) => item.id === chainId);
   const shortAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '';
+
+  const { data: balanceData } = useReadContract({
+    address: IDRX_ADDRESS,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+      refetchInterval: 10000,
+    }
+  });
+
+  const { data: decimals } = useReadContract({
+    address: IDRX_ADDRESS,
+    abi: erc20Abi,
+    functionName: 'decimals',
+  });
+
+  const formattedBalance = React.useMemo(() => {
+    if (balanceData === undefined || decimals === undefined) return null;
+    const balance = Number(formatUnits(balanceData, decimals));
+    return new Intl.NumberFormat('id-ID', {
+      maximumFractionDigits: 2,
+    }).format(balance);
+  }, [balanceData, decimals]);
 
   const isOnBase = chainId === base.id || chainId === baseSepolia.id;
 
@@ -185,7 +206,9 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   };
 
   const handleDisconnectWallet = () => {
-    disconnect();
+    wagmiDisconnect();
+    disconnectWallet();
+    logout(); // Also clear backend session
     router.push('/pendana/connect');
   };
 
@@ -253,18 +276,24 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
             // Wallet info for investors
             <>
               <div className="mb-3 p-3 rounded-xl bg-slate-800/60 border border-slate-700/50">
-                {address ? (
+                {(address || (user?.wallet_address && role === 'investor')) ? (
                   <div className="flex items-center space-x-3">
                     <div className="relative">
                       <div className="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-500/30 to-teal-500/30 ring-2 ring-cyan-500/30 flex items-center justify-center text-sm font-semibold text-slate-900">
-                        {address.slice(2, 4).toUpperCase()}
+                        {(address || user?.wallet_address)?.slice(2, 4).toUpperCase()}
                       </div>
                       <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-slate-900 shadow-lg shadow-emerald-400/50" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-slate-400 font-medium mb-0.5">{t('common.walletConnected')}</p>
-                      <p className="text-sm font-mono font-semibold text-cyan-300 truncate">{shortAddress}</p>
-                      {!isOnBase && (
+                      <p className="text-sm font-mono font-semibold text-cyan-300 truncate">
+                        {address
+                          ? `${address.slice(0, 6)}...${address.slice(-4)}`
+                          : user?.wallet_address
+                            ? `${user.wallet_address.slice(0, 6)}...${user.wallet_address.slice(-4)}`
+                            : ''}
+                      </p>
+                      {!isOnBase && address && (
                         <p className="text-[10px] text-amber-300 mt-1 flex items-center gap-1">
                           <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
                           {currentChain?.name || 'Jaringan lain'}

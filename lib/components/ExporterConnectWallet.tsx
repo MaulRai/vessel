@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ConnectWallet, Wallet } from '@coinbase/onchainkit/wallet';
-import { useAccount, useSignMessage } from 'wagmi';
+import { useAccount, useSignMessage, useConnect, useDisconnect } from 'wagmi';
 import { authAPI } from '@/lib/api/auth';
 import { userAPI } from '@/lib/api/user';
 
@@ -14,8 +13,24 @@ interface ExporterConnectWalletProps {
 export function ExporterConnectWallet({ currentWallet, onSuccess }: ExporterConnectWalletProps) {
     const { address, isConnected } = useAccount();
     const { signMessageAsync } = useSignMessage();
+    const { connect, connectors } = useConnect();
+    const { disconnect } = useDisconnect();
     const [isLinking, setIsLinking] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const handleConnectMetaMask = () => {
+        setError(null);
+        // Look for MetaMask specific connectors first
+        const connector = connectors.find(c => c.id === 'metaMaskSDK') ||
+            connectors.find(c => c.id === 'io.metamask') ||
+            connectors.find(c => c.id === 'injected');
+
+        if (connector) {
+            connect({ connector });
+        } else {
+            setError('MetaMask tidak ditemukan. Silakan instal MetaMask terlebih dahulu.');
+        }
+    };
 
     const handleLinkWallet = async () => {
         if (!address) return;
@@ -74,9 +89,30 @@ export function ExporterConnectWallet({ currentWallet, onSuccess }: ExporterConn
             </div>
 
             <div className="flex flex-col gap-3">
-                <Wallet>
-                    <ConnectWallet className="w-full bg-slate-800 hover:bg-slate-700 text-white border border-slate-600" />
-                </Wallet>
+                {!isConnected ? (
+                    <button
+                        onClick={handleConnectMetaMask}
+                        className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 rounded-xl font-semibold flex items-center justify-center gap-3 transition-all group"
+                    >
+                        <svg className="w-6 h-6 transition-transform group-hover:scale-110" viewBox="0 0 32 32" fill="none">
+                            <path d="M28.05 5.5l-2.05 7L16 9l-10 3.5-2.05-7L16 2.5l12.05 3z" fill="#E1712C" />
+                            <path d="M3.95 5.5l2.05 7L16 9V2.5L3.95 5.5z" fill="#E2761B" />
+                            <path d="M28.05 5.5l-2.05 7L16 9V2.5l12.05 3z" fill="#E2761B" />
+                            <path d="M24 22l2 4.5L16 30l-10-3.5 2-4.5 8-2 8 2z" fill="#E1712C" />
+                            <path d="M16 30l10-3.5-2-4.5-8-2v10z" fill="#E2761B" />
+                            <path d="M16 30l-10-3.5 2-4.5 8-2v10z" fill="#E2761B" />
+                            <path d="M26 12.5l2.05 10L16 27l-12.05-4.5 2.05-10L16 16l10-3.5z" fill="#F6851B" />
+                        </svg>
+                        Hubungkan MetaMask
+                    </button>
+                ) : (
+                    <button
+                        onClick={() => disconnect()}
+                        className="w-full py-2 bg-slate-800/50 hover:bg-slate-800 text-slate-400 border border-slate-700 rounded-lg text-xs font-medium transition-all"
+                    >
+                        Putuskan Koneksi (Disconnect)
+                    </button>
+                )}
 
                 {isConnected && address && address.toLowerCase() !== currentWallet?.toLowerCase() && (
                     <div className="animate-in fade-in slide-in-from-top-2">

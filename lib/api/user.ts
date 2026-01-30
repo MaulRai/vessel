@@ -319,11 +319,13 @@ interface RiskQuestionnaireRequest {
     q1_answer: number;
     q2_answer: number;
     q3_answer: number;
+    selected_tier: string;
 }
 
 export interface RiskQuestionnaireStatusResponse {
     completed: boolean;
     catalyst_unlocked: boolean;
+    selected_tier?: string;
     completed_at?: string;
     message: string;
 }
@@ -479,6 +481,7 @@ export interface ActiveInvestment {
     status_display: string;
     status_color: string;
     invested_at: string;
+    tx_hash?: string;
 }
 
 interface ActiveInvestmentListResponse {
@@ -605,9 +608,18 @@ export interface Invoice {
     original_currency?: string;
     original_amount?: number;
     exchange_rate?: number;
+    advance_percentage: number;
+    advance_amount?: number;
+    funding_limit_percentage?: number;
     funding_duration_days: number;
     created_at: string;
     updated_at: string;
+    nft?: {
+        token_id?: number;
+        contract_address?: string;
+        mint_tx_hash?: string;
+        minted_at?: string;
+    };
 }
 
 export interface InvoiceDocument {

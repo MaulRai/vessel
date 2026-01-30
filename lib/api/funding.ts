@@ -22,6 +22,7 @@ export interface FundingPool {
     deadline: string;
     status: 'open' | 'filled' | 'disbursed' | 'closed' | 'repaid';
     created_at: string;
+    create_pool_tx_hash?: string;
 }
 
 export interface InvestRequest {
@@ -117,6 +118,7 @@ interface BackendFundingPoolResponse {
         status: 'open' | 'filled' | 'disbursed' | 'closed' | 'repaid';
         created_at: string;
         deadline: string;
+        create_pool_tx_hash?: string;
     };
     invoice?: {
         id: string;
@@ -217,7 +219,8 @@ class FundingAPI {
             tenor_days: item.invoice?.funding_duration_days || 30,
             deadline: item.pool.deadline,
             status: item.pool.status,
-            created_at: item.pool.created_at
+            created_at: item.pool.created_at,
+            create_pool_tx_hash: item.pool.create_pool_tx_hash,
         };
     }
 

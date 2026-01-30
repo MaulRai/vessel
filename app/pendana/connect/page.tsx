@@ -1,88 +1,171 @@
 'use client';
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ConnectWallet, Wallet } from '@coinbase/onchainkit/wallet';
-import { useAccount, useChainId, useSwitchChain, useSignMessage } from 'wagmi';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { ONCHAINKIT_CONFIG } from '@/lib/config/onchainkit';
+import { useAuth } from '@/lib/context/AuthContext';
 import { authAPI } from '@/lib/api/auth';
+import { SignInWithBaseButton } from '@base-org/account-ui/react';
+import { createBaseAccountSDK } from '@base-org/account';
+
+import { baseSepolia } from 'wagmi/chains';
+import { riskQuestionnaireAPI } from '@/lib/api/user';
 
 export default function InvestorConnectPage() {
     const router = useRouter();
-    const { isConnected, address } = useAccount();
-    const chainId = useChainId();
-    const { switchChain, isPending: isSwitching, error: switchErrorRaw } = useSwitchChain();
-    const { signMessageAsync } = useSignMessage();
+    const { walletLogin } = useAuth();
     const { t, language, setLanguage } = useLanguage();
-    const expectedChainId = ONCHAINKIT_CONFIG.chain.id;
-    const switchError = switchErrorRaw instanceof Error ? switchErrorRaw : null;
-    const isWrongChain = isConnected && chainId !== expectedChainId;
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Backend authentication state
-    const [isAuthenticating, setIsAuthenticating] = useState(false);
-    const [authError, setAuthError] = useState<string | null>(null);
-    const [hasAuthenticated, setHasAuthenticated] = useState(false);
-
-    // Backend authentication after wallet connects
-    const authenticateWithBackend = useCallback(async (walletAddress: string) => {
-        if (isAuthenticating || hasAuthenticated) return;
-
-        setIsAuthenticating(true);
-        setAuthError(null);
-
+    const handleSignIn = async () => {
+        setError('');
+        setIsLoading(true);
         try {
-            // Step 1: Get nonce from backend
-            const nonceResponse = await authAPI.walletNonce({ wallet_address: walletAddress });
-            if (!nonceResponse.success || !nonceResponse.data) {
-                throw new Error(nonceResponse.error?.message || 'Failed to get nonce');
-            }
-
-            const { nonce, message } = nonceResponse.data;
-
-            // Step 2: Sign the message with wallet
-            const signature = await signMessageAsync({ message });
-
-            // Step 3: Login/Register with backend
-            const loginResponse = await authAPI.walletLogin({
-                wallet_address: walletAddress,
-                signature,
-                message,
-                nonce,
+            // Initialize Base Account SDK
+            const sdk = createBaseAccountSDK({
+                appName: 'Vessel Finance',
+                appChainIds: [baseSepolia.id] // Base Sepolia Testnet
             });
 
-            if (!loginResponse.success || !loginResponse.data) {
-                throw new Error(loginResponse.error?.message || 'Failed to authenticate');
+            const provider = sdk.getProvider();
+
+            // 1. Connect
+            const accounts = await provider.request({ method: 'eth_requestAccounts' });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (!accounts || (accounts as any).length === 0) {
+                throw new Error('No accounts found');
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const address = (accounts as any)[0];
+
+            // 2. Get Nonce
+            const nonceRes = await authAPI.walletNonce({ wallet_address: address });
+            if (!nonceRes.success || !nonceRes.data) {
+                throw new Error(nonceRes.error?.message || "Failed to generate nonce");
+            }
+            const { nonce, message } = nonceRes.data;
+
+            // 3. Sign message
+            const signature = await provider.request({
+                method: 'personal_sign',
+                params: [message, address]
+            });
+
+            // 4. Login
+            const loginRes = await walletLogin({
+                wallet_address: address,
+                signature: signature as string,
+                message,
+                nonce
+            });
+            if (loginRes?.success) {
+                // Check risk assessment status
+                try {
+                    const statusRes = await riskQuestionnaireAPI.getStatus();
+                    if (statusRes.success && statusRes.data && statusRes.data.completed) {
+                        router.push('/pendana/dashboard');
+                    } else {
+                        router.push('/pendana/risk-assessment');
+                    }
+                } catch {
+                    // Fallback if status check fails
+                    router.push('/pendana/risk-assessment');
+                }
+            } else {
+                throw new Error(loginRes?.error?.message || "Login failed");
             }
 
-            // Step 4: Store tokens for authenticated API calls
-            localStorage.setItem('access_token', loginResponse.data.access_token);
-            localStorage.setItem('refresh_token', loginResponse.data.refresh_token);
-            localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
-
-            setHasAuthenticated(true);
-
-            // Redirect to dashboard
-            router.push('/pendana/dashboard');
-        } catch (error: unknown) {
-            console.error('Backend authentication failed:', error);
-            const message = error instanceof Error ? error.message : 'Authentication failed. Please try again.';
-            setAuthError(message);
-            setIsAuthenticating(false);
+        } catch (err: unknown) {
+            console.error("Sign In Error:", err);
+            setError(err instanceof Error ? err.message : "Failed to sign in");
+        } finally {
+            setIsLoading(false);
         }
-    }, [isAuthenticating, hasAuthenticated, signMessageAsync, router]);
+    };
 
-    useEffect(() => {
-        if (isConnected && !isWrongChain && address && !hasAuthenticated && !isAuthenticating) {
-            authenticateWithBackend(address);
+    const handleMetaMaskSignIn = async () => {
+        setError('');
+        setIsLoading(true);
+        try {
+            if (!window.ethereum) {
+                window.open('https://metamask.io/download/', '_blank');
+                return;
+            }
+
+            // Handle multiple providers (e.g., if Coinbase Wallet is also installed)
+            let provider = window.ethereum;
+            if (window.ethereum.providers?.length) {
+                provider = window.ethereum.providers.find((p: { isMetaMask?: boolean }) => p.isMetaMask) || window.ethereum;
+            }
+
+            if (!provider.isMetaMask) {
+                window.open('https://metamask.io/download/', '_blank');
+                return;
+            }
+
+            // 1. Connect
+            const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
+            if (!accounts || accounts.length === 0) {
+                throw new Error('No accounts found');
+            }
+            const address = accounts[0];
+
+            // 2. Get Nonce
+            const nonceRes = await authAPI.walletNonce({ wallet_address: address });
+            if (!nonceRes.success || !nonceRes.data) {
+                throw new Error(nonceRes.error?.message || "Failed to generate nonce");
+            }
+            const { nonce, message } = nonceRes.data;
+
+            // 3. Sign message
+            const signature = await provider.request({
+                method: 'personal_sign',
+                params: [message, address]
+            }) as string;
+
+            // 4. Login
+            const loginRes = await walletLogin({
+                wallet_address: address,
+                signature,
+                message,
+                nonce
+            });
+
+            if (loginRes?.success) {
+                // Check risk assessment status
+                try {
+                    const statusRes = await riskQuestionnaireAPI.getStatus();
+                    if (statusRes.success && statusRes.data && statusRes.data.completed) {
+                        router.push('/pendana/dashboard');
+                    } else {
+                        router.push('/pendana/risk-assessment');
+                    }
+                } catch {
+                    // Fallback if status check fails
+                    router.push('/pendana/risk-assessment');
+                }
+            } else {
+                throw new Error(loginRes?.error?.message || "Login failed");
+            }
+        } catch (err: unknown) {
+            console.error("MetaMask Sign In Error:", err);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((err as any).code === 4001) {
+                setError('Connection rejected');
+            } else {
+                setError(err instanceof Error ? err.message : "Failed to sign in with MetaMask");
+            }
+        } finally {
+            setIsLoading(false);
         }
-    }, [isConnected, isWrongChain, address, hasAuthenticated, isAuthenticating, authenticateWithBackend]);
+    };
 
     return (
-        <div className="min-h-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">
+        <div className="min-h-screen h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden relative">
             <div className="w-full max-w-5xl h-[calc(100vh-2rem)] max-h-[700px] bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
                 <div className="grid md:grid-cols-2 h-full">
                     {/* Left Column - Connection Interface */}
@@ -154,79 +237,45 @@ export default function InvestorConnectPage() {
                                 ))}
                             </div>
 
-                            {/* Authentication Error */}
-                            {authError && (
-                                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg">
-                                    <p className="text-red-400 text-sm">{authError}</p>
+                            {/* Error Message */}
+                            {error && (
+                                <div className="p-3 mb-4 bg-red-500/10 border border-red-500/50 rounded-lg">
+                                    <p className="text-red-400 text-sm">{error}</p>
                                 </div>
                             )}
 
-                            {/* Authenticating State */}
-                            {isAuthenticating && (
-                                <div className="mb-4 p-3 bg-cyan-500/10 border border-cyan-500/50 rounded-lg">
-                                    <p className="text-cyan-400 text-sm flex items-center gap-2">
-                                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                        </svg>
-                                        {t('investorConnect.authenticating') || 'Authenticating... Please sign the message in your wallet.'}
-                                    </p>
-                                </div>
-                            )}
-
-                            {isWrongChain && (
-                                <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/50 rounded-lg text-sm text-amber-100 space-y-2">
-                                    <div className="flex items-start gap-2">
-                                        <svg className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                        <div>
-                                            <p className="font-medium text-xs mb-1">{t('investorConnect.wrongNetworkTitle')}</p>
-                                            <p className="text-xs text-amber-200/80">{t('investorConnect.wrongNetworkBody')} {ONCHAINKIT_CONFIG.chain.name}</p>
-                                        </div>
+                            <div className="flex flex-col gap-3">
+                                <div className="w-full relative group">
+                                    <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 to-cyan-600 rounded-lg opacity-20 group-hover:opacity-40 transition duration-200"></div>
+                                    <div className="relative">
+                                        <SignInWithBaseButton
+                                            colorScheme="dark"
+                                            onClick={isLoading ? undefined : handleSignIn}
+                                        />
                                     </div>
-                                    <button
-                                        onClick={() => switchChain({ chainId: expectedChainId })}
-                                        disabled={isSwitching}
-                                        className="w-full px-3 py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-100 rounded-lg text-xs font-medium transition-all disabled:opacity-60"
-                                    >
-                                        {isSwitching ? t('investorConnect.switching') : `${t('investorConnect.switchTo')} ${ONCHAINKIT_CONFIG.chain.name}`}
-                                    </button>
-                                    {switchError && <p className="text-xs text-amber-200/80">{switchError.message}</p>}
                                 </div>
-                            )}
 
-                            <div className="flex items-center gap-3">
-                                <div className="flex-1" aria-hidden />
-                                <Wallet>
-                                    <ConnectWallet className="min-w-[220px] justify-center px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 rounded-lg font-bold text-base text-white transition-all shadow-lg shadow-cyan-900/50" />
-                                </Wallet>
-                                <div className="flex-1" aria-hidden />
-                            </div>
-
-                            {/* Don't have a wallet? */}
-                            <div className="mt-4 p-3 bg-slate-900/50 border border-slate-700/50 rounded-lg">
-                                <p className="text-slate-400 text-xs text-center mb-2">
-                                    {t('investorConnect.noWalletTitle')}
-                                </p>
-                                <div className="flex flex-wrap gap-2 justify-center">
-                                    <a
-                                        href="https://metamask.io/download/"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
-                                    >
-                                        {t('investorConnect.getMetaMask')}
-                                    </a>
-                                    <a
-                                        href="https://www.coinbase.com/wallet"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
-                                    >
-                                        {t('investorConnect.getCoinbase')}
-                                    </a>
+                                <div className="relative flex items-center py-2">
+                                    <div className="grow border-t border-slate-700"></div>
+                                    <span className="shrink-0 px-2 text-xs text-slate-500 uppercase">Or</span>
+                                    <div className="grow border-t border-slate-700"></div>
                                 </div>
+
+                                <button
+                                    onClick={isLoading ? undefined : handleMetaMaskSignIn}
+                                    disabled={isLoading}
+                                    className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 rounded-lg text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-linear-to-r from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <Image
+                                        src="/assets/auth/metamask.svg" // Make sure this asset exists or use a generic one
+                                        alt="MetaMask"
+                                        width={24}
+                                        height={24}
+                                        className="w-6 h-6 object-contain"
+                                    />
+                                    <span className="font-medium text-sm">Connect with MetaMask</span>
+                                </button>
                             </div>
 
                             <div className="relative my-6">
@@ -266,7 +315,7 @@ export default function InvestorConnectPage() {
                     </div>
 
                     {/* Right Column - Image */}
-                    <div className="hidden md:block relative bg-gradient-to-br from-slate-800 via-cyan-900 to-teal-900">
+                    <div className="hidden md:block relative bg-linear-to-br from-slate-800 via-cyan-900 to-teal-900">
                         <div className="absolute inset-0">
                             <Image
                                 src="/assets/auth/auth-image-4.png"
