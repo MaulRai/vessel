@@ -180,30 +180,27 @@ function RiskAssessmentContent() {
           />
         </div>
 
-        <div className="space-y-8 flex-1">
-          <div>
-            <h1 className="text-2xl font-black text-white mb-2 leading-tight uppercase tracking-tight">
-              {t('riskAssessment.title')}
-            </h1>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              {t('riskAssessment.subtitle')}
-            </p>
-          </div>
+        <div className="space-y-4 flex-1">
+          <MarketplaceHero
+            imageSrc="/assets/general/risk-management.png"
+            title={t('riskAssessment.title')}
+            subtitle={t('riskAssessment.subtitle')}
+          />
 
           {/* Progress */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-widest">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-[11px] font-black tracking-widest">
               <span className="text-slate-500">
                 {isTierSelectionStep
                   ? (language === 'en' ? 'Final Step' : 'Tahap Akhir')
                   : `${t('riskAssessment.question')} ${currentStep + 1} ${t('riskAssessment.of')} ${questions.length}`}
               </span>
-              <span className="text-cyan-400">{Math.round(((currentStep + 1) / totalSteps) * 100)}%</span>
+              <span className="text-cyan-400">{Math.round((currentStep / questions.length) * 100)}%</span>
             </div>
             <div className="w-full bg-slate-900 rounded-full h-1.5 border border-slate-800">
               <div
                 className={`h-1.5 rounded-full transition-all duration-700 ease-out fill-mode-forwards ${isTierSelectionStep ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-gradient-to-r from-cyan-500 to-teal-500 shadow-[0_0_10px_rgba(6,182,212,0.3)]'}`}
-                style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
+                style={{ width: `${(currentStep / questions.length) * 100}%` }}
               />
             </div>
           </div>
@@ -229,7 +226,7 @@ function RiskAssessmentContent() {
           {/* Quick Select - Skip Questionnaire */}
           {!isTierSelectionStep && (
             <div className="p-6 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5 border border-violet-500/10 rounded-2xl text-center">
-              <p className="text-[10px] text-slate-500 font-black mb-4 uppercase tracking-[0.2em] leading-none opacity-60">
+              <p className="text-[10px] text-slate-100 font-bold mb-4 uppercase tracking-[0.2em] leading-none opacity-80">
                 {language === 'en' ? 'Already Know?' : 'Sudah Tahu?'}
               </p>
               <div className="grid grid-cols-2 gap-3">
