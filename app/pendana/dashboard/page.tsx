@@ -18,6 +18,7 @@ import {
   Avatar,
   EthBalance
 } from '@coinbase/onchainkit/identity';
+import { MarketplaceHero } from '@/lib/components/MarketplaceHero';
 
 const numberId = new Intl.NumberFormat('id-ID');
 const IDRX_ADDRESS = process.env.NEXT_PUBLIC_IDRX_TOKEN_ADDRESS as `0x${string}`;
@@ -137,49 +138,27 @@ function InvestorDashboardContent() {
     <DashboardLayout role="investor">
       <div className="min-h-screen bg-slate-950 px-4 text-slate-100">
         <div className="mx-auto flex max-w-6xl flex-col gap-8">
-          <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <p className="text-sm font-semibold tracking-wide text-cyan-300/80">Pendana &bull; Dashboard</p>
-              <h1 className="text-3xl font-bold text-slate-50">Ringkasan Aset</h1>
-              <p className="max-w-3xl text-sm text-slate-400">
-                Pantau Nilai Pembiayaan Berjalan, realisasi imbal hasil, dan distribusi aset lintas prioritas.
-              </p>
-            </div>
-
-            {/* User Profile & Basename Identity */}
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              {/* IDRX Wallet Balance Chip */}
-              <div className="flex items-center gap-3 bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 shadow-lg shadow-cyan-500/5">
-                <div className="flex -space-x-1">
-                  <div className="w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
-                    <span className="text-[10px] font-bold text-cyan-400">ID</span>
-                  </div>
-                  <div className="w-6 h-6 rounded-full bg-teal-500/20 flex items-center justify-center border border-teal-500/30">
-                    <span className="text-[10px] font-bold text-teal-400">RX</span>
-                  </div>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Your Wallet</span>
-                  <span className="text-sm font-bold text-slate-100">{numberId.format(walletBalance)} <span className="text-[10px] text-cyan-400">IDRX</span></span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                {user?.wallet_address && (
-                  <Identity
-                    address={user.wallet_address as `0x${string}`}
-                    chain={base}
-                  >
-                    <Avatar address={user.wallet_address as `0x${string}`} chain={base} className="h-10 w-10" />
-                    <div className="flex flex-col">
-                      <Name address={user.wallet_address as `0x${string}`} chain={base} className="text-sm font-semibold text-slate-100" />
-                      <Address address={user.wallet_address as `0x${string}`} className="text-xs text-slate-400" />
+          <MarketplaceHero
+            imageSrc="/assets/general/investor.png"
+            title="Ringkasan Aset"
+            subtitle="Pantau Nilai Pembiayaan Berjalan, realisasi imbal hasil, dan distribusi aset lintas prioritas."
+            cta={(
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                {/* IDRX Wallet Balance Chip */}
+                <div className="flex items-center gap-1 bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800 shadow-lg shadow-cyan-500/5">
+                  <div className="flex -space-x-1">
+                    <div className="w-12 h-12 rounded-full bg-transparent flex items-center justify-center border border-transparent">
+                      <Image src="/assets/general/idrx.png" alt="IDRX" width={40} height={40} className="object-contain" />
                     </div>
-                  </Identity>
-                )}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Your Wallet</span>
+                    <span className="text-sm font-bold text-slate-100">{numberId.format(walletBalance)} <span className="text-[10px] text-cyan-400">IDRX</span></span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </header>
+            )}
+          />
 
           <section className="grid gap-4 md:grid-cols-3">
             <StatRibbonCard

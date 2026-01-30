@@ -130,7 +130,7 @@ export function InvestmentModal({ pool, isOpen, onClose, onSuccess, initialTab =
                     abi: erc20Abi,
                     functionName: 'approve',
                     args: [PLATFORM_WALLET, amountBigInt],
-                    // @ts-ignore - capabilities is part of wagmi/viem AA support
+                    // @ts-expect-error - capabilities is part of wagmi/viem AA support
                     capabilities: {
                         paymasterService: {
                             url: `https://api.developer.coinbase.com/rpc/v1/base-sepolia/${process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}`
@@ -146,7 +146,7 @@ export function InvestmentModal({ pool, isOpen, onClose, onSuccess, initialTab =
                 abi: erc20Abi,
                 functionName: 'transfer',
                 args: [PLATFORM_WALLET, amountBigInt],
-                // @ts-ignore - capabilities is part of wagmi/viem AA support
+                // @ts-expect-error - capabilities is part of wagmi/viem AA support
                 capabilities: {
                     paymasterService: {
                         url: `https://api.developer.coinbase.com/rpc/v1/base-sepolia/${process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}`
