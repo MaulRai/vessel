@@ -18,7 +18,7 @@ import {
   Avatar,
   EthBalance
 } from '@coinbase/onchainkit/identity';
-import { HeaderHero } from '@/lib/components/MarketplaceHero';
+import { HeaderHero } from '@/lib/components/HeaderHero';
 
 const numberId = new Intl.NumberFormat('id-ID');
 const IDRX_ADDRESS = process.env.NEXT_PUBLIC_IDRX_TOKEN_ADDRESS as `0x${string}`;

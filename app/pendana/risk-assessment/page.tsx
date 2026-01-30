@@ -10,7 +10,7 @@ import {
   RiskQuestionnaireStatusResponse,
 } from '@/lib/api/user';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { HeaderHero } from '@/lib/components/MarketplaceHero';
+import { HeaderHero } from '@/lib/components/HeaderHero';
 import Link from 'next/link';
 import Image from 'next/image';
 

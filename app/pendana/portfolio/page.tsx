@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
-import { HeaderHero } from '@/lib/components/MarketplaceHero';
+import { HeaderHero } from '@/lib/components/HeaderHero';
 import { investmentAPI, InvestorPortfolio, ActiveInvestment } from '@/lib/api/user';
 import Link from 'next/link';
 import { StatRibbonCard } from '@/lib/components/StatRibbonCard';
