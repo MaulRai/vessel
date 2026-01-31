@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { invoiceAPI, Invoice } from '@/lib/api/user';
+import { HeaderHero } from '@/lib/components/HeaderHero';
 
 function InvoiceListContent() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -68,21 +69,18 @@ function InvoiceListContent() {
   return (
     <DashboardLayout role="mitra">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Daftar Invoice</h1>
-            <p className="text-slate-400 mt-1">Kelola invoice dan permohonan pendanaan Anda</p>
-          </div>
-          <Link
-            href="/eksportir/invoices/create"
-            className="px-4 py-2 bg-linear-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 rounded-lg font-medium text-sm transition-all shadow-lg shadow-teal-500/25 flex items-center space-x-2"
-          >
+        <HeaderHero
+          imageSrc="/assets/general/invoice.png"
+          title="Daftar Invoice"
+          subtitle="Kelola invoice dan permohonan pendanaan Anda"
+          color="sky"
+          cta={<Link href="/eksportir/invoices/create" className="px-4 py-2 bg-linear-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 rounded-lg font-medium text-sm transition-all shadow-lg shadow-teal-500/25 flex items-center space-x-2">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             <span>Buat Invoice Baru</span>
-          </Link>
-        </div>
+          </Link>}
+        />
 
         <div className="flex items-center space-x-4">
           <select

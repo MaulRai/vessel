@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { AuthGuard } from "@/lib/components/AuthGuard";
 import { DashboardLayout } from "@/lib/components/DashboardLayout";
 import { mitraAPI, MitraPoolSummary, MitraInvoice } from "@/lib/api/mitra";
+import { HeaderHero } from "@/lib/components/HeaderHero";
 
 type StatTone = "cyan" | "amber" | "rose" | "emerald";
 type BadgeTone = "amber" | "slate" | "emerald" | "cyan";
@@ -57,19 +58,14 @@ function PendanaanEksportirContent() {
 
 	return (
 		<DashboardLayout role="mitra">
-			<div className="px-4 py-10 text-slate-100">
+			<div className="px-4 text-slate-100">
 				<div className="mx-auto flex max-w-6xl flex-col gap-8">
-					<header className="space-y-2">
-						<p className="text-sm font-semibold tracking-wide text-cyan-300/80">
-							Eksportir &bull; Pendanaan
-						</p>
-						<h1 className="text-3xl font-bold text-slate-50">
-							Kelola Pendanaan Aktif
-						</h1>
-						<p className="max-w-3xl text-sm text-slate-400">
-							Pantau status pendanaan invoice Anda, lihat detail pool, dan kelola pembayaran.
-						</p>
-					</header>
+					<HeaderHero
+						imageSrc="/assets/general/pool.png"
+						title="Kelola Pendanaan Aktif"
+						subtitle="Pantau status pendanaan invoice Anda, lihat detail pool, dan kelola pembayaran."
+						color="sky"
+					/>
 
 					<section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 						<StatCard
