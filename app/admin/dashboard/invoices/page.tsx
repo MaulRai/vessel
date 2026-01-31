@@ -6,6 +6,7 @@ import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { adminAPI, PendingInvoice } from '@/lib/api/admin';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { HeaderHero } from '@/lib/components/HeaderHero';
 
 function InvoiceReviewListContent() {
   const { t, language } = useLanguage();
@@ -59,20 +60,12 @@ function InvoiceReviewListContent() {
   return (
     <DashboardLayout role="admin">
       <div className="space-y-8">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600/10 via-fuchsia-600/10 to-transparent border border-violet-500/20 p-8 backdrop-blur-xl">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]" />
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/25">
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">{t('admin.invoiceList.heroTitle')}</h1>
-                <p className="text-violet-200/70 mt-1">{t('admin.invoiceList.heroSubtitle')}</p>
-              </div>
-            </div>
+        <HeaderHero
+          imageSrc="/assets/general/review.png"
+          title={t('admin.invoiceList.heroTitle')}
+          subtitle={t('admin.invoiceList.heroSubtitle')}
+          color="violet"
+          cta={
             <div className="flex items-center gap-3">
               <div className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl">
                 <div className="flex items-center gap-2">
@@ -81,8 +74,8 @@ function InvoiceReviewListContent() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 overflow-hidden">
           {loading ? (

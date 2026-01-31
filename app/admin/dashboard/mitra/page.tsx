@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { adminAPI, MitraApplicationItem } from '@/lib/api/admin';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { HeaderHero } from '@/lib/components/HeaderHero';
 
 interface ApplicationRow {
   id: string;
@@ -122,10 +123,12 @@ export default function AdminMitraPage() {
   return (
     <DashboardLayout role="admin">
       <div className="space-y-8">
-        <header className="space-y-2">
-          <h1 className="text-3xl font-bold text-slate-50">{t('admin.mitraList.title')}</h1>
-          <p className="text-slate-400 max-w-2xl">{t('admin.mitraList.subtitle')}</p>
-        </header>
+        <HeaderHero
+          imageSrc="/assets/general/verification.png"
+          title={t('admin.mitraList.title')}
+          subtitle={t('admin.mitraList.subtitle')}
+          color="violet"
+        />
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <article className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
