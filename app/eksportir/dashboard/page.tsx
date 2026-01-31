@@ -7,6 +7,8 @@ import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { userAPI, MitraApplicationResponse, invoiceAPI } from '@/lib/api/user';
 import { mitraAPI, MitraDashboard } from '@/lib/api/mitra';
+import { HeaderHero } from '@/lib/components/HeaderHero';
+import { StatRibbonCard } from '@/lib/components/StatRibbonCard';
 
 type MitraApplicationStatus = 'not_applied' | 'pending' | 'approved' | 'rejected';
 
@@ -177,38 +179,6 @@ function MitraDashboardContent() {
 
   const canCreateInvoice = mitraState?.status === 'approved';
 
-  const stats = [
-    {
-      label: 'Invoice Aktif',
-      value: String(dashboard?.active_invoices?.length || 0),
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
-    },
-    {
-      label: 'Jatuh Tempo',
-      value: dashboard?.average_remaining_tenor ? `${dashboard.average_remaining_tenor} Hari` : '-',
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      ),
-    },
-    {
-      label: 'Wallet Terhubung',
-      value: user?.wallet_address
-        ? `${user.wallet_address.slice(0, 6)}...${user.wallet_address.slice(-4)}`
-        : 'Belum Terhubung',
-      icon: (
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-        </svg>
-      ),
-    },
-  ];
-
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
       draft: { label: 'Draft', className: 'bg-slate-500/10 text-slate-400' },
@@ -234,16 +204,12 @@ function MitraDashboardContent() {
         {mitraState?.status === 'pending' && <PendingApprovalBanner application={mitraState.application} />}
         {mitraState?.status === 'rejected' && <RejectedBanner reason={mitraState.rejectionReason} application={mitraState.application} />}
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">
-              Selamat datang, {user?.username || 'Mitra'}!
-            </h1>
-            <p className="text-slate-400 mt-1">
-              Kelola invoice dan pendanaan ekspor Anda
-            </p>
-          </div>
-          {canCreateInvoice ? (
+        <HeaderHero
+          imageSrc="/assets/general/exporter.png"
+          title={`Selamat datang, ${user?.username || 'Mitra'}!`}
+          subtitle="Kelola invoice dan pendanaan ekspor Anda"
+          color="sky"
+          cta={canCreateInvoice ? (
             <Link
               href="/eksportir/invoices/create"
               className="px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 rounded-lg font-medium text-sm transition-all shadow-lg shadow-teal-500/25"
@@ -259,23 +225,41 @@ function MitraDashboardContent() {
               Buat Invoice Baru
             </button>
           )}
-        </div>
+        />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat, i) => (
-            <div
-              key={i}
-              className="p-5 bg-slate-800/30 border border-slate-700/50 rounded-xl backdrop-blur-sm"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-2 bg-teal-500/10 rounded-lg text-teal-400">
-                  {stat.icon}
-                </div>
-              </div>
-              <p className="text-slate-400 text-sm">{stat.label}</p>
-              <p className="text-xl font-bold text-white mt-1">{stat.value}</p>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <StatRibbonCard
+            color="#14b8a6"
+            imageSrc="/assets/general/tranche.png"
+            imageAlt="Invoice Active"
+          >
+            <p className="text-slate-400 text-sm">Invoice Aktif</p>
+            <p className="text-xl font-bold text-white mt-1">{dashboard?.active_invoices?.length || 0}</p>
+          </StatRibbonCard>
+
+          <StatRibbonCard
+            color="#06b6d4"
+            imageSrc="/assets/general/calendar.png"
+            imageAlt="Deadline"
+          >
+            <p className="text-slate-400 text-sm">Jatuh Tempo</p>
+            <p className="text-xl font-bold text-white mt-1">
+              {dashboard?.average_remaining_tenor ? `${dashboard.average_remaining_tenor} Hari` : '-'}
+            </p>
+          </StatRibbonCard>
+
+          <StatRibbonCard
+            color="#8b5cf6"
+            imageSrc="/assets/general/idrx.png"
+            imageAlt="Wallet"
+          >
+            <p className="text-slate-400 text-sm">Wallet Terhubung</p>
+            <p className="text-xl font-bold text-white mt-1">
+              {user?.wallet_address
+                ? `${user.wallet_address.slice(0, 6)}...${user.wallet_address.slice(-4)}`
+                : 'Belum Terhubung'}
+            </p>
+          </StatRibbonCard>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
