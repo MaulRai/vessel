@@ -27,6 +27,18 @@ function PoolInvestmentContent() {
       return language === 'en' ? `${diffDays} days remaining` : `${diffDays} hari tersisa`;
     };
 
+    const countryMap: Record<string, { flag: string; name: string }> = {
+      'Singapore': { flag: '🇸🇬', name: 'Singapura' },
+      'United States': { flag: '🇺🇸', name: 'Amerika Serikat' },
+      'China': { flag: '🇨🇳', name: 'Tiongkok' },
+      'Japan': { flag: '🇯🇵', name: 'Jepang' },
+      'Germany': { flag: '🇩🇪', name: 'Jerman' },
+      'Netherlands': { flag: '🇳🇱', name: 'Belanda' },
+      'Australia': { flag: '🇦🇺', name: 'Australia' },
+    };
+
+    const mappedCountry = pool.buyer_country ? countryMap[pool.buyer_country] : undefined;
+
     return {
       pool_id: pool.id,
       invoice_id: pool.invoice_number,
@@ -48,8 +60,8 @@ function PoolInvestmentContent() {
       priority_funded: pool.priority_funded,
       catalyst_target: pool.catalyst_target,
       catalyst_funded: pool.catalyst_funded,
-      buyer_country_flag: '🌍',
-      buyer_country: pool.buyer_country,
+      buyer_country_flag: mappedCountry?.flag || '🌍',
+      buyer_country: mappedCountry?.name || pool.buyer_country,
       buyer_country_risk: '',
       buyer_company_name: pool.buyer_company_name,
       yield_range: yieldRange,
