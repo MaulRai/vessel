@@ -159,6 +159,16 @@ function PendingApprovalScreen({ application }: { application?: MitraApplication
                     <p className="text-slate-500 text-sm text-center">
                         {t('completeProfile.pending.notification')}
                     </p>
+
+                    {/* Return to Dashboard CTA */}
+                    <div className="mt-8">
+                        <Link
+                            href="/eksportir/dashboard"
+                            className="block w-full py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium rounded-lg text-center transition-colors border border-slate-700 hover:border-slate-600"
+                        >
+                            Return to Dashboard
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
@@ -483,12 +493,12 @@ export default function CompleteProfilePage() {
                                             <p className="text-sm text-slate-400">Hubungkan wallet untuk menerima pencairan dana</p>
                                         </div>
                                     </div>
-                                    <ExporterConnectWallet 
-                                        currentWallet={currentWallet} 
+                                    <ExporterConnectWallet
+                                        currentWallet={currentWallet}
                                         onSuccess={(addr) => {
                                             setCurrentWallet(addr);
                                             refreshProfile();
-                                        }} 
+                                        }}
                                     />
                                 </div>
 
@@ -501,7 +511,7 @@ export default function CompleteProfilePage() {
                                             <div className="w-2 h-2 rounded-full bg-cyan-400" />
                                         </div>
                                     </div>
-                                    
+
                                     {/* Action Buttons */}
                                     <div className="flex items-center justify-between gap-4">
                                         <button
@@ -537,9 +547,9 @@ export default function CompleteProfilePage() {
                                 </div>
                             </div>
                         )}
-                            </div>
-            </div>
+                    </div>
                 </div>
+            </div>
         </AuthGuard >
     );
 }
