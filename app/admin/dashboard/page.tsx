@@ -8,6 +8,7 @@ import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { useAuth } from '@/lib/context/AuthContext';
 import { adminAPI, UserListItem } from '@/lib/api/admin';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { HeaderHero } from '@/lib/components/HeaderHero';
 
 function AdminDashboardContent() {
   const { user } = useAuth();
@@ -100,7 +101,12 @@ function AdminDashboardContent() {
   return (
     <DashboardLayout role="admin">
       <div className="space-y-8">
-        {/* Welcome Section */}
+        <HeaderHero
+          imageSrc="/assets/general/admin.png"
+          title={`${t('admin.dashboard.hero.welcome')} ${user?.username || t('admin.dashboard.hero.defaultName')}`}
+          subtitle={t('admin.dashboard.hero.subtitle')}
+          color="violet"
+        />
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-700/25 via-violet-500/10 to-transparent py-4 px-8">
           <div className="absolute inset-0">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_50%,rgba(139,92,246,0.2),rgba(120,119,198,0))]" />
