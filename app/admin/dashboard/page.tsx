@@ -107,29 +107,6 @@ function AdminDashboardContent() {
           subtitle={t('admin.dashboard.hero.subtitle')}
           color="violet"
         />
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-700/25 via-violet-500/10 to-transparent py-4 px-8">
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_50%,rgba(139,92,246,0.2),rgba(120,119,198,0))]" />
-          </div>
-
-          <div className="relative flex items-center gap-4">
-            <div className="relative h-24 w-24 rounded-2xl overflow-hidden">
-              <Image
-                src="/assets/general/admin.png"
-                alt="Admin illustration"
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">
-                {`${t('admin.dashboard.hero.welcome')} ${user?.username || t('admin.dashboard.hero.defaultName')}`}
-              </h1>
-              <p className="text-violet-200/70 mt-1 text-base">{t('admin.dashboard.hero.subtitle')}</p>
-            </div>
-          </div>
-        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

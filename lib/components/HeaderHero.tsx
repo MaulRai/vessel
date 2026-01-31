@@ -79,7 +79,7 @@ export function HeaderHero({
             </div>
             <div className="relative flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2 sm:flex sm:items-stretch sm:gap-4">
-                    <div className={`relative h-24 w-24 flex-shrink-0 rounded-2xl overflow-hidden shadow-lg ${variant.shadow}`}>
+                    <div className={`relative h-24 w-24 flex-shrink-0 rounded-2xl overflow-hidden ${variant.shadow}`}>
                         <Image src={imageSrc} alt={title} fill className="object-cover" priority />
                     </div>
                     <div className="contents sm:flex sm:flex-col sm:justify-center">

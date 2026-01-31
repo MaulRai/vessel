@@ -6,6 +6,7 @@ import { AuthGuard } from '@/lib/components/AuthGuard';
 import { DashboardLayout } from '@/lib/components/DashboardLayout';
 import { adminAPI, FundingPool } from '@/lib/api/admin';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import { HeaderHero } from '@/lib/components/HeaderHero';
 
 function PoolListContent() {
   const { t, language } = useLanguage();
@@ -156,22 +157,12 @@ function PoolListContent() {
   return (
     <DashboardLayout role="admin">
       <div className="space-y-8">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600/10 via-cyan-600/10 to-transparent border border-blue-500/20 p-8">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(59,130,246,0.1),rgba(255,255,255,0))]" />
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">{t('admin.invoiceList.heroTitle')}</h1>
-                <p className="text-blue-200/70 mt-1">{t('admin.invoiceList.heroSubtitle')}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <HeaderHero
+          imageSrc="/assets/general/pool-adm.png"
+          title={t('admin.pools.list.heroTitle')}
+          subtitle={t('admin.pools.list.heroSubtitle')}
+          color="violet"
+        />
 
         <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 overflow-hidden">
           {loading ? (
